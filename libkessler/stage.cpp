@@ -1,11 +1,4 @@
 #include "stage.h"
-#include <fmt/format.h>
-
-#include <iostream>
-
-void hello() {
-    fmt::print("Hello World!");
-}
 
 //def event_queue_manager(self) -> None:
 //message_lead = struct.pack(">B", 0x04)
@@ -28,10 +21,15 @@ void hello() {
 //except ConnectionResetError:
 //# Problematic
 //break
-Stage::Stage(const std::string& host, const int port) {
+Stage::Stage(const std::string &host, const int port) {
     auto address = boost::asio::ip::address::from_string(host);
     boost::asio::ip::tcp::endpoint endpoint(address, port);
     boost::asio::io_service service;
     this->socket = new boost::asio::ip::tcp::socket(service, endpoint.protocol());
-    this->socket->bind(endpoint);
+    this->socket->connect(endpoint);
+
+    this->events = new std::map<unsigned int, std::queue<std::string>>();
+    for (const auto messageid: AllMessageIDs) {
+        this->events->emplace(messageid, std::queue<std::string>());
+    }
 }

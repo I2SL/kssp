@@ -1,15 +1,22 @@
 #ifndef LIBKESSLER_STAGE_H
 #define LIBKESSLER_STAGE_H
 
+#include <iostream>
+#include <map>
+#include <queue>
 #include <string>
+
 #include <boost/asio.hpp>
+#include <fmt/format.h>
+
+#include "enums/messageid.h"
 
 class Stage{
 public:
     Stage(const std::string& host, int port);
 private:
     boost::asio::ip::tcp::socket* socket;
+    std::map<unsigned int, std::queue<std::string>>* events;
 };
-void hello();
 
 #endif //LIBKESSLER_STAGE_H
