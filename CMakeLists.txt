@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 14)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 add_library(libkessler libkessler/stage.cpp)
+target_link_libraries(libkessler wsock32 ws2_32)
 target_link_libraries(libkessler ${CONAN_LIBS})
 
 add_executable(driver tests/driver.cpp)
