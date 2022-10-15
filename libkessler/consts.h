@@ -1,0 +1,2 @@
+const int SSP_PROTOCOL_VERSION = 0x04;
+const int SSP_GET_MESSAGE_SIZE = 0x06;

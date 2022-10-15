@@ -4,6 +4,6 @@
 
 BOOST_AUTO_TEST_CASE(TestConstructor)
 {
-    Stage instance("127.0.0.1 ", 4200);
+    Stage instance("192.168.50.1", 5520);
     BOOST_CHECK(true);
 }
