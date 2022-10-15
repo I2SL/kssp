@@ -32,4 +32,5 @@ Stage::Stage(const std::string &host, const int port) {
     for (const auto messageid: AllMessageIDs) {
         this->events->emplace(messageid, std::queue<std::string>());
     }
+
 }

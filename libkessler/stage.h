@@ -14,6 +14,9 @@
 #include "enums/messageid.h"
 #include "enums/messagetype.h"
 #include "enums/noteid.h"
+#include "responses/device_guid.h"
+#include "responses/device_info.h"
+#include "responses/motor_info.h"
 
 class Stage{
 public:

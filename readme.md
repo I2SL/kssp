@@ -15,3 +15,4 @@
 1) https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1204r0.html#tests-unit
 2) https://medium.com/swlh/cpm-an-awesome-dependency-manager-for-c-with-cmake-3c53f4376766
 3) https://blog.jetbrains.com/clion/2019/05/getting-started-with-the-conan-clion-plugin/
+4) https://support.kesslercrane.com/hc/en-us/articles/210577103-HOW-TO-CineDrive-API-Instructions
