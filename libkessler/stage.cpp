@@ -25,8 +25,12 @@
 Stage::Stage(const std::string &host, const int port) {
     this->socket.connect(endpoint);
     for (const auto messageid: AllMessageIDs) {
-        this->events->emplace(messageid, std::queue<std::string>());
+        this->events.emplace(messageid, std::queue<std::string>());
     }
+
+    boost::async([this]() {
+        this->event_queue_manager();
+    });
 }
 
 void Stage::get(MessageID messageid) {
