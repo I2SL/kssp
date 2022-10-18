@@ -862,7 +862,7 @@ _Pvt_Extensions
 .paket/paket.exe
 paket-files/
 
-# FAKE - F# Make
+# FAKE - MockServer# Make
 .fake/
 
 # CodeRush personal settings
@@ -912,7 +912,7 @@ healthchecksdb
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/
 
-# Ionide (cross platform F# VS Code tools) working folder
+# Ionide (cross platform MockServer# VS Code tools) working folder
 .ionide/
 
 # Fody - auto-generated XML schema

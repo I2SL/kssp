@@ -1,3 +1,5 @@
+#define BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION
+
 #ifndef LIBKESSLER_STAGE_H
 #define LIBKESSLER_STAGE_H
 
@@ -7,6 +9,7 @@
 #include <string>
 
 #include <boost/asio.hpp>
+#include <boost/thread/future.hpp>
 #include <fmt/format.h>
 
 #include "consts.h"

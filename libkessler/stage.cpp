@@ -1,3 +1,4 @@
+#include <thread>
 #include "stage.h"
 
 //def event_queue_manager(self) -> None:
@@ -22,15 +23,41 @@
 //# Problematic
 //break
 Stage::Stage(const std::string &host, const int port) {
-    auto address = boost::asio::ip::address::from_string(host);
-    boost::asio::ip::tcp::endpoint endpoint(address, port);
-    boost::asio::io_service service;
-    this->socket = new boost::asio::ip::tcp::socket(service, endpoint.protocol());
-    this->socket->connect(endpoint);
-
-    this->events = new std::map<unsigned int, std::queue<std::string>>();
+    this->socket.connect(endpoint);
     for (const auto messageid: AllMessageIDs) {
         this->events->emplace(messageid, std::queue<std::string>());
+    }
+}
+
+void Stage::get(MessageID messageid) {
+    std::vector<char> msg = std::vector<char>(6);
+    msg[0] = SSP_PROTOCOL_VERSION;
+    msg[1] = 0x00;
+    msg[2] = SSP_GET_MESSAGE_SIZE;
+    msg[3] = 0x00;
+    msg[4] = messageid;
+    msg[5] = MessageType::Get;
+    this->socket.send(boost::asio::buffer(msg));
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+}
+
+void Stage::event_queue_manager() {
+    while (true) {
+        try {
+            boost::asio::streambuf sb;
+            boost::system::error_code ec;
+            while (boost::asio::read(socket, sb, ec)) {
+                std::cout << "received: '" << &sb << "'\n";
+
+                if (ec) {
+                    std::cout << "status: " << ec.message() << "\n";
+                    break;
+                }
+            }
+        }
+        catch (std::exception& e) {
+            std::cerr << "Exception: " << e.what() << std::endl;
+        }
     }
 }
 
