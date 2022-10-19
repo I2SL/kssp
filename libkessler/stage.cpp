@@ -14,7 +14,7 @@ Stage::Stage(const std::string &host, const int port)
     boost::asio::ip::tcp::endpoint endpoint = boost::asio::ip::tcp::endpoint(address, port);
     ConnectSocket.connect(endpoint);
     for (const auto messageid: AllMessageIDs) {
-        this->events.emplace(messageid, std::queue<std::string>());
+        events.emplace(messageid, std::queue<std::string>());
     }
 
     boost::async([this]() {
