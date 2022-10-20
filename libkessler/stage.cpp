@@ -31,7 +31,7 @@ void Stage::get(MessageID messageid) {
     msg[4] = messageid;
     msg[5] = MessageType::Get;
     ConnectSocket.send(boost::asio::buffer(msg));
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
 }
 
 void Stage::event_queue_manager() {
@@ -39,7 +39,7 @@ void Stage::event_queue_manager() {
         try {
             boost::asio::streambuf sb;
             boost::system::error_code ec;
-            while (boost::asio::read(ConnectSocket, sb, ec)) {
+            while (boost::asio::read(ConnectSocket, sb,boost::asio::transfer_exactly(1), ec)) {
                 std::cout << "received: '" << &sb << "'\n";
 
                 if (ec) {
