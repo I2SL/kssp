@@ -7,9 +7,18 @@
 6) [Install Conan](https://conan.io/)
 7) Generate Conan profile `conan profile new default --detect`
 8) Verify compiler version in Canon profile (`~/.conan/profiles/`)
-9) `cd cmake-build-debug`
-10) `conan install .. --build=missing`
+9) In Conan profile, ensure `compiler.libcxx=libstdc++11`
+10) `cd cmake-build-debug`
+11) `conan install .. --build=missing`
     * **Note:** If this step throws errors, try deleting everything in `~/.conan/data/` folder and run again.
+
+# Notes
+## Reinstalling packages
+Sometimes packages need to be reinstalled when switching between machines. Try this if the IDE cannot find files or there are build errors:
+1) Clear cache: `conan remove '*' -s -b -f`
+2) Remove packages: `conan remove '*'`
+3) Navigate to build folder: `cd cmake-build-debug`
+4) Install packages: `conan install .. --build=missing`
 
 # References
 1) https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1204r0.html#tests-unit
