@@ -65,6 +65,17 @@ BOOST_FIXTURE_TEST_CASE(SayHello, MockServer)
     instance.get(MessageID::DeviceInfo);
 }
 
+BOOST_FIXTURE_TEST_CASE(SendProtocol, MockServer)
+{
+    char sample_message[1];
+    sample_message[0] = SSP_PROTOCOL_VERSION;
+    this->accept().then([this, &sample_message](boost::unique_future<void> f) {
+        this->client->send(boost::asio::buffer(sample_message));
+    });
+    Stage instance("127.0.0.1", 5555);
+    instance.get(MessageID::DeviceInfo);
+}
+
 BOOST_FIXTURE_TEST_CASE(GetMotorInfo, MockServer)
 {
     unsigned short motor_count = 1;
@@ -89,7 +100,7 @@ BOOST_FIXTURE_TEST_CASE(GetMotorInfo, MockServer)
                  max_max_move_speed,
                  max_max_acceleration
                  );
-    printf(sample_message);
+    //printf(sample_message);
     this->accept().then([this, &sample_message](boost::unique_future<void> f) {
        this->client->send(boost::asio::buffer(std::string(sample_message)));
     });

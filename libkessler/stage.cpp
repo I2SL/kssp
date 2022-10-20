@@ -31,7 +31,7 @@ void Stage::get(MessageID messageid) {
     msg[4] = messageid;
     msg[5] = MessageType::Get;
     ConnectSocket.send(boost::asio::buffer(msg));
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 void Stage::event_queue_manager() {
@@ -40,7 +40,14 @@ void Stage::event_queue_manager() {
             boost::asio::streambuf sb;
             boost::system::error_code ec;
             while (boost::asio::read(ConnectSocket, sb,boost::asio::transfer_exactly(1), ec)) {
-                std::cout << "received: '" << &sb << "'\n";
+                unsigned char received;
+                std::sscanf(boost::asio::buffer_cast<const char *>(sb.data()), "%c", received);
+
+                if (received == SSP_PROTOCOL_VERSION) {
+                    printf("Received message header");
+                } else {
+                    std::cout << "Received unhandled byte: '" << received << "'\n";
+                }
 
                 if (ec) {
                     std::cout << "status: " << ec.message() << "\n";
