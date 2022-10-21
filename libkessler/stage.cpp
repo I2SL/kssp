@@ -1,5 +1,6 @@
 #include <thread>
 #include "stage.h"
+#include "utils.hpp"
 
 Stage::Stage(const std::string &host, const int port)
     : ConnectSocket(
@@ -39,20 +40,19 @@ void Stage::event_queue_manager() {
         try {
             boost::asio::streambuf sb;
             boost::system::error_code ec;
-            while (boost::asio::read(ConnectSocket, sb,boost::asio::transfer_exactly(1), ec)) {
-                unsigned char received;
-                std::sscanf(boost::asio::buffer_cast<const char *>(sb.data()), "%c", received);
+            boost::asio::read(ConnectSocket, sb,boost::asio::transfer_exactly(1), ec);
+            char received;
+            std::sscanf(buffer_to_char_array(sb), "%c", &received);
 
-                if (received == SSP_PROTOCOL_VERSION) {
-                    printf("Received message header");
-                } else {
-                    std::cout << "Received unhandled byte: '" << received << "'\n";
-                }
+            if (received == SSP_PROTOCOL_VERSION) {
+                printf("Received message header: %hu\n", received);
+            } else {
+                std::cout << "Received unhandled byte: '" << &sb << "'\n";
+            }
 
-                if (ec) {
-                    std::cout << "status: " << ec.message() << "\n";
-                    break;
-                }
+            if (ec) {
+                std::cout << "status: " << ec.message() << "\n";
+                break;
             }
         }
         catch (std::exception& e) {

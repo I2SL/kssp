@@ -3,6 +3,7 @@
 #ifndef LIBKESSLER_STAGE_H
 #define LIBKESSLER_STAGE_H
 
+#include <iomanip>
 #include <iostream>
 #include <map>
 #include <queue>

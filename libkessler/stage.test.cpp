@@ -69,6 +69,7 @@ BOOST_FIXTURE_TEST_CASE(SendProtocol, MockServer)
 {
     char sample_message[1];
     sample_message[0] = SSP_PROTOCOL_VERSION;
+    std::cout << "Sent: '" << std::setw(2) << std::setfill('0') << std::hex << (int)( sample_message[0] ) << "'\n";
     this->accept().then([this, &sample_message](boost::unique_future<void> f) {
         this->client->send(boost::asio::buffer(sample_message));
     });
