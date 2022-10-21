@@ -25,15 +25,14 @@
 class Stage{
 public:
     Stage(const std::string &host, int port);
-    void get(MessageID messageid);
+    class DeviceInfo get_device_info();
 private:
-    /**
-     * Receive bytes from the socket and parse them into event objects.
-     */
     void event_queue_manager();
+    void on_receive_device_info_response();
     boost::asio::io_service service;
     boost::asio::ip::tcp::socket ConnectSocket;
-    std::map<unsigned int, std::queue<std::string>> events = std::map<unsigned int, std::queue<std::string>>();
+    //::map<unsigned int, std::queue<std::string>> events = std::map<unsigned int, std::queue<std::string>>();
+    std::queue<class DeviceInfo> DeviceInfoQueue;
 };
 
 #endif //LIBKESSLER_STAGE_H

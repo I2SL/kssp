@@ -68,7 +68,6 @@ BOOST_AUTO_TEST_SUITE(MockStageTests)
     {
         this->accept_and_say_hello();
         Stage instance("127.0.0.1", 5555);
-        instance.get(MessageID::DeviceInfo);
     }
 
     BOOST_FIXTURE_TEST_CASE(SendProtocol, MockServer)
@@ -80,49 +79,17 @@ BOOST_AUTO_TEST_SUITE(MockStageTests)
             this->client->send(boost::asio::buffer(sample_message));
         });
         Stage instance("127.0.0.1", 5555);
-        instance.get(MessageID::DeviceInfo);
-    }
-
-    BOOST_FIXTURE_TEST_CASE(GetMotorInfo, MockServer)
-    {
-        unsigned short motor_count = 1;
-        unsigned short motor_address = 2;
-        float position = 32;
-        float end_position = 31;
-        float max_max_setup_speed = 30;
-        float max_max_move_speed = 29;
-        float max_max_acceleration = 28;
-        char sample_message[28];
-        std::sprintf(sample_message,
-                     "%c%hd%hd%c%c%c%f%f%f%f%f",
-                     SSP_PROTOCOL_VERSION,
-                     28,
-                     MessageID::MotorInfo,
-                     MessageType::Response,
-                     motor_count,
-                     motor_address,
-                     position,
-                     end_position,
-                     max_max_setup_speed,
-                     max_max_move_speed,
-                     max_max_acceleration
-                     );
-        //printf(sample_message);
-        this->accept().then([this, &sample_message](boost::unique_future<void> f) {
-           this->client->send(boost::asio::buffer(std::string(sample_message)));
-        });
-        Stage instance("127.0.0.1", 5555);
-        instance.get(MessageID::MotorInfo);
     }
 
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(StageTests)
 
-    BOOST_AUTO_TEST_CASE(SendGet)
+    BOOST_AUTO_TEST_CASE(GetDeviceInfo)
     {
         Stage instance("192.168.50.1", 5520);
-        instance.get(MessageID::DeviceInfo);
+        class DeviceInfo test = instance.get_device_info();
+        std::cout << test.to_string();
         BOOST_CHECK(true);
     }
 

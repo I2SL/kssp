@@ -1,18 +1,18 @@
 #include "device_info.h"
 
 DeviceInfo::DeviceInfo(
-        unsigned short device_type,
-        unsigned short device_addr,
-        unsigned short playback_mode,
-        unsigned short playback_status,
-        unsigned short firmware_version_major,
-        unsigned short firmware_version_minor,
-        unsigned short firmware_version_release,
-        unsigned short firmware_version_build,
-        unsigned short network_id,
-        unsigned short hardware_id,
+        unsigned char device_type,
+        unsigned char device_addr,
+        unsigned char playback_mode,
+        unsigned char playback_status,
+        unsigned char firmware_version_major,
+        unsigned char firmware_version_minor,
+        unsigned char firmware_version_release,
+        unsigned char firmware_version_build,
+        unsigned char network_id,
+        unsigned char hardware_id,
         std::string device_password,
-        unsigned short aux_input_status,
+        unsigned char aux_input_status,
         float delay_time_remaining,
         float elapsed_time
         ):
