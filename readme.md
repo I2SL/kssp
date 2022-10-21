@@ -25,3 +25,4 @@ Sometimes packages need to be reinstalled when switching between machines. Try t
 2) https://medium.com/swlh/cpm-an-awesome-dependency-manager-for-c-with-cmake-3c53f4376766
 3) https://blog.jetbrains.com/clion/2019/05/getting-started-with-the-conan-clion-plugin/
 4) https://support.kesslercrane.com/hc/en-us/articles/210577103-HOW-TO-CineDrive-API-Instructions
+5) https://gist.github.com/vladon/8b487e41cb3b49e172db
