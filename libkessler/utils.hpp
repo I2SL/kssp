@@ -1,4 +1,5 @@
 #include <boost/asio.hpp>
+#include <boost/endian/buffers.hpp>
 
 class Utils {
 public:
@@ -21,9 +22,12 @@ public:
         return result;
     }
 
-    static unsigned short int bytes_to_int(char *bytes) {
-        unsigned short int ret;
-        memcpy(&ret, &bytes, sizeof(ret));
-        return ret;
+    static boost::endian::big_uint8_buf_t buffer_to_big_uint8(const boost::asio::streambuf &buffer) {
+        using boost::asio::buffers_begin;
+
+        auto bufs = buffer.data();
+        boost::endian::big_uint8_buf_t result(1);
+
+        return result;
     }
 };

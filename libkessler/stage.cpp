@@ -119,19 +119,11 @@ void Stage::on_receive_device_info_response() {
     boost::asio::streambuf sb3;
     boost::asio::streambuf sb4;
     boost::system::error_code ec;
-    boost::asio::read(ConnectSocket, sb1, boost::asio::transfer_exactly(10), ec);
-    std::sscanf(Utils::buffer_to_char_array(sb1),
-                "%c%c%c%c%c%c%c%c%c%c",
-                &device_type,
-                &device_addr,
-                &playback_mode,
-                &playback_status,
-                &firmware_version_major,
-                &firmware_version_minor,
-                &firmware_version_release,
-                &firmware_version_build,
-                &network_id,
-                &hardware_id);
+    boost::asio::read(ConnectSocket, sb1, boost::asio::transfer_exactly(1), ec);
+    //FINISH
+    device_type = Utils::buffer_to_big_uint8(sb1);
+    //device_type = boost::endian::endian_load<>();
+    //device_type = reinterpret_cast<boost::endian::big_uint8_buf_t>(&sb1);
     boost::asio::read(ConnectSocket, sb2, boost::asio::transfer_exactly(2), ec);
     std::sscanf(Utils::buffer_to_char_array(sb2), "%hd", &string_length);
     if (string_length.value() > 0) {
