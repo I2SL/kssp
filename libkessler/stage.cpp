@@ -98,21 +98,21 @@ void Stage::event_queue_manager() {
 }
 
 void Stage::on_receive_device_info_response() {
-    unsigned char device_type;
-    unsigned char device_addr;
-    unsigned char playback_mode;
-    unsigned char playback_status;
-    unsigned char firmware_version_major;
-    unsigned char firmware_version_minor;
-    unsigned char firmware_version_release;
-    unsigned char firmware_version_build;
-    unsigned char network_id;
-    unsigned char hardware_id;
+    boost::endian::big_uint8_buf_t device_type;
+    boost::endian::big_uint8_buf_t device_addr;
+    boost::endian::big_uint8_buf_t playback_mode;
+    boost::endian::big_uint8_buf_t playback_status;
+    boost::endian::big_uint8_buf_t firmware_version_major;
+    boost::endian::big_uint8_buf_t firmware_version_minor;
+    boost::endian::big_uint8_buf_t firmware_version_release;
+    boost::endian::big_uint8_buf_t firmware_version_build;
+    boost::endian::big_uint8_buf_t network_id;
+    boost::endian::big_uint8_buf_t hardware_id;
     std::string device_password;
-    unsigned char aux_input_status;
-    float delay_time_remaining;
-    float elapsed_time;
-    unsigned short int string_length;
+    boost::endian::big_uint8_buf_t aux_input_status;
+    boost::endian::big_float32_buf_t delay_time_remaining;
+    boost::endian::big_float32_buf_t elapsed_time;
+    boost::endian::big_uint16_buf_t string_length;
 
     boost::asio::streambuf sb1;
     boost::asio::streambuf sb2;
@@ -134,8 +134,8 @@ void Stage::on_receive_device_info_response() {
                 &hardware_id);
     boost::asio::read(ConnectSocket, sb2, boost::asio::transfer_exactly(2), ec);
     std::sscanf(Utils::buffer_to_char_array(sb2), "%hd", &string_length);
-    if (string_length > 0) {
-        boost::asio::read(ConnectSocket, sb3, boost::asio::transfer_exactly(string_length), ec);
+    if (string_length.value() > 0) {
+        boost::asio::read(ConnectSocket, sb3, boost::asio::transfer_exactly(string_length.value()), ec);
         std::sscanf(Utils::buffer_to_char_array(sb3), "%s", &device_password);
     }
     else {

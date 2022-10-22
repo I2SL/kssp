@@ -2,9 +2,12 @@
 
 #define BOOST_TEST_MODULE example
 #include <memory>
+
+#include <boost/endian/buffers.hpp>
 #include <boost/thread.hpp>
 #include <boost/thread/future.hpp>
 #include <boost/test/unit_test.hpp>
+
 #include "stage.h"
 
 BOOST_AUTO_TEST_SUITE(MockStageTests)
@@ -63,9 +66,24 @@ BOOST_AUTO_TEST_SUITE(MockStageTests)
     }
 
     BOOST_AUTO_TEST_CASE(TestDeviceInfoObject) {
-        class DeviceInfo instance(1,2,3,4,5,6,7,8,9,10,"hello",11,12.1,13.2);
+        class DeviceInfo instance(
+                boost::endian::big_uint8_buf_t(1),
+                boost::endian::big_uint8_buf_t(2),
+                boost::endian::big_uint8_buf_t(3),
+                boost::endian::big_uint8_buf_t(4),
+                boost::endian::big_uint8_buf_t(5),
+                boost::endian::big_uint8_buf_t(6),
+                boost::endian::big_uint8_buf_t(7),
+                boost::endian::big_uint8_buf_t(8),
+                boost::endian::big_uint8_buf_t(9),
+                boost::endian::big_uint8_buf_t(10),
+                "hello",
+                boost::endian::big_uint8_buf_t(11),
+                boost::endian::big_float32_buf_t(12.1),
+                boost::endian::big_float32_buf_t(13.1)
+                );
         std::cout << instance.to_string();
-        BOOST_CHECK(instance.device_type == 1);
+        BOOST_CHECK(instance.device_type.value() == 1);
     }
 
     BOOST_FIXTURE_TEST_CASE(EstablishConnection, MockServer)
