@@ -1,20 +1,20 @@
 #include "device_info.h"
 
 DeviceInfo::DeviceInfo(
-        boost::endian::big_uint8_buf_t device_type,
-        boost::endian::big_uint8_buf_t device_addr,
-        boost::endian::big_uint8_buf_t playback_mode,
-        boost::endian::big_uint8_buf_t playback_status,
-        boost::endian::big_uint8_buf_t firmware_version_major,
-        boost::endian::big_uint8_buf_t firmware_version_minor,
-        boost::endian::big_uint8_buf_t firmware_version_release,
-        boost::endian::big_uint8_buf_t firmware_version_build,
-        boost::endian::big_uint8_buf_t network_id,
-        boost::endian::big_uint8_buf_t hardware_id,
+        boost::uint8_t device_type,
+        boost::uint8_t device_addr,
+        boost::uint8_t playback_mode,
+        boost::uint8_t playback_status,
+        boost::uint8_t firmware_version_major,
+        boost::uint8_t firmware_version_minor,
+        boost::uint8_t firmware_version_release,
+        boost::uint8_t firmware_version_build,
+        boost::uint8_t network_id,
+        boost::uint8_t hardware_id,
         std::string device_password,
-        boost::endian::big_uint8_buf_t aux_input_status,
-        boost::endian::big_float32_buf_t delay_time_remaining,
-        boost::endian::big_float32_buf_t elapsed_time
+        boost::uint8_t aux_input_status,
+        float delay_time_remaining,
+        float elapsed_time
         ):
     device_type(device_type),
     device_addr(device_addr),
@@ -37,19 +37,19 @@ DeviceInfo::DeviceInfo(
 std::string DeviceInfo::to_string() {
     std::string result = std::string("DEVICE INFO:\n");
     result += std::string("------------\n");
-    result += fmt::format("Device Type: {}\n", device_type.value());
-    result += fmt::format("Device Address: {}\n", device_addr.value());
-    result += fmt::format("Playback Mode: {}\n", playback_mode.value());
-    result += fmt::format("Playback Status: {}\n", playback_status.value());
-    result += fmt::format("Firmware Version Major: {}\n", firmware_version_major.value());
-    result += fmt::format("Firmware Version Minor: {}\n", firmware_version_minor.value());
-    result += fmt::format("Firmware Version Release: {}\n", firmware_version_release.value());
-    result += fmt::format("Firmware Version Build: {}\n", firmware_version_build.value());
-    result += fmt::format("Network ID: {}\n", network_id.value());
-    result += fmt::format("Hardware ID: {}\n", hardware_id.value());
+    result += fmt::format("Device Type: {}\n", device_type);
+    result += fmt::format("Device Address: {}\n", device_addr);
+    result += fmt::format("Playback Mode: {}\n", playback_mode);
+    result += fmt::format("Playback Status: {}\n", playback_status);
+    result += fmt::format("Firmware Version Major: {}\n", firmware_version_major);
+    result += fmt::format("Firmware Version Minor: {}\n", firmware_version_minor);
+    result += fmt::format("Firmware Version Release: {}\n", firmware_version_release);
+    result += fmt::format("Firmware Version Build: {}\n", firmware_version_build);
+    result += fmt::format("Network ID: {}\n", network_id);
+    result += fmt::format("Hardware ID: {}\n", hardware_id);
     result += fmt::format("Device Password: {}\n", device_password);
-    result += fmt::format("Aux Input Status: {}\n", aux_input_status.value());
-    result += fmt::format("Delay Time Remaining: {}\n", delay_time_remaining.value());
-    result += fmt::format("Elapsed Time: {}\n", elapsed_time.value());
+    result += fmt::format("Aux Input Status: {}\n", aux_input_status);
+    result += fmt::format("Delay Time Remaining: {}\n", delay_time_remaining);
+    result += fmt::format("Elapsed Time: {}\n", elapsed_time);
     return result;
 }

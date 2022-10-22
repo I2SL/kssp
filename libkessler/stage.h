@@ -8,8 +8,10 @@
 #include <map>
 #include <queue>
 #include <string>
+#include <thread>
 
 #include <boost/asio.hpp>
+#include <boost/endian/conversion.hpp>
 #include <boost/thread/future.hpp>
 #include <fmt/format.h>
 
@@ -32,7 +34,6 @@ private:
     void on_receive_device_info_response();
     boost::asio::io_service service;
     boost::asio::ip::tcp::socket ConnectSocket;
-    //::map<unsigned int, std::queue<std::string>> events = std::map<unsigned int, std::queue<std::string>>();
     std::queue<class DeviceInfo> DeviceInfoQueue;
 };
 

@@ -9,35 +9,35 @@
 class DeviceInfo {
 public:
     DeviceInfo(
-            boost::endian::big_uint8_buf_t device_type,
-            boost::endian::big_uint8_buf_t device_addr,
-            boost::endian::big_uint8_buf_t playback_mode,
-            boost::endian::big_uint8_buf_t playback_status,
-            boost::endian::big_uint8_buf_t firmware_version_major,
-            boost::endian::big_uint8_buf_t firmware_version_minor,
-            boost::endian::big_uint8_buf_t firmware_version_release,
-            boost::endian::big_uint8_buf_t firmware_version_build,
-            boost::endian::big_uint8_buf_t network_id,
-            boost::endian::big_uint8_buf_t hardware_id,
+            boost::uint8_t device_type,
+            boost::uint8_t device_addr,
+            boost::uint8_t playback_mode,
+            boost::uint8_t playback_status,
+            boost::uint8_t firmware_version_major,
+            boost::uint8_t firmware_version_minor,
+            boost::uint8_t firmware_version_release,
+            boost::uint8_t firmware_version_build,
+            boost::uint8_t network_id,
+            boost::uint8_t hardware_id,
             std::string device_password,
-            boost::endian::big_uint8_buf_t aux_input_status,
-            boost::endian::big_float32_buf_t delay_time_remaining,
-            boost::endian::big_float32_buf_t elapsed_time
+            boost::uint8_t aux_input_status,
+            float delay_time_remaining,
+            float elapsed_time
             );
-    boost::endian::big_uint8_buf_t device_type;
-    boost::endian::big_uint8_buf_t device_addr;
-    boost::endian::big_uint8_buf_t playback_mode;
-    boost::endian::big_uint8_buf_t playback_status;
-    boost::endian::big_uint8_buf_t firmware_version_major;
-    boost::endian::big_uint8_buf_t firmware_version_minor;
-    boost::endian::big_uint8_buf_t firmware_version_release;
-    boost::endian::big_uint8_buf_t firmware_version_build;
-    boost::endian::big_uint8_buf_t network_id;
-    boost::endian::big_uint8_buf_t hardware_id;
+    boost::uint8_t device_type;
+    boost::uint8_t device_addr;
+    boost::uint8_t playback_mode;
+    boost::uint8_t playback_status;
+    boost::uint8_t firmware_version_major;
+    boost::uint8_t firmware_version_minor;
+    boost::uint8_t firmware_version_release;
+    boost::uint8_t firmware_version_build;
+    boost::uint8_t network_id;
+    boost::uint8_t hardware_id;
     std::string device_password;
-    boost::endian::big_uint8_buf_t aux_input_status;
-    boost::endian::big_float32_buf_t delay_time_remaining;
-    boost::endian::big_float32_buf_t elapsed_time;
+    boost::uint8_t aux_input_status;
+    float delay_time_remaining;
+    float elapsed_time;
     std::string to_string();
 };
 

@@ -4,6 +4,7 @@
 #include <memory>
 
 #include <boost/endian/buffers.hpp>
+#include <boost/endian/conversion.hpp>
 #include <boost/thread.hpp>
 #include <boost/thread/future.hpp>
 #include <boost/test/unit_test.hpp>
@@ -55,35 +56,43 @@ BOOST_AUTO_TEST_SUITE(MockStageTests)
         }
     };
 
-    BOOST_AUTO_TEST_CASE(TestBytestoInt) {
-        unsigned char bytes[2];
-        bytes[0] = (unsigned char)0;
-        bytes[1] = (unsigned char)15;
-        unsigned short int comp(15);
-        unsigned short int conv = Utils::bytes_to_int(reinterpret_cast<char *>(bytes));
-        printf("Result: %hd\n", conv);
-        BOOST_CHECK(conv == comp);
+    BOOST_AUTO_TEST_CASE(TestEndianLoad) {
+        boost::uint16_t testendian(16);
+        unsigned char* test;
+        boost::endian::store_big_u16(test, testendian);
+        boost::uint16_t loadresult = boost::endian::load_big_u16(test);
+        BOOST_CHECK(testendian==loadresult);
+    }
+
+    BOOST_AUTO_TEST_CASE(TestFloattoInt32toFloat) {
+        float input = -233.42;
+        boost::int32_t input_as_int = reinterpret_cast <int&>(input);
+        unsigned char* test;
+        boost::endian::store_big_s32(test, input_as_int);
+        boost::int32_t output_as_int = boost::endian::load_big_s32(test);
+        float output = reinterpret_cast <float&>(output_as_int);
+        BOOST_CHECK(input == output);
     }
 
     BOOST_AUTO_TEST_CASE(TestDeviceInfoObject) {
         class DeviceInfo instance(
-                boost::endian::big_uint8_buf_t(1),
-                boost::endian::big_uint8_buf_t(2),
-                boost::endian::big_uint8_buf_t(3),
-                boost::endian::big_uint8_buf_t(4),
-                boost::endian::big_uint8_buf_t(5),
-                boost::endian::big_uint8_buf_t(6),
-                boost::endian::big_uint8_buf_t(7),
-                boost::endian::big_uint8_buf_t(8),
-                boost::endian::big_uint8_buf_t(9),
-                boost::endian::big_uint8_buf_t(10),
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
                 "hello",
-                boost::endian::big_uint8_buf_t(11),
-                boost::endian::big_float32_buf_t(12.1),
-                boost::endian::big_float32_buf_t(13.1)
+                11,
+                12.1,
+                13.1
                 );
         std::cout << instance.to_string();
-        BOOST_CHECK(instance.device_type.value() == 1);
+        BOOST_CHECK(instance.device_type == 1);
     }
 
     BOOST_FIXTURE_TEST_CASE(EstablishConnection, MockServer)
@@ -98,15 +107,41 @@ BOOST_AUTO_TEST_SUITE(MockStageTests)
         Stage instance("127.0.0.1", 5555);
     }
 
-    BOOST_FIXTURE_TEST_CASE(SendProtocol, MockServer)
+    BOOST_FIXTURE_TEST_CASE(SendDeviceInfo, MockServer)
     {
-        char sample_message[1];
+        unsigned char sample_message[27];
         sample_message[0] = SSP_PROTOCOL_VERSION;
-        std::cout << "Sent: '" << std::setw(2) << std::setfill('0') << std::hex << (int)( sample_message[0] ) << "'\n";
+        sample_message[1] = 0x00;
+        sample_message[2] = SSP_GET_MESSAGE_SIZE;
+        sample_message[3] = 0x00;
+        sample_message[4] = MessageID::DeviceInfo;
+        sample_message[5] = MessageType::Response;
+        sample_message[6] = 1;
+        sample_message[7] = 2;
+        sample_message[8] = 3;
+        sample_message[9] = 4;
+        sample_message[10] = 5;
+        sample_message[11] = 6;
+        sample_message[12] = 7;
+        sample_message[13] = 8;
+        sample_message[14] = 9;
+        sample_message[15] = 10;
+        sample_message[16] = 0;
+        sample_message[17] = 0;
+        sample_message[18] = 11;
+        sample_message[19] = 0x41;
+        sample_message[20] = 0x41;
+        sample_message[21] = 0x99;
+        sample_message[22] = 0x9A;
+        sample_message[23] = 0xC1;
+        sample_message[24] = 0x51;
+        sample_message[25] = 0x99;
+        sample_message[26] = 0x9A;
         this->accept().then([this, &sample_message](boost::unique_future<void> f) {
             this->client->send(boost::asio::buffer(sample_message));
         });
         Stage instance("127.0.0.1", 5555);
+        std::cout << instance.get_device_info().to_string();
     }
 
 BOOST_AUTO_TEST_SUITE_END()

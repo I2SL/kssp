@@ -1,4 +1,3 @@
-#include <thread>
 #include "stage.h"
 
 Stage::Stage(const std::string &host, const int port)
@@ -45,32 +44,44 @@ class DeviceInfo Stage::get_device_info() {
 void Stage::event_queue_manager() {
     while (true) {
         try {
-            char message_lead;
-            boost::asio::streambuf sb1;
-            boost::asio::streambuf sb2;
-            boost::asio::streambuf sb3;
-            boost::asio::streambuf sb4;
+            boost::uint8_t message_lead;
+            boost::asio::streambuf sb;
             boost::system::error_code ec;
-            boost::asio::read(ConnectSocket, sb1, boost::asio::transfer_exactly(1), ec);
-            //std::sscanf(Utils::buffer_to_char_array(sb1), "%c", &message_lead);
-            message_lead = Utils::buffer_to_string(sb1)[0];
+
+            boost::asio::mutable_buffers_1 bufs = sb.prepare(1);
+            size_t n = ConnectSocket.receive(bufs);
+            sb.commit(n);
+            message_lead = Utils::buffer_to_char_array(sb)[0];
+            sb.consume(n);
 
             if (message_lead == SSP_PROTOCOL_VERSION) {
                 printf("Got a header\n");
-                unsigned short int message_length;
-                unsigned short int message_id;
-                char message_type;
-                boost::asio::read(ConnectSocket, sb2, boost::asio::transfer_exactly(2), ec);
-                //std::string len_response = Utils::buffer_to_string(sb2);
-                //printf("Length Response Elements: (%hd, %hd)\n", len_response[0], len_response[1]);
-                std::sscanf(Utils::buffer_to_char_array(sb2), "%hd", &message_length);
-                boost::asio::read(ConnectSocket, sb3, boost::asio::transfer_exactly(2), ec);
-                //std::string id_response = Utils::buffer_to_string(sb3);
-                //printf("ID Response Elements: (%hd, %hd)\n", id_response[0], id_response[1]);
-                //std::sscanf(id_response, "%hd", &message_id);
-                std::sscanf(Utils::buffer_to_char_array(sb3), "%hd", &message_id);
-                boost::asio::read(ConnectSocket, sb4, boost::asio::transfer_exactly(1), ec);
-                std::sscanf(Utils::buffer_to_char_array(sb4), "%c", &message_type);
+                boost::uint16_t message_length;
+                boost::uint16_t message_id;
+                boost::uint8_t message_type;
+
+                bufs = sb.prepare(2);
+                n = ConnectSocket.receive(bufs);
+                sb.commit(n);
+                message_length = boost::endian::load_big_u16(
+                        Utils::buffer_to_char_array(sb)
+                        );
+                sb.consume(n);
+
+                bufs = sb.prepare(2);
+                n = ConnectSocket.receive(bufs);
+                sb.commit(n);
+                message_id = boost::endian::load_big_u16(
+                        Utils::buffer_to_char_array(sb)
+                );
+                sb.consume(n);
+
+                bufs = sb.prepare(1);
+                n = ConnectSocket.receive(bufs);
+                sb.commit(n);
+                message_type = Utils::buffer_to_char_array(sb)[0];
+                sb.consume(n);
+
                 printf("Protocol: %hd\n", (short)message_lead);
                 printf("Length: %hd\n", message_length);
                 printf("ID: %hd\n", message_id);
@@ -83,7 +94,7 @@ void Stage::event_queue_manager() {
                 }
 
             } else {
-                std::cout << "Received unhandled byte: '" << &sb1 << "'\n";
+                std::cout << "Received unhandled byte: '" << &sb << "'\n";
             }
 
             if (ec) {
@@ -98,43 +109,80 @@ void Stage::event_queue_manager() {
 }
 
 void Stage::on_receive_device_info_response() {
-    boost::endian::big_uint8_buf_t device_type;
-    boost::endian::big_uint8_buf_t device_addr;
-    boost::endian::big_uint8_buf_t playback_mode;
-    boost::endian::big_uint8_buf_t playback_status;
-    boost::endian::big_uint8_buf_t firmware_version_major;
-    boost::endian::big_uint8_buf_t firmware_version_minor;
-    boost::endian::big_uint8_buf_t firmware_version_release;
-    boost::endian::big_uint8_buf_t firmware_version_build;
-    boost::endian::big_uint8_buf_t network_id;
-    boost::endian::big_uint8_buf_t hardware_id;
+    boost::uint8_t device_type;
+    boost::uint8_t device_addr;
+    boost::uint8_t playback_mode;
+    boost::uint8_t playback_status;
+    boost::uint8_t firmware_version_major;
+    boost::uint8_t firmware_version_minor;
+    boost::uint8_t firmware_version_release;
+    boost::uint8_t firmware_version_build;
+    boost::uint8_t network_id;
+    boost::uint8_t hardware_id;
     std::string device_password;
-    boost::endian::big_uint8_buf_t aux_input_status;
-    boost::endian::big_float32_buf_t delay_time_remaining;
-    boost::endian::big_float32_buf_t elapsed_time;
-    boost::endian::big_uint16_buf_t string_length;
+    boost::uint8_t aux_input_status;
+    float delay_time_remaining;
+    float elapsed_time;
+    boost::uint16_t string_length;
 
-    boost::asio::streambuf sb1;
-    boost::asio::streambuf sb2;
-    boost::asio::streambuf sb3;
-    boost::asio::streambuf sb4;
-    boost::system::error_code ec;
-    boost::asio::read(ConnectSocket, sb1, boost::asio::transfer_exactly(1), ec);
-    //FINISH
-    device_type = Utils::buffer_to_big_uint8(sb1);
-    //device_type = boost::endian::endian_load<>();
-    //device_type = reinterpret_cast<boost::endian::big_uint8_buf_t>(&sb1);
-    boost::asio::read(ConnectSocket, sb2, boost::asio::transfer_exactly(2), ec);
-    std::sscanf(Utils::buffer_to_char_array(sb2), "%hd", &string_length);
-    if (string_length.value() > 0) {
-        boost::asio::read(ConnectSocket, sb3, boost::asio::transfer_exactly(string_length.value()), ec);
-        std::sscanf(Utils::buffer_to_char_array(sb3), "%s", &device_password);
+    boost::asio::streambuf sb;
+    boost::asio::mutable_buffers_1 bufs = sb.prepare(10);
+    size_t n = ConnectSocket.receive(bufs);
+    sb.commit(n);
+    unsigned char* data = Utils::buffer_to_char_array(sb);
+    sb.consume(n);
+    device_type = data[0];
+    device_addr = data[1];
+    playback_mode = data[2];
+    playback_status = data[3];
+    firmware_version_major = data[4];
+    firmware_version_minor = data[5];
+    firmware_version_release = data[6];
+    firmware_version_build = data[7];
+    network_id = data[8];
+    hardware_id = data[9];
+
+    bufs = sb.prepare(2);
+    n = ConnectSocket.receive(bufs);
+    sb.commit(n);
+    string_length = boost::endian::load_big_u16(
+            Utils::buffer_to_char_array(sb)
+    );
+    sb.consume(n);
+
+    if (string_length > 0) {
+        bufs = sb.prepare(string_length);
+        n = ConnectSocket.receive(bufs);
+        sb.commit(n);
+        device_password = Utils::buffer_to_string(sb);
+        sb.consume(n);
     }
     else {
         device_password = std::string("");
     }
-    boost::asio::read(ConnectSocket, sb4, boost::asio::transfer_exactly(9), ec);
-    std::sscanf(Utils::buffer_to_char_array(sb4), "%c%f%f", &aux_input_status, &delay_time_remaining, &elapsed_time);
+
+    bufs = sb.prepare(1);
+    n = ConnectSocket.receive(bufs);
+    sb.commit(n);
+    aux_input_status = Utils::buffer_to_char_array(sb)[0];
+    sb.consume(n);
+
+    bufs = sb.prepare(4);
+    n = ConnectSocket.receive(bufs);
+    sb.commit(n);
+    delay_time_remaining = Utils::int32_to_float(
+            boost::endian::load_big_s32(Utils::buffer_to_char_array(sb))
+    );
+    sb.consume(n);
+
+    bufs = sb.prepare(4);
+    n = ConnectSocket.receive(bufs);
+    sb.commit(n);
+    elapsed_time = Utils::int32_to_float(
+            boost::endian::load_big_s32(Utils::buffer_to_char_array(sb))
+    );
+    sb.consume(n);
+
 
     class DeviceInfo response(
             device_type,
