@@ -52,6 +52,16 @@ BOOST_AUTO_TEST_SUITE(MockStageTests)
         }
     };
 
+    BOOST_AUTO_TEST_CASE(TestBytestoInt) {
+        unsigned char bytes[2];
+        bytes[0] = (unsigned char)0;
+        bytes[1] = (unsigned char)15;
+        unsigned short int comp(15);
+        unsigned short int conv = Utils::bytes_to_int(reinterpret_cast<char *>(bytes));
+        printf("Result: %hd\n", conv);
+        BOOST_CHECK(conv == comp);
+    }
+
     BOOST_AUTO_TEST_CASE(TestDeviceInfoObject) {
         class DeviceInfo instance(1,2,3,4,5,6,7,8,9,10,"hello",11,12.1,13.2);
         std::cout << instance.to_string();

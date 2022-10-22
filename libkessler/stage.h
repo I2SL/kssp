@@ -21,6 +21,7 @@
 #include "responses/device_guid.h"
 #include "responses/device_info.h"
 #include "responses/motor_info.h"
+#include "utils.hpp"
 
 class Stage{
 public:

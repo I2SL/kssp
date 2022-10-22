@@ -1,6 +1,5 @@
 #include <thread>
 #include "stage.h"
-#include "utils.hpp"
 
 Stage::Stage(const std::string &host, const int port)
     : ConnectSocket(
@@ -53,18 +52,29 @@ void Stage::event_queue_manager() {
             boost::asio::streambuf sb4;
             boost::system::error_code ec;
             boost::asio::read(ConnectSocket, sb1, boost::asio::transfer_exactly(1), ec);
-            std::sscanf(buffer_to_char_array(sb1), "%c", &message_lead);
+            //std::sscanf(Utils::buffer_to_char_array(sb1), "%c", &message_lead);
+            message_lead = Utils::buffer_to_string(sb1)[0];
 
             if (message_lead == SSP_PROTOCOL_VERSION) {
+                printf("Got a header\n");
                 unsigned short int message_length;
                 unsigned short int message_id;
                 char message_type;
                 boost::asio::read(ConnectSocket, sb2, boost::asio::transfer_exactly(2), ec);
-                std::sscanf(buffer_to_char_array(sb2), "%hd", &message_length);
+                //std::string len_response = Utils::buffer_to_string(sb2);
+                //printf("Length Response Elements: (%hd, %hd)\n", len_response[0], len_response[1]);
+                std::sscanf(Utils::buffer_to_char_array(sb2), "%hd", &message_length);
                 boost::asio::read(ConnectSocket, sb3, boost::asio::transfer_exactly(2), ec);
-                std::sscanf(buffer_to_char_array(sb3), "%hd", &message_id);
+                //std::string id_response = Utils::buffer_to_string(sb3);
+                //printf("ID Response Elements: (%hd, %hd)\n", id_response[0], id_response[1]);
+                //std::sscanf(id_response, "%hd", &message_id);
+                std::sscanf(Utils::buffer_to_char_array(sb3), "%hd", &message_id);
                 boost::asio::read(ConnectSocket, sb4, boost::asio::transfer_exactly(1), ec);
-                std::sscanf(buffer_to_char_array(sb4), "%c", &message_type);
+                std::sscanf(Utils::buffer_to_char_array(sb4), "%c", &message_type);
+                printf("Protocol: %hd\n", (short)message_lead);
+                printf("Length: %hd\n", message_length);
+                printf("ID: %hd\n", message_id);
+                printf("Type: %hd\n", (short)message_type);
 
                 if (message_type == (char)MessageType::Response) {
                     if (message_id == (unsigned short int)MessageID::DeviceInfo) {
@@ -110,7 +120,7 @@ void Stage::on_receive_device_info_response() {
     boost::asio::streambuf sb4;
     boost::system::error_code ec;
     boost::asio::read(ConnectSocket, sb1, boost::asio::transfer_exactly(10), ec);
-    std::sscanf(buffer_to_char_array(sb1),
+    std::sscanf(Utils::buffer_to_char_array(sb1),
                 "%c%c%c%c%c%c%c%c%c%c",
                 &device_type,
                 &device_addr,
@@ -123,16 +133,16 @@ void Stage::on_receive_device_info_response() {
                 &network_id,
                 &hardware_id);
     boost::asio::read(ConnectSocket, sb2, boost::asio::transfer_exactly(2), ec);
-    std::sscanf(buffer_to_char_array(sb2), "%hd", &string_length);
+    std::sscanf(Utils::buffer_to_char_array(sb2), "%hd", &string_length);
     if (string_length > 0) {
         boost::asio::read(ConnectSocket, sb3, boost::asio::transfer_exactly(string_length), ec);
-        std::sscanf(buffer_to_char_array(sb3), "%s", &device_password);
+        std::sscanf(Utils::buffer_to_char_array(sb3), "%s", &device_password);
     }
     else {
         device_password = std::string("");
     }
     boost::asio::read(ConnectSocket, sb4, boost::asio::transfer_exactly(9), ec);
-    std::sscanf(buffer_to_char_array(sb4), "%c%f%f", &aux_input_status, &delay_time_remaining, &elapsed_time);
+    std::sscanf(Utils::buffer_to_char_array(sb4), "%c%f%f", &aux_input_status, &delay_time_remaining, &elapsed_time);
 
     class DeviceInfo response(
             device_type,
@@ -152,6 +162,7 @@ void Stage::on_receive_device_info_response() {
             );
     DeviceInfoQueue.push(response);
 }
+
 
 
 
