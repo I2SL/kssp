@@ -45,14 +45,7 @@ void Stage::event_queue_manager() {
     while (true) {
         try {
             boost::uint8_t message_lead;
-            boost::asio::streambuf sb;
-            boost::system::error_code ec;
-
-            boost::asio::mutable_buffers_1 bufs = sb.prepare(1);
-            size_t n = ConnectSocket.receive(bufs);
-            sb.commit(n);
-            message_lead = Utils::buffer_to_char_array(sb)[0];
-            sb.consume(n);
+            message_lead = get_uint8();
 
             if (message_lead == SSP_PROTOCOL_VERSION) {
                 printf("Got a header\n");
@@ -60,27 +53,9 @@ void Stage::event_queue_manager() {
                 boost::uint16_t message_id;
                 boost::uint8_t message_type;
 
-                bufs = sb.prepare(2);
-                n = ConnectSocket.receive(bufs);
-                sb.commit(n);
-                message_length = boost::endian::load_big_u16(
-                        Utils::buffer_to_char_array(sb)
-                        );
-                sb.consume(n);
-
-                bufs = sb.prepare(2);
-                n = ConnectSocket.receive(bufs);
-                sb.commit(n);
-                message_id = boost::endian::load_big_u16(
-                        Utils::buffer_to_char_array(sb)
-                );
-                sb.consume(n);
-
-                bufs = sb.prepare(1);
-                n = ConnectSocket.receive(bufs);
-                sb.commit(n);
-                message_type = Utils::buffer_to_char_array(sb)[0];
-                sb.consume(n);
+                message_length = get_uint16();
+                message_id = get_uint16();
+                message_type = get_uint8();
 
                 printf("Protocol: %hd\n", (short)message_lead);
                 printf("Length: %hd\n", message_length);
@@ -95,13 +70,6 @@ void Stage::event_queue_manager() {
                     }
                 }
 
-            } else {
-                std::cout << "Received unhandled byte: '" << &sb << "'\n";
-            }
-
-            if (ec) {
-                std::cout << "status: " << ec.message() << "\n";
-                break;
             }
         }
         catch (std::exception& e) {
@@ -128,63 +96,28 @@ void Stage::on_receive_device_info_response() {
     float elapsed_time;
     boost::uint16_t string_length;
 
-    boost::asio::streambuf sbresponse;
-    boost::asio::mutable_buffers_1 bufs = sbresponse.prepare(10);
-    size_t n = ConnectSocket.receive(bufs);
-    sbresponse.commit(n);
-    unsigned char* data = Utils::buffer_to_char_array(sbresponse);
-    sbresponse.consume(n);
-    device_type = data[0];
-    device_addr = data[1];
-    playback_mode = data[2];
-    playback_status = data[3];
-    firmware_version_major = data[4];
-    firmware_version_minor = data[5];
-    firmware_version_release = data[6];
-    firmware_version_build = data[7];
-    network_id = data[8];
-    hardware_id = data[9];
+    device_type = get_uint8();
+    device_addr = get_uint8();
+    playback_mode = get_uint8();
+    playback_status = get_uint8();
+    firmware_version_major = get_uint8();
+    firmware_version_minor = get_uint8();
+    firmware_version_release = get_uint8();
+    firmware_version_build = get_uint8();
+    network_id = get_uint8();
+    hardware_id = get_uint8();
 
-    bufs = sbresponse.prepare(2);
-    n = ConnectSocket.receive(bufs);
-    sbresponse.commit(n);
-    string_length = boost::endian::load_big_u16(
-            Utils::buffer_to_char_array(sbresponse)
-    );
-    sbresponse.consume(n);
-
+    string_length = get_uint16();
     if (string_length > 0) {
-        bufs = sbresponse.prepare(string_length);
-        n = ConnectSocket.receive(bufs);
-        sbresponse.commit(n);
-        device_password = Utils::buffer_to_string(sbresponse);
-        sbresponse.consume(n);
+        device_password = get_string(string_length);
     }
     else {
         device_password = std::string("");
     }
 
-    bufs = sbresponse.prepare(1);
-    n = ConnectSocket.receive(bufs);
-    sbresponse.commit(n);
-    aux_input_status = Utils::buffer_to_char_array(sbresponse)[0];
-    sbresponse.consume(n);
-
-    bufs = sbresponse.prepare(4);
-    n = ConnectSocket.receive(bufs);
-    sbresponse.commit(n);
-    delay_time_remaining = Utils::int32_to_float(
-            boost::endian::load_big_s32(Utils::buffer_to_char_array(sbresponse))
-    );
-    sbresponse.consume(n);
-
-    bufs = sbresponse.prepare(4);
-    n = ConnectSocket.receive(bufs);
-    sbresponse.commit(n);
-    elapsed_time = Utils::int32_to_float(
-            boost::endian::load_big_s32(Utils::buffer_to_char_array(sbresponse))
-    );
-    sbresponse.consume(n);
+    aux_input_status = get_uint8();
+    delay_time_remaining = get_float();
+    elapsed_time = get_float();
 
 
     class DeviceInfo response(
@@ -204,6 +137,60 @@ void Stage::on_receive_device_info_response() {
             elapsed_time
             );
     DeviceInfoQueue.push(response);
+}
+
+boost::uint8_t Stage::get_uint8() {
+    boost::uint8_t out;
+    boost::asio::streambuf uint8sb;
+    boost::asio::mutable_buffers_1 bufs = uint8sb.prepare(1);
+    size_t n = ConnectSocket.receive(bufs);
+    uint8sb.commit(n);
+    out = Utils::buffer_to_char_array(uint8sb)[0];
+    uint8sb.consume(n);
+
+    return out;
+}
+
+boost::uint16_t Stage::get_uint16() {
+    boost::uint16_t out;
+    boost::asio::streambuf uint16sb;
+    boost::asio::mutable_buffers_1 bufs = uint16sb.prepare(2);
+    size_t n = ConnectSocket.receive(bufs);
+    uint16sb.commit(n);
+    out = boost::endian::load_big_u16(Utils::buffer_to_char_array(uint16sb));
+    uint16sb.consume(n);
+
+    return out;
+}
+
+float Stage::get_float() {
+    float out;
+    boost::asio::streambuf int32sb;
+    boost::asio::mutable_buffers_1 bufs = int32sb.prepare(4);
+    size_t n = ConnectSocket.receive(bufs);
+    int32sb.commit(n);
+    out = Utils::int32_to_float(
+            boost::endian::load_big_s32(Utils::buffer_to_char_array(int32sb))
+    );
+    int32sb.consume(n);
+
+    return out;
+}
+
+std::string Stage::get_string(boost::uint16_t len) {
+    std::string out;
+    boost::asio::streambuf strsb;
+    boost::asio::mutable_buffers_1 bufs = strsb.prepare(len);
+    size_t n = ConnectSocket.receive(bufs);
+    strsb.commit(n);
+    unsigned char* uchars = Utils::buffer_to_char_array(strsb);
+    char* chars;
+    //Not sure about this
+    std::memcpy(&chars, &uchars, sizeof(uchars));
+    out = chars;
+    strsb.consume(n);
+
+    return out;
 }
 
 

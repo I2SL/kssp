@@ -30,11 +30,15 @@ public:
     Stage(const std::string &host, int port);
     class DeviceInfo get_device_info();
 private:
-    void event_queue_manager();
-    void on_receive_device_info_response();
     boost::asio::io_service service;
     boost::asio::ip::tcp::socket ConnectSocket;
     std::queue<class DeviceInfo> DeviceInfoQueue;
+    void event_queue_manager();
+    void on_receive_device_info_response();
+    boost::uint8_t get_uint8();
+    boost::uint16_t get_uint16();
+    float get_float();
+    std::string get_string(boost::uint16_t);
 };
 
 #endif //LIBKESSLER_STAGE_H
