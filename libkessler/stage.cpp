@@ -7,7 +7,8 @@ Stage::Stage(const std::string &host, const int port)
                     boost::asio::ip::address::from_string(host),
                     port
                     ).protocol()
-            )
+            ),
+            lck(receive_mtx)
 {
     boost::asio::ip::address address = boost::asio::ip::address::from_string(host);
     boost::asio::ip::tcp::endpoint endpoint = boost::asio::ip::tcp::endpoint(address, port);
@@ -35,10 +36,15 @@ class DeviceInfo Stage::get_device_info() {
     msg[5] = MessageType::Get;
     ConnectSocket.send(boost::asio::buffer(msg));
     //Wait for queue change instead?
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    //std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    while (!ready) {
+        cv.wait(lck);
+    }
 
     class DeviceInfo response = DeviceInfoQueue.front();
     DeviceInfoQueue.pop();
+    ready = false;
     return response;
 }
 
@@ -140,6 +146,8 @@ void Stage::on_receive_device_info_response() {
             elapsed_time
             );
     DeviceInfoQueue.push(response);
+    ready = true;
+    cv.notify_all();
 }
 
 boost::uint8_t Stage::get_uint8() {

@@ -35,7 +35,10 @@ private:
     boost::asio::ip::tcp::socket ConnectSocket;
     std::queue<class DeviceInfo> DeviceInfoQueue;
     std::mutex event_mtx;
+    std::mutex receive_mtx;
+    std::unique_lock<std::mutex> lck;
     std::condition_variable cv;
+    bool ready = false;
     void event_queue_manager();
     void on_receive_device_info_response();
     boost::uint8_t get_uint8();
