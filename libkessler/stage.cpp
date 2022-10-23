@@ -185,7 +185,6 @@ std::string Stage::get_string(boost::uint16_t len) {
     strsb.commit(n);
     unsigned char* uchars = Utils::buffer_to_char_array(strsb);
     char* chars;
-    //Not sure about this
     std::memcpy(&chars, &uchars, sizeof(uchars));
     out = chars;
     strsb.consume(n);
