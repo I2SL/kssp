@@ -89,7 +89,9 @@ void Stage::event_queue_manager() {
 
                 if (message_type == (char)MessageType::Response) {
                     if (message_id == (unsigned short int)MessageID::DeviceInfo) {
+                        printf("Got Device Info Response\n");
                         on_receive_device_info_response();
+                        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
                     }
                 }
 
@@ -109,6 +111,7 @@ void Stage::event_queue_manager() {
 }
 
 void Stage::on_receive_device_info_response() {
+    printf("Processing Device Info Response\n");
     boost::uint8_t device_type;
     boost::uint8_t device_addr;
     boost::uint8_t playback_mode;
@@ -125,12 +128,12 @@ void Stage::on_receive_device_info_response() {
     float elapsed_time;
     boost::uint16_t string_length;
 
-    boost::asio::streambuf sb;
-    boost::asio::mutable_buffers_1 bufs = sb.prepare(10);
+    boost::asio::streambuf sbresponse;
+    boost::asio::mutable_buffers_1 bufs = sbresponse.prepare(10);
     size_t n = ConnectSocket.receive(bufs);
-    sb.commit(n);
-    unsigned char* data = Utils::buffer_to_char_array(sb);
-    sb.consume(n);
+    sbresponse.commit(n);
+    unsigned char* data = Utils::buffer_to_char_array(sbresponse);
+    sbresponse.consume(n);
     device_type = data[0];
     device_addr = data[1];
     playback_mode = data[2];
@@ -142,46 +145,46 @@ void Stage::on_receive_device_info_response() {
     network_id = data[8];
     hardware_id = data[9];
 
-    bufs = sb.prepare(2);
+    bufs = sbresponse.prepare(2);
     n = ConnectSocket.receive(bufs);
-    sb.commit(n);
+    sbresponse.commit(n);
     string_length = boost::endian::load_big_u16(
-            Utils::buffer_to_char_array(sb)
+            Utils::buffer_to_char_array(sbresponse)
     );
-    sb.consume(n);
+    sbresponse.consume(n);
 
     if (string_length > 0) {
-        bufs = sb.prepare(string_length);
+        bufs = sbresponse.prepare(string_length);
         n = ConnectSocket.receive(bufs);
-        sb.commit(n);
-        device_password = Utils::buffer_to_string(sb);
-        sb.consume(n);
+        sbresponse.commit(n);
+        device_password = Utils::buffer_to_string(sbresponse);
+        sbresponse.consume(n);
     }
     else {
         device_password = std::string("");
     }
 
-    bufs = sb.prepare(1);
+    bufs = sbresponse.prepare(1);
     n = ConnectSocket.receive(bufs);
-    sb.commit(n);
-    aux_input_status = Utils::buffer_to_char_array(sb)[0];
-    sb.consume(n);
+    sbresponse.commit(n);
+    aux_input_status = Utils::buffer_to_char_array(sbresponse)[0];
+    sbresponse.consume(n);
 
-    bufs = sb.prepare(4);
+    bufs = sbresponse.prepare(4);
     n = ConnectSocket.receive(bufs);
-    sb.commit(n);
+    sbresponse.commit(n);
     delay_time_remaining = Utils::int32_to_float(
-            boost::endian::load_big_s32(Utils::buffer_to_char_array(sb))
+            boost::endian::load_big_s32(Utils::buffer_to_char_array(sbresponse))
     );
-    sb.consume(n);
+    sbresponse.consume(n);
 
-    bufs = sb.prepare(4);
+    bufs = sbresponse.prepare(4);
     n = ConnectSocket.receive(bufs);
-    sb.commit(n);
+    sbresponse.commit(n);
     elapsed_time = Utils::int32_to_float(
-            boost::endian::load_big_s32(Utils::buffer_to_char_array(sb))
+            boost::endian::load_big_s32(Utils::buffer_to_char_array(sbresponse))
     );
-    sb.consume(n);
+    sbresponse.consume(n);
 
 
     class DeviceInfo response(
