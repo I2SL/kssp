@@ -1,11 +1,8 @@
 #define BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION
 
 #define BOOST_TEST_MODULE example
-#include <memory>
 
-#include <boost/endian/buffers.hpp>
 #include <boost/endian/conversion.hpp>
-#include <boost/thread.hpp>
 #include <boost/thread/future.hpp>
 #include <boost/test/unit_test.hpp>
 

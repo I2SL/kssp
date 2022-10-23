@@ -8,18 +8,11 @@ Stage::Stage(const std::string &host, const int port)
                     port
                     ).protocol()
             ),
-            lck(receive_mtx)
+    lck(receive_mtx)
 {
     boost::asio::ip::address address = boost::asio::ip::address::from_string(host);
     boost::asio::ip::tcp::endpoint endpoint = boost::asio::ip::tcp::endpoint(address, port);
     ConnectSocket.connect(endpoint);
-    //for (const auto messageid: AllMessageIDs) {
-    //    events.emplace(messageid, std::queue<std::string>());
-    //}
-    //std::queue<class DeviceInfo> line;
-    //events.emplace(MessageID::DeviceInfo, line);
-    //events.insert(std::pair<const unsigned int, std::queue<class DeviceInfo>>(MessageID::DeviceInfo, std::queue<class DeviceInfo>()));
-    //std::pair<const unsigned int, std::queue<class DeviceInfo>>
 
     boost::async([this]() {
         this->event_queue_manager();
@@ -35,8 +28,6 @@ class DeviceInfo Stage::get_device_info() {
     msg[4] = MessageID::DeviceInfo;
     msg[5] = MessageType::Get;
     ConnectSocket.send(boost::asio::buffer(msg));
-    //Wait for queue change instead?
-    //std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     while (!ready) {
         cv.wait(lck);
@@ -74,7 +65,6 @@ void Stage::event_queue_manager() {
                     if (message_id == (unsigned short int)MessageID::DeviceInfo) {
                         printf("Got Device Info Response\n");
                         on_receive_device_info_response();
-                        //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
                     }
                 }
 
