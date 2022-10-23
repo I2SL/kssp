@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_SUITE(MockStageTests)
 
     BOOST_FIXTURE_TEST_CASE(SendDeviceInfo, MockServer)
     {
-        unsigned char sample_message[33];
+        unsigned char sample_message[39];
         sample_message[0] = SSP_PROTOCOL_VERSION;
         sample_message[1] = 0x00;
         sample_message[2] = SSP_GET_MESSAGE_SIZE;
@@ -126,23 +126,29 @@ BOOST_AUTO_TEST_SUITE(MockStageTests)
         sample_message[13] = 8;
         sample_message[14] = 9;
         sample_message[15] = 10;
-        sample_message[16] = 0x00; //6-character password
-        sample_message[17] = 0x06;
-        sample_message[18] = 0x68; //hello!
+        sample_message[16] = 0x00; //12-character password
+        sample_message[17] = 0x0C;
+        sample_message[18] = 0x68; //hello world!
         sample_message[19] = 0x65;
         sample_message[20] = 0x6C;
         sample_message[21] = 0x6C;
         sample_message[22] = 0x6F;
-        sample_message[23] = 0x21;
-        sample_message[24] = 11; // aux input
-        sample_message[25] = 0x41;
-        sample_message[26] = 0x41;
-        sample_message[27] = 0x99;
-        sample_message[28] = 0x9A;
-        sample_message[29] = 0xC1;
-        sample_message[30] = 0x51;
-        sample_message[31] = 0x99;
-        sample_message[32] = 0x9A;
+        sample_message[23] = 0x20;
+        sample_message[24] = 0x77;
+        sample_message[25] = 0x6F;
+        sample_message[26] = 0x72;
+        sample_message[27] = 0x6C;
+        sample_message[28] = 0x64;
+        sample_message[29] = 0x21;
+        sample_message[30] = 11; // aux input
+        sample_message[31] = 0x41;
+        sample_message[32] = 0x41;
+        sample_message[33] = 0x99;
+        sample_message[34] = 0x9A;
+        sample_message[35] = 0xC1;
+        sample_message[36] = 0x51;
+        sample_message[37] = 0x99;
+        sample_message[38] = 0x9A;
         this->accept().then([this, &sample_message](boost::unique_future<void> f) {
             this->client->send(boost::asio::buffer(sample_message));
         });

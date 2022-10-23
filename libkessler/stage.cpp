@@ -34,6 +34,7 @@ class DeviceInfo Stage::get_device_info() {
     msg[4] = MessageID::DeviceInfo;
     msg[5] = MessageType::Get;
     ConnectSocket.send(boost::asio::buffer(msg));
+    //Wait for queue change instead?
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     class DeviceInfo response = DeviceInfoQueue.front();
@@ -43,6 +44,7 @@ class DeviceInfo Stage::get_device_info() {
 
 void Stage::event_queue_manager() {
     while (true) {
+        event_mtx.lock();
         try {
             boost::uint8_t message_lead;
             message_lead = get_uint8();
@@ -66,7 +68,7 @@ void Stage::event_queue_manager() {
                     if (message_id == (unsigned short int)MessageID::DeviceInfo) {
                         printf("Got Device Info Response\n");
                         on_receive_device_info_response();
-                        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+                        //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
                     }
                 }
 
@@ -75,6 +77,7 @@ void Stage::event_queue_manager() {
         catch (std::exception& e) {
             std::cerr << "Exception: " << e.what() << std::endl;
         }
+        event_mtx.unlock();
     }
 }
 

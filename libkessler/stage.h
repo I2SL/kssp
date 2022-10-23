@@ -3,9 +3,10 @@
 #ifndef LIBKESSLER_STAGE_H
 #define LIBKESSLER_STAGE_H
 
+#include <condition_variable>
 #include <iomanip>
 #include <iostream>
-#include <map>
+#include <mutex>
 #include <queue>
 #include <string>
 #include <thread>
@@ -33,6 +34,8 @@ private:
     boost::asio::io_service service;
     boost::asio::ip::tcp::socket ConnectSocket;
     std::queue<class DeviceInfo> DeviceInfoQueue;
+    std::mutex event_mtx;
+    std::condition_variable cv;
     void event_queue_manager();
     void on_receive_device_info_response();
     boost::uint8_t get_uint8();
