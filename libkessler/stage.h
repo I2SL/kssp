@@ -30,10 +30,13 @@ class Stage{
 public:
     Stage(const std::string &host, int port);
     class DeviceInfo get_device_info();
+    class MotorInfo get_motor_info();
 private:
     boost::asio::io_service service;
     boost::asio::ip::tcp::socket ConnectSocket;
     std::queue<class DeviceInfo> DeviceInfoQueue;
+    std::queue<class Motor> MotorQueue;
+    std::queue<class MotorInfo> MotorInfoQueue;
     std::mutex event_mtx;
     std::mutex receive_mtx;
     std::unique_lock<std::mutex> lck;
@@ -41,6 +44,7 @@ private:
     bool ready = false;
     void event_queue_manager();
     void on_receive_device_info_response();
+    void on_receive_motor_info_response(boost::uint8_t message_type);
     boost::uint8_t get_uint8();
     boost::uint16_t get_uint16();
     float get_float();

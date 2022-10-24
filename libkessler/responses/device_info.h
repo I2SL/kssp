@@ -4,7 +4,7 @@
 #include <fmt/format.h>
 #include <string>
 
-#include <boost/endian/buffers.hpp>
+#include <boost/endian/conversion.hpp>
 
 class DeviceInfo {
 public:

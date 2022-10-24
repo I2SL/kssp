@@ -36,6 +36,28 @@ class DeviceInfo Stage::get_device_info() {
     class DeviceInfo response = DeviceInfoQueue.front();
     DeviceInfoQueue.pop();
     ready = false;
+
+    return response;
+}
+
+class MotorInfo Stage::get_motor_info() {
+    char msg[6];
+    msg[0] = SSP_PROTOCOL_VERSION;
+    msg[1] = 0x00;
+    msg[2] = SSP_GET_MESSAGE_SIZE;
+    msg[3] = 0x00;
+    msg[4] = MessageID::MotorInfo;
+    msg[5] = MessageType::Get;
+    ConnectSocket.send(boost::asio::buffer(msg));
+
+    while (!ready) {
+        cv.wait(lck);
+    }
+
+    class MotorInfo response = MotorInfoQueue.front();
+    MotorInfoQueue.pop();
+    ready = false;
+
     return response;
 }
 
@@ -61,10 +83,14 @@ void Stage::event_queue_manager() {
                 printf("ID: %hd\n", message_id);
                 printf("Type: %hd\n", (short)message_type);
 
-                if (message_type == (char)MessageType::Response) {
+                if (message_type == MessageType::Response || message_type == MessageType::Ongoing) {
                     if (message_id == (unsigned short int)MessageID::DeviceInfo) {
                         printf("Got Device Info Response\n");
                         on_receive_device_info_response();
+                    }
+                    else if (message_id == (unsigned short int)MessageID::MotorInfo) {
+                        printf("Got Motor Info Response: {}\n", message_type);
+                        on_receive_motor_info_response(message_type);
                     }
                 }
 
@@ -138,6 +164,42 @@ void Stage::on_receive_device_info_response() {
     DeviceInfoQueue.push(response);
     ready = true;
     cv.notify_all();
+}
+
+void Stage::on_receive_motor_info_response(boost::uint8_t message_type) {
+    printf("Processing Motor Info Response\n");
+    boost::uint8_t motor_count = get_uint8();
+    boost::uint8_t motor_address = get_uint8();
+    float position = get_float();
+    float end_position = get_float();
+    float max_max_setup_speed = get_float();
+    float max_max_move_speed = get_float();
+    float max_max_acceleration = get_float();
+
+    class Motor motor(
+            motor_count,
+            motor_address,
+            position,
+            end_position,
+            max_max_setup_speed,
+            max_max_move_speed,
+            max_max_acceleration
+            );
+    MotorQueue.push(motor);
+
+    // Response message type indicates final response.
+    // Construct MotorInfo object by emptying Motor queue
+    if(message_type == MessageType::Response) {
+        std::vector<Motor> motors;
+        while (!MotorQueue.empty()) {
+            motors.push_back(MotorQueue.front());
+            MotorQueue.pop();
+        }
+        class MotorInfo response(motors);
+        MotorInfoQueue.push(response);
+        ready = true;
+        cv.notify_all();
+    }
 }
 
 boost::uint8_t Stage::get_uint8() {
