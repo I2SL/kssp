@@ -31,12 +31,14 @@ public:
     Stage(const std::string &host, int port);
     class DeviceInfo get_device_info();
     class MotorInfo get_motor_info();
+    class DeviceGUID get_device_guid();
 private:
     boost::asio::io_service service;
     boost::asio::ip::tcp::socket ConnectSocket;
     std::queue<class DeviceInfo> DeviceInfoQueue;
     std::queue<class Motor> MotorQueue;
     std::queue<class MotorInfo> MotorInfoQueue;
+    std::queue<class DeviceGUID> DeviceGUIDQueue;
     std::mutex event_mtx;
     std::mutex receive_mtx;
     std::unique_lock<std::mutex> lck;
@@ -45,10 +47,12 @@ private:
     void event_queue_manager();
     void on_receive_device_info_response();
     void on_receive_motor_info_response(boost::uint8_t message_type);
+    void on_receive_device_guid_response();
     boost::uint8_t get_uint8();
     boost::uint16_t get_uint16();
     float get_float();
-    std::string get_string(boost::uint16_t);
+    std::string get_string(boost::uint16_t len);
+    unsigned char* get_block(boost::uint16_t len);
 };
 
 #endif //LIBKESSLER_STAGE_H

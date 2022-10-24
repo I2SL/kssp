@@ -61,6 +61,27 @@ class MotorInfo Stage::get_motor_info() {
     return response;
 }
 
+class DeviceGUID Stage::get_device_guid() {
+    char msg[6];
+    msg[0] = SSP_PROTOCOL_VERSION;
+    msg[1] = 0x00;
+    msg[2] = SSP_GET_MESSAGE_SIZE;
+    msg[3] = 0x00;
+    msg[4] = MessageID::DeviceGUID;
+    msg[5] = MessageType::Get;
+    ConnectSocket.send(boost::asio::buffer(msg));
+
+    while (!ready) {
+        cv.wait(lck);
+    }
+
+    class DeviceGUID response = DeviceGUIDQueue.front();
+    DeviceInfoQueue.pop();
+    ready = false;
+
+    return response;
+}
+
 void Stage::event_queue_manager() {
     while (true) {
         event_mtx.lock();
@@ -91,6 +112,10 @@ void Stage::event_queue_manager() {
                     else if (message_id == (unsigned short int)MessageID::MotorInfo) {
                         printf("Got Motor Info Response: {}\n", message_type);
                         on_receive_motor_info_response(message_type);
+                    }
+                    else if (message_id == (unsigned short int)MessageID::DeviceGUID) {
+                        printf("Got Device GUID Response\n");
+                        on_receive_device_guid_response();
                     }
                 }
 
@@ -202,6 +227,17 @@ void Stage::on_receive_motor_info_response(boost::uint8_t message_type) {
     }
 }
 
+void Stage::on_receive_device_guid_response() {
+    printf("Processing Device GUID Response\n");
+    boost::uint16_t block_length = get_uint16();
+    unsigned char* block_data = get_block(block_length);
+
+    class DeviceGUID response(block_length, block_data);
+    DeviceGUIDQueue.push(response);
+    ready = true;
+    cv.notify_all();
+}
+
 boost::uint8_t Stage::get_uint8() {
     boost::uint8_t out;
     boost::asio::streambuf uint8sb;
@@ -253,6 +289,18 @@ std::string Stage::get_string(boost::uint16_t len) {
     strsb.consume(n);
 
     return out;
+}
+
+unsigned char* Stage::get_block(boost::uint16_t len) {
+    std::string out;
+    boost::asio::streambuf blocksb;
+    boost::asio::mutable_buffers_1 bufs = blocksb.prepare(len);
+    size_t n = ConnectSocket.receive(bufs);
+    blocksb.commit(n);
+    unsigned char* uchars = Utils::buffer_to_char_array(blocksb);
+    blocksb.consume(n);
+
+    return uchars;
 }
 
 

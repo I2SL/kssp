@@ -174,5 +174,15 @@ BOOST_AUTO_TEST_SUITE(StageTests)
         BOOST_CHECK(test.motors[0].motor_count == 1);
     }
 
+    BOOST_AUTO_TEST_CASE(GetDeviceGUID)
+    {
+        Stage instance("192.168.50.1", 5520);
+        instance.get_device_info();
+        instance.get_motor_info();
+        class DeviceGUID test = instance.get_device_guid();
+        std::cout << test.to_string();
+        BOOST_CHECK(true);
+    }
+
 BOOST_AUTO_TEST_SUITE_END()
 
