@@ -15,4 +15,12 @@ public:
 
         return output;
     }
+
+    static unsigned char* string_to_uchars(const std::string& input) {
+        unsigned char* output;
+        const char* chars = input.c_str();
+        std::memcpy(&output, &chars, sizeof(chars));
+
+        return output;
+    }
 };

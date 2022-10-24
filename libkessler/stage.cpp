@@ -23,7 +23,7 @@ class DeviceInfo Stage::get_device_info() {
     char msg[6];
     msg[0] = SSP_PROTOCOL_VERSION;
     msg[1] = 0x00;
-    msg[2] = SSP_GET_MESSAGE_SIZE;
+    msg[2] = SSP_HEADER_SIZE;
     msg[3] = 0x00;
     msg[4] = MessageID::DeviceInfo;
     msg[5] = MessageType::Get;
@@ -44,7 +44,7 @@ class MotorInfo Stage::get_motor_info() {
     char msg[6];
     msg[0] = SSP_PROTOCOL_VERSION;
     msg[1] = 0x00;
-    msg[2] = SSP_GET_MESSAGE_SIZE;
+    msg[2] = SSP_HEADER_SIZE;
     msg[3] = 0x00;
     msg[4] = MessageID::MotorInfo;
     msg[5] = MessageType::Get;
@@ -65,7 +65,7 @@ class DeviceGUID Stage::get_device_guid() {
     char msg[6];
     msg[0] = SSP_PROTOCOL_VERSION;
     msg[1] = 0x00;
-    msg[2] = SSP_GET_MESSAGE_SIZE;
+    msg[2] = SSP_HEADER_SIZE;
     msg[3] = 0x00;
     msg[4] = MessageID::DeviceGUID;
     msg[5] = MessageType::Get;
@@ -80,6 +80,15 @@ class DeviceGUID Stage::get_device_guid() {
     ready = false;
 
     return response;
+}
+
+void Stage::set_user_password(std::string password) {
+    unsigned char* password_data = Utils::string_to_uchars(password);
+    boost::uint16_t password_length = sizeof(password_data);
+    boost::uint16_t message_length = SSP_HEADER_SIZE + 2 + password_length;
+    std::vector<unsigned char> msg;
+
+    ConnectSocket.send(boost::asio::buffer(msg));
 }
 
 void Stage::event_queue_manager() {

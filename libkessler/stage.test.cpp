@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_SUITE(MockStageTests)
         unsigned char sample_message[39];
         sample_message[0] = SSP_PROTOCOL_VERSION;
         sample_message[1] = 0x00;
-        sample_message[2] = SSP_GET_MESSAGE_SIZE;
+        sample_message[2] = SSP_HEADER_SIZE;
         sample_message[3] = 0x00;
         sample_message[4] = MessageID::DeviceInfo;
         sample_message[5] = MessageType::Response;
