@@ -9,8 +9,8 @@
 class DeviceGUID {
 public:
     DeviceGUID(boost::uint16_t block_length, unsigned char* block_data);
-    boost::uuids::uuid device_guid;
-    std::string to_string();
+    boost::uuids::uuid device_guid{};
+    std::string to_string() const;
 };
 
 #endif //LIBKESSLER_DEVICE_GUID_H

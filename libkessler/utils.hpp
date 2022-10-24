@@ -1,4 +1,5 @@
 #include <boost/asio.hpp>
+#include <boost/endian/conversion.hpp>
 
 class Utils {
 public:
@@ -22,5 +23,37 @@ public:
         std::memcpy(&output, &chars, sizeof(chars));
 
         return output;
+    }
+
+    static std::vector<unsigned char> make_message_header(const boost::uint16_t message_length,
+                                                          const boost::uint16_t message_id,
+                                                          const boost::uint8_t message_type) {
+        std::vector<unsigned char> header;
+        unsigned char length_bytes[2];
+        boost::endian::store_big_u16(length_bytes, message_length);
+        unsigned char id_bytes[2];
+        boost::endian::store_big_u16(id_bytes, message_id);
+        header.push_back(SSP_PROTOCOL_VERSION);
+        header.insert(std::end(header), std::begin(length_bytes), std::end(length_bytes));
+        header.insert(std::end(header), std::begin(id_bytes), std::end(id_bytes));
+        header.push_back(message_type);
+
+        return header;
+    }
+
+    static std::vector<unsigned char> make_message(const boost::uint16_t message_length,
+                                                   const boost::uint16_t message_id,
+                                                   const boost::uint8_t message_type,
+                                                   const std::vector<unsigned char> parameters) {
+        std::vector<unsigned char> message = make_message_header(message_length, message_id, message_type);
+//        int arr_size = sizeof(parameters);
+//        unsigned char param_arr[arr_size];
+//        memcpy(&param_arr, &parameters, arr_size);
+//        for (unsigned char byte : param_arr) {
+//            message.push_back(byte);
+//        }
+        message.insert(std::end(message), std::begin(parameters), std::end(parameters));
+
+        return message;
     }
 };

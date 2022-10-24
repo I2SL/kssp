@@ -32,7 +32,7 @@ public:
     class DeviceInfo get_device_info();
     class MotorInfo get_motor_info();
     class DeviceGUID get_device_guid();
-    void set_user_password(std::string password);
+    void set_user_password(const std::vector<unsigned char>& password);
     void shutdown();
 private:
     boost::asio::io_service service;

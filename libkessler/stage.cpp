@@ -20,14 +20,8 @@ Stage::Stage(const std::string &host, const int port)
 }
 
 class DeviceInfo Stage::get_device_info() {
-    char msg[6];
-    msg[0] = SSP_PROTOCOL_VERSION;
-    msg[1] = 0x00;
-    msg[2] = SSP_HEADER_SIZE;
-    msg[3] = 0x00;
-    msg[4] = MessageID::DeviceInfo;
-    msg[5] = MessageType::Get;
-    ConnectSocket.send(boost::asio::buffer(msg));
+    std::vector<unsigned char> message = Utils::make_message_header(SSP_HEADER_SIZE, MessageID::DeviceInfo, MessageType::Get);
+    ConnectSocket.send(boost::asio::buffer(message));
 
     while (!ready) {
         cv.wait(lck);
@@ -41,14 +35,8 @@ class DeviceInfo Stage::get_device_info() {
 }
 
 class MotorInfo Stage::get_motor_info() {
-    char msg[6];
-    msg[0] = SSP_PROTOCOL_VERSION;
-    msg[1] = 0x00;
-    msg[2] = SSP_HEADER_SIZE;
-    msg[3] = 0x00;
-    msg[4] = MessageID::MotorInfo;
-    msg[5] = MessageType::Get;
-    ConnectSocket.send(boost::asio::buffer(msg));
+    std::vector<unsigned char> message = Utils::make_message_header(SSP_HEADER_SIZE, MessageID::MotorInfo, MessageType::Get);
+    ConnectSocket.send(boost::asio::buffer(message));
 
     while (!ready) {
         cv.wait(lck);
@@ -62,14 +50,8 @@ class MotorInfo Stage::get_motor_info() {
 }
 
 class DeviceGUID Stage::get_device_guid() {
-    char msg[6];
-    msg[0] = SSP_PROTOCOL_VERSION;
-    msg[1] = 0x00;
-    msg[2] = SSP_HEADER_SIZE;
-    msg[3] = 0x00;
-    msg[4] = MessageID::DeviceGUID;
-    msg[5] = MessageType::Get;
-    ConnectSocket.send(boost::asio::buffer(msg));
+    std::vector<unsigned char> message = Utils::make_message_header(SSP_HEADER_SIZE, MessageID::DeviceGUID, MessageType::Get);
+    ConnectSocket.send(boost::asio::buffer(message));
 
     while (!ready) {
         cv.wait(lck);
@@ -82,13 +64,11 @@ class DeviceGUID Stage::get_device_guid() {
     return response;
 }
 
-void Stage::set_user_password(std::string password) {
-    unsigned char* password_data = Utils::string_to_uchars(password);
-    boost::uint16_t password_length = sizeof(password_data);
+void Stage::set_user_password(const std::vector<unsigned char>& password) {
+    boost::uint16_t password_length = password.size();
     boost::uint16_t message_length = SSP_HEADER_SIZE + 2 + password_length;
-    std::vector<unsigned char> msg;
-
-    ConnectSocket.send(boost::asio::buffer(msg));
+    std::vector<unsigned char> message = Utils::make_message(message_length, MessageID::UserPassword, MessageType::Set, password);
+    ConnectSocket.send(boost::asio::buffer(message));
 }
 
 void Stage::event_queue_manager() {

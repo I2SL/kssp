@@ -55,6 +55,12 @@ BOOST_AUTO_TEST_SUITE(MockStageTests)
         }
     };
 
+    BOOST_AUTO_TEST_CASE(TestSizeOfEmptyVector) {
+        std::vector<unsigned char> test;
+        //test.push_back(0);
+        BOOST_CHECK(test.size()==0);
+    }
+
     BOOST_AUTO_TEST_CASE(TestEndianLoad) {
         boost::uint16_t testendian(16);
         unsigned char* test;
