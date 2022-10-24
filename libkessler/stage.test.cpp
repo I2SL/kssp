@@ -5,6 +5,8 @@
 #include <boost/endian/conversion.hpp>
 #include <boost/thread/future.hpp>
 #include <boost/test/unit_test.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include "stage.h"
 

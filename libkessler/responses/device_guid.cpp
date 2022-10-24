@@ -5,5 +5,8 @@ DeviceGUID::DeviceGUID(boost::uint16_t block_length, unsigned char* block_data) 
 }
 
 std::string DeviceGUID::to_string() {
-    return boost::uuids::to_string(device_guid);
+    std::string result =  boost::uuids::to_string(device_guid);
+    result += "\n";
+
+    return result;
 }

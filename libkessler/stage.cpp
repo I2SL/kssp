@@ -76,7 +76,7 @@ class DeviceGUID Stage::get_device_guid() {
     }
 
     class DeviceGUID response = DeviceGUIDQueue.front();
-    DeviceInfoQueue.pop();
+    DeviceGUIDQueue.pop();
     ready = false;
 
     return response;
@@ -119,7 +119,7 @@ void Stage::event_queue_manager() {
                         on_receive_device_info_response();
                     }
                     else if (message_id == (unsigned short int)MessageID::MotorInfo) {
-                        printf("Got Motor Info Response: {}\n", message_type);
+                        printf("Got Motor Info Response: %d\n", message_type);
                         on_receive_motor_info_response(message_type);
                     }
                     else if (message_id == (unsigned short int)MessageID::DeviceGUID) {
@@ -310,6 +310,12 @@ unsigned char* Stage::get_block(boost::uint16_t len) {
     blocksb.consume(n);
 
     return uchars;
+}
+
+void Stage::shutdown() {
+    boost::system::error_code ec;
+    ConnectSocket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+    ConnectSocket.close();
 }
 
 

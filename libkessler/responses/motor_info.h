@@ -28,8 +28,8 @@ public:
 
 class MotorInfo {
 public:
-    explicit MotorInfo(std::vector<Motor>& motors);
-    std::vector<Motor>& motors;
+    explicit MotorInfo(std::vector<Motor> motors);
+    std::vector<Motor> motors;
     std::string to_string();
 };
 

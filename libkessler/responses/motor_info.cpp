@@ -1,5 +1,7 @@
 #include "motor_info.h"
 
+#include <utility>
+
 Motor::Motor(
             boost::uint8_t motor_count,
             boost::uint8_t motor_address,
@@ -34,15 +36,15 @@ std::string Motor::to_string() {
     return result;
 }
 
-MotorInfo::MotorInfo(std::vector<Motor>& motors):
-    motors(motors)
+MotorInfo::MotorInfo(std::vector<Motor> motors):
+    motors(std::move(motors))
 {
 
 }
 
 std::string MotorInfo::to_string() {
     std::string result = std::string("");
-    for (Motor& motor : motors) {
+    for (Motor motor : motors) {
         result += motor.to_string();
     }
 
