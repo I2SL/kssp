@@ -49,7 +49,7 @@ public:
     static std::vector<unsigned char> make_message(const boost::uint16_t message_length,
                                                    const boost::uint16_t message_id,
                                                    const boost::uint8_t message_type,
-                                                   const std::vector<unsigned char> parameters) {
+                                                   const std::vector<unsigned char>& parameters) {
         std::vector<unsigned char> message = make_message_header(message_length, message_id, message_type);
         message.insert(std::end(message), std::begin(parameters), std::end(parameters));
 
@@ -58,6 +58,14 @@ public:
 
     static std::string char_vector_to_string(const std::vector<unsigned char>& input) {
         std::string output(input.begin(), input.end());
+        return output;
+    }
+
+    static std::vector<unsigned char> string_to_char_vector(const std::string& input) {
+        std::vector<unsigned char> output;
+        for (unsigned char letter : input) {
+            output.push_back(letter);
+        }
         return output;
     }
 

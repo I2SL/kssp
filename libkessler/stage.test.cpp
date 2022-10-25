@@ -56,9 +56,24 @@ BOOST_AUTO_TEST_SUITE(MockStageTests)
     };
 
     BOOST_AUTO_TEST_CASE(TestSizeOfEmptyVector) {
-        std::vector<unsigned char> test;
-        //test.push_back(0);
+        std::vector<unsigned char> test{};
         BOOST_CHECK(test.size()==0);
+    }
+
+    BOOST_AUTO_TEST_CASE(TestVectorStringConversion) {
+        std::string original = std::string("");
+        std::vector<unsigned char> original_vect = Utils::string_to_char_vector(original);
+        std::string original2 = Utils::char_vector_to_string(original_vect);
+        printf("Vector Size: %d\n", original_vect.size());
+        BOOST_CHECK(original==original2);
+    }
+
+    BOOST_AUTO_TEST_CASE(TestEmptyStringBehavior) {
+        std::string original = std::string("");
+        std::vector<unsigned char> original_vect = {'h', 'i'};
+        original_vect.insert(std::end(original_vect), std::begin(original), std::end(original));
+        BOOST_CHECK(original.size()==0);
+        BOOST_CHECK(original_vect.size() == 2);
     }
 
     BOOST_AUTO_TEST_CASE(TestEndianLoad) {

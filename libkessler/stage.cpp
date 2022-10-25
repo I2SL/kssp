@@ -64,11 +64,13 @@ class DeviceGUID Stage::get_device_guid() {
     return response;
 }
 
-//fix params
-void Stage::set_user_password(const std::vector<unsigned char>& password) {
+void Stage::set_user_password(const std::string& password) {
     boost::uint16_t password_length = password.size();
     boost::uint16_t message_length = SSP_HEADER_SIZE + 2 + password_length;
-    std::vector<unsigned char> message = Utils::make_message(message_length, MessageID::UserPassword, MessageType::Set, password);
+    std::vector<unsigned char> params;
+    params = Utils::push_unit16(params, password_length);
+    params.insert(std::end(params), std::begin(password), std::end(password));
+    std::vector<unsigned char> message = Utils::make_message(message_length, MessageID::UserPassword, MessageType::Set, params);
     ConnectSocket.send(boost::asio::buffer(message));
 }
 
