@@ -1,3 +1,5 @@
+#pragma once
+
 enum NoteID {
     MotorStatus = 0x01,
     PlaybackStatus = 0x02,

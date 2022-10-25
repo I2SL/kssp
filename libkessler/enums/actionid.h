@@ -1,3 +1,5 @@
+#pragma once
+
 enum ActionID {
     ResetDevice = 0x01,
     ResetAxis = 0x02,

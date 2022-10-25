@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef LIBKESSLER_MOTOR_INFO_H
 #define LIBKESSLER_MOTOR_INFO_H
 

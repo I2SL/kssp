@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef LIBKESSLER_DEVICE_GUID_H
 #define LIBKESSLER_DEVICE_GUID_H
 

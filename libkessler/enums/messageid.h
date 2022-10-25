@@ -1,3 +1,5 @@
+#pragma once
+
 enum MessageID {
     NetworkInfo = 0x02,
     LEDStatus = 0x07,

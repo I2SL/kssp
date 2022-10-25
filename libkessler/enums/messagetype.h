@@ -1,3 +1,5 @@
+#pragma once
+
 enum MessageType {
     Set = 0x00,
     Get = 0x01,

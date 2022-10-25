@@ -1,5 +1,9 @@
+#pragma once
+
 #include <boost/asio.hpp>
 #include <boost/endian/conversion.hpp>
+
+#include "consts.h"
 
 class Utils {
 public:
@@ -46,14 +50,13 @@ public:
                                                    const boost::uint8_t message_type,
                                                    const std::vector<unsigned char> parameters) {
         std::vector<unsigned char> message = make_message_header(message_length, message_id, message_type);
-//        int arr_size = sizeof(parameters);
-//        unsigned char param_arr[arr_size];
-//        memcpy(&param_arr, &parameters, arr_size);
-//        for (unsigned char byte : param_arr) {
-//            message.push_back(byte);
-//        }
         message.insert(std::end(message), std::begin(parameters), std::end(parameters));
 
         return message;
+    }
+
+    static std::string char_vector_to_string(const std::vector<unsigned char>& input) {
+        std::string output(input.begin(), input.end());
+        return output;
     }
 };
