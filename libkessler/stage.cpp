@@ -84,6 +84,13 @@ void Stage::set_device_password(const std::string& password) {
     ConnectSocket.send(boost::asio::buffer(message));
 }
 
+void Stage::handshake() {
+    class DeviceInfo init = get_device_info();
+    set_user_password(init.device_password);
+    get_motor_info();
+    get_device_guid();
+}
+
 
 void Stage::set_position_speed_acceleration(const boost::uint8_t motor_address, const float position, const float speed, const float acceleration) {
     boost::uint16_t message_length = 20;
@@ -93,9 +100,7 @@ void Stage::set_position_speed_acceleration(const boost::uint8_t motor_address, 
     params = Utils::push_float(params, position);
     params = Utils::push_float(params, speed);
     params = Utils::push_float(params, acceleration);
-    printf("params size: %d\n", params.size());
     std::vector<unsigned char> message = Utils::make_message(message_length, MessageID::Action, MessageType::Set, params);
-    printf("message size: %d\n", message.size());
     ConnectSocket.send(boost::asio::buffer(message));
 }
 
@@ -123,15 +128,12 @@ void Stage::event_queue_manager() {
 
                 if (message_type == MessageType::Response || message_type == MessageType::Ongoing) {
                     if (message_id == (unsigned short int)MessageID::DeviceInfo) {
-                        printf("Got Device Info Response\n");
                         on_receive_device_info_response();
                     }
                     else if (message_id == (unsigned short int)MessageID::MotorInfo) {
-                        printf("Got Motor Info Response: %d\n", message_type);
                         on_receive_motor_info_response(message_type);
                     }
                     else if (message_id == (unsigned short int)MessageID::DeviceGUID) {
-                        printf("Got Device GUID Response\n");
                         on_receive_device_guid_response();
                     }
                     else if (message_id == (unsigned short int)MessageID::Notification) {
@@ -150,7 +152,6 @@ void Stage::event_queue_manager() {
 }
 
 void Stage::on_receive_device_info_response() {
-    printf("Processing Device Info Response\n");
     boost::uint8_t device_type;
     boost::uint8_t device_addr;
     boost::uint8_t playback_mode;
@@ -213,7 +214,6 @@ void Stage::on_receive_device_info_response() {
 }
 
 void Stage::on_receive_motor_info_response(boost::uint8_t message_type) {
-    printf("Processing Motor Info Response\n");
     boost::uint8_t motor_count = get_uint8();
     boost::uint8_t motor_address = get_uint8();
     float position = get_float();
@@ -249,7 +249,6 @@ void Stage::on_receive_motor_info_response(boost::uint8_t message_type) {
 }
 
 void Stage::on_receive_device_guid_response() {
-    printf("Processing Device GUID Response\n");
     boost::uint16_t block_length = get_uint16();
     unsigned char* block_data = get_block(block_length);
 

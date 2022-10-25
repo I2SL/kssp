@@ -210,53 +210,45 @@ BOOST_AUTO_TEST_SUITE(StageTests)
     BOOST_AUTO_TEST_CASE(MoveSlideMotor)
     {
         Stage instance("192.168.50.1", 5520);
-        instance.get_device_info();
-        //instance.set_user_password();
-        instance.get_motor_info();
-        instance.get_device_guid();
+        instance.handshake();
         instance.set_position_speed_acceleration(1, 25000, 100, 50);
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         instance.set_position_speed_acceleration(1, -25000, 0, 50);
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         instance.set_position_speed_acceleration(1, -25000, 100, 50);
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         instance.set_position_speed_acceleration(1, -25000, 0, 50);
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         BOOST_CHECK(true);
     }
 
     BOOST_AUTO_TEST_CASE(MovePanMotor)
     {
         Stage instance("192.168.50.1", 5520);
-        instance.get_device_info();
-        //instance.set_user_password();
-        instance.get_motor_info();
-        instance.get_device_guid();
+        instance.handshake();
         instance.set_position_speed_acceleration(2, 25000, 65, 50);
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         instance.set_position_speed_acceleration(2, -25000, 0, 50);
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         instance.set_position_speed_acceleration(2, -25000, 65, 50);
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         instance.set_position_speed_acceleration(2, -25000, 0, 50);
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         BOOST_CHECK(true);
     }
 
     BOOST_AUTO_TEST_CASE(MoveTiltMotor)
     {
         Stage instance("192.168.50.1", 5520);
-        instance.get_device_info();
-        instance.get_motor_info();
-        instance.get_device_guid();
+        instance.handshake();
         instance.set_position_speed_acceleration(3, 25000, 65, 50);
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         instance.set_position_speed_acceleration(3, -25000, 0, 50);
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         instance.set_position_speed_acceleration(3, -25000, 65, 50);
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         instance.set_position_speed_acceleration(3, -25000, 0, 50);
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         BOOST_CHECK(true);
     }
 
