@@ -74,6 +74,16 @@ void Stage::set_user_password(const std::string& password) {
     ConnectSocket.send(boost::asio::buffer(message));
 }
 
+void Stage::set_device_password(const std::string& password) {
+    boost::uint16_t password_length = password.size();
+    boost::uint16_t message_length = SSP_HEADER_SIZE + 2 + password_length;
+    std::vector<unsigned char> params;
+    params = Utils::push_unit16(params, password_length);
+    params.insert(std::end(params), std::begin(password), std::end(password));
+    std::vector<unsigned char> message = Utils::make_message(message_length, MessageID::DevicePassword, MessageType::Set, params);
+    ConnectSocket.send(boost::asio::buffer(message));
+}
+
 
 void Stage::set_position_speed_acceleration(const boost::uint8_t motor_address, const float position, const float speed, const float acceleration) {
     boost::uint16_t message_length = 20;

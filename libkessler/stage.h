@@ -34,6 +34,7 @@ public:
     class MotorInfo get_motor_info();
     class DeviceGUID get_device_guid();
     void set_user_password(const std::string& password);
+    void set_device_password(const std::string& password);
     void set_position_speed_acceleration(boost::uint8_t motor_address, float position, float speed, float acceleration);
     void shutdown();
 private:

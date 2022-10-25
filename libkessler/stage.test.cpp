@@ -247,7 +247,6 @@ BOOST_AUTO_TEST_SUITE(StageTests)
     {
         Stage instance("192.168.50.1", 5520);
         instance.get_device_info();
-        //instance.set_user_password();
         instance.get_motor_info();
         instance.get_device_guid();
         instance.set_position_speed_acceleration(3, 25000, 65, 50);
@@ -259,6 +258,23 @@ BOOST_AUTO_TEST_SUITE(StageTests)
         instance.set_position_speed_acceleration(3, -25000, 0, 50);
         std::this_thread::sleep_for(std::chrono::milliseconds(2000));
         BOOST_CHECK(true);
+    }
+
+    BOOST_AUTO_TEST_CASE(SetDevicePassword) {
+        std::string password("hello world!");
+        std::string empty("");
+        Stage instance("192.168.50.1", 5520);
+        instance.get_device_info();
+        instance.get_motor_info();
+        instance.get_device_guid();
+        instance.set_device_password(password);
+        instance.set_user_password(password);
+        class DeviceInfo newinfo = instance.get_device_info();
+        BOOST_CHECK(newinfo.device_password == password);
+        instance.set_device_password(empty);
+        instance.set_user_password(empty);
+        newinfo = instance.get_device_info();
+        BOOST_CHECK(newinfo.device_password == empty);
     }
 
 BOOST_AUTO_TEST_SUITE_END()
