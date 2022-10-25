@@ -2,6 +2,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/endian/conversion.hpp>
+#include <utility>
 
 #include "consts.h"
 
@@ -58,5 +59,25 @@ public:
     static std::string char_vector_to_string(const std::vector<unsigned char>& input) {
         std::string output(input.begin(), input.end());
         return output;
+    }
+
+    static std::vector<unsigned char> push_unit16(std::vector<unsigned char> vect, const boost::uint16_t num) {
+        std::vector<unsigned char> new_vect = std::move(vect);
+        unsigned char int_bytes[2];
+        boost::endian::store_big_u16(int_bytes, num);
+        new_vect.insert(std::end(new_vect), std::begin(int_bytes), std::end(int_bytes));
+
+        return new_vect;
+    }
+
+    static std::vector<unsigned char> push_float(std::vector<unsigned char> vect, const float num) {
+        boost::int32_t to_int;
+        memcpy(&to_int, &num, sizeof(num));
+        std::vector<unsigned char> new_vect = std::move(vect);
+        unsigned char float_bytes[4];
+        boost::endian::store_big_s32(float_bytes, to_int);
+        new_vect.insert(std::end(new_vect), std::begin(float_bytes), std::end(float_bytes));
+
+        return new_vect;
     }
 };

@@ -64,10 +64,26 @@ class DeviceGUID Stage::get_device_guid() {
     return response;
 }
 
+//fix params
 void Stage::set_user_password(const std::vector<unsigned char>& password) {
     boost::uint16_t password_length = password.size();
     boost::uint16_t message_length = SSP_HEADER_SIZE + 2 + password_length;
     std::vector<unsigned char> message = Utils::make_message(message_length, MessageID::UserPassword, MessageType::Set, password);
+    ConnectSocket.send(boost::asio::buffer(message));
+}
+
+
+void Stage::set_position_speed_acceleration(const boost::uint8_t motor_address, const float position, const float speed, const float acceleration) {
+    boost::uint16_t message_length = 20;
+    std::vector<unsigned char> params;
+    params.push_back(ActionID::SetPositionSpeedAcceleration);
+    params.push_back(motor_address);
+    params = Utils::push_float(params, position);
+    params = Utils::push_float(params, speed);
+    params = Utils::push_float(params, acceleration);
+    printf("params size: %d\n", params.size());
+    std::vector<unsigned char> message = Utils::make_message(message_length, MessageID::Action, MessageType::Set, params);
+    printf("message size: %d\n", message.size());
     ConnectSocket.send(boost::asio::buffer(message));
 }
 
@@ -105,6 +121,10 @@ void Stage::event_queue_manager() {
                     else if (message_id == (unsigned short int)MessageID::DeviceGUID) {
                         printf("Got Device GUID Response\n");
                         on_receive_device_guid_response();
+                    }
+                    else if (message_id == (unsigned short int)MessageID::Notification) {
+                        printf("Got Notification from device.\n");
+                        printf("Notification Type: %hd\n", get_uint8());
                     }
                 }
 
