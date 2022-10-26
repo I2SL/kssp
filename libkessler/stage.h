@@ -25,6 +25,7 @@
 #include "responses/device_guid.h"
 #include "responses/device_info.h"
 #include "responses/motor_info.h"
+#include "responses/network_info.h"
 #include "utils.hpp"
 
 class Stage{
@@ -33,6 +34,7 @@ public:
     class DeviceInfo get_device_info();
     class MotorInfo get_motor_info();
     class DeviceGUID get_device_guid();
+    class NetworkInfo get_network_info();
     void set_user_password(const std::string& password);
     void set_device_password(const std::string& password);
     void handshake();
@@ -45,6 +47,7 @@ private:
     std::queue<class Motor> MotorQueue;
     std::queue<class MotorInfo> MotorInfoQueue;
     std::queue<class DeviceGUID> DeviceGUIDQueue;
+    std::queue<class NetworkInfo> NetworkInfoQueue;
     std::mutex event_mtx;
     std::mutex receive_mtx;
     std::unique_lock<std::mutex> lck;
@@ -54,8 +57,10 @@ private:
     void on_receive_device_info_response();
     void on_receive_motor_info_response(boost::uint8_t message_type);
     void on_receive_device_guid_response();
+    void on_receive_network_info_response();
     boost::uint8_t get_uint8();
     boost::uint16_t get_uint16();
+    boost::uint32_t get_uint32();
     float get_float();
     std::string get_string(boost::uint16_t len);
     unsigned char* get_block(boost::uint16_t len);

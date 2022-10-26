@@ -23,6 +23,13 @@ Sometimes packages need to be reinstalled when switching between machines. Try t
 ## Float data type
 This implementation uses the `boost` endian library, which does not yet include load and store functions for `float` types. All values that should be floats are read in as `int32` and reinterpreted as floats.
 
+## Not Implemented
+The following features are not yet implemented:
+
+### NetworkInfo
+The NetworkInfo feature does not have the `Set` or `LimitedResponse == true`features.
+
+
 # References
 1) https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1204r0.html#tests-unit
 2) https://medium.com/swlh/cpm-an-awesome-dependency-manager-for-c-with-cmake-3c53f4376766

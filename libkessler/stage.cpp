@@ -91,6 +91,22 @@ void Stage::handshake() {
     get_device_guid();
 }
 
+class NetworkInfo Stage::get_network_info() {
+    std::vector<unsigned char> params;
+    params.push_back(0x00); //LimitedResponse true not implemented
+    std::vector<unsigned char> message = Utils::make_message(SSP_HEADER_SIZE + 1, MessageID::NetworkInfo, MessageType::Get, params);
+    ConnectSocket.send(boost::asio::buffer(message));
+
+    while (!ready) {
+        cv.wait(lck);
+    }
+
+    class NetworkInfo response = NetworkInfoQueue.front();
+    NetworkInfoQueue.pop();
+    ready = false;
+
+    return response;
+}
 
 void Stage::set_position_speed_acceleration(const boost::uint8_t motor_address, const float position, const float speed, const float acceleration) {
     boost::uint16_t message_length = 20;
@@ -135,6 +151,9 @@ void Stage::event_queue_manager() {
                     }
                     else if (message_id == (unsigned short int)MessageID::DeviceGUID) {
                         on_receive_device_guid_response();
+                    }
+                    else if (message_id == (unsigned short int)MessageID::NetworkInfo) {
+                        on_receive_network_info_response();
                     }
                     else if (message_id == (unsigned short int)MessageID::Notification) {
                         printf("Got Notification from device.\n");
@@ -258,6 +277,29 @@ void Stage::on_receive_device_guid_response() {
     cv.notify_all();
 }
 
+void Stage::on_receive_network_info_response() {
+    boost::uint8_t DHCP = get_uint8();
+    unsigned char* mac_address = get_block(6);
+    boost::uint32_t ip_address = get_uint32();
+    boost::uint32_t subnet_mask = get_uint32();
+    boost::uint32_t gateway = get_uint32();
+    boost::uint8_t device_type = get_uint8();
+    boost::uint8_t device_addr = get_uint8();
+
+    class NetworkInfo response(
+            DHCP,
+            mac_address,
+            ip_address,
+            subnet_mask,
+            gateway,
+            device_type,
+            device_addr
+            );
+    NetworkInfoQueue.push(response);
+    ready = true;
+    cv.notify_all();
+}
+
 boost::uint8_t Stage::get_uint8() {
     boost::uint8_t out;
     boost::asio::streambuf uint8sb;
@@ -278,6 +320,18 @@ boost::uint16_t Stage::get_uint16() {
     uint16sb.commit(n);
     out = boost::endian::load_big_u16(Utils::buffer_to_char_array(uint16sb));
     uint16sb.consume(n);
+
+    return out;
+}
+
+boost::uint32_t Stage::get_uint32() {
+    boost::uint32_t out;
+    boost::asio::streambuf uint32sb;
+    boost::asio::mutable_buffers_1 bufs = uint32sb.prepare(4);
+    size_t n = ConnectSocket.receive(bufs);
+    uint32sb.commit(n);
+    out = boost::endian::load_big_u32(Utils::buffer_to_char_array(uint32sb));
+    uint32sb.consume(n);
 
     return out;
 }

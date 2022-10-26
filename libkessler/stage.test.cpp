@@ -269,5 +269,14 @@ BOOST_AUTO_TEST_SUITE(StageTests)
         BOOST_CHECK(newinfo.device_password == empty);
     }
 
+    BOOST_AUTO_TEST_CASE(GetNetworkInfo)
+    {
+        Stage instance("192.168.50.1", 5520);
+        instance.handshake();
+        class NetworkInfo result = instance.get_network_info();
+        std::cout << result.to_string();
+        BOOST_CHECK(true);
+    }
+
 BOOST_AUTO_TEST_SUITE_END()
 
