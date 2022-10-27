@@ -27,7 +27,8 @@ This implementation uses the `boost` endian library, which does not yet include 
 The following features are not yet implemented:
 
 ### NetworkInfo
-The NetworkInfo feature does not have the `Set` or `LimitedResponse == true`features.
+* `Set`
+* `Get` with `LimitedResponse = 1`parameter.
 
 
 # References

@@ -278,5 +278,28 @@ BOOST_AUTO_TEST_SUITE(StageTests)
         BOOST_CHECK(true);
     }
 
+    BOOST_AUTO_TEST_CASE(TestLEDStatus)
+    {
+        Stage instance("192.168.50.1", 5520);
+        instance.handshake();
+        instance.set_led_status(1,0);
+        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        class LEDStatus status = instance.get_led_status();
+        BOOST_CHECK(status.master_status == 1);
+        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        instance.set_led_status(2,0);
+        status = instance.get_led_status();
+        BOOST_CHECK(status.master_status == 2);
+        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        instance.set_led_status(3,0);
+        status = instance.get_led_status();
+        BOOST_CHECK(status.master_status == 3);
+        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        instance.set_led_status(0,0);
+        status = instance.get_led_status();
+        BOOST_CHECK(status.master_status == 0);
+        std::cout << status.to_string();
+    }
+
 BOOST_AUTO_TEST_SUITE_END()
 

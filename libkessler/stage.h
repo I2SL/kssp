@@ -24,6 +24,7 @@
 #include "enums/noteid.h"
 #include "responses/device_guid.h"
 #include "responses/device_info.h"
+#include "responses/led_status.h"
 #include "responses/motor_info.h"
 #include "responses/network_info.h"
 #include "utils.hpp"
@@ -35,8 +36,10 @@ public:
     class MotorInfo get_motor_info();
     class DeviceGUID get_device_guid();
     class NetworkInfo get_network_info();
+    class LEDStatus get_led_status();
     void set_user_password(const std::string& password);
     void set_device_password(const std::string& password);
+    void set_led_status(boost::uint8_t master_status, boost::uint8_t slave_status);
     void handshake();
     void set_position_speed_acceleration(boost::uint8_t motor_address, float position, float speed, float acceleration);
     void shutdown();
@@ -48,6 +51,7 @@ private:
     std::queue<class MotorInfo> MotorInfoQueue;
     std::queue<class DeviceGUID> DeviceGUIDQueue;
     std::queue<class NetworkInfo> NetworkInfoQueue;
+    std::queue<class LEDStatus> LEDStatusQueue;
     std::mutex event_mtx;
     std::mutex receive_mtx;
     std::unique_lock<std::mutex> lck;
@@ -58,6 +62,7 @@ private:
     void on_receive_motor_info_response(boost::uint8_t message_type);
     void on_receive_device_guid_response();
     void on_receive_network_info_response();
+    void on_receive_led_status_response();
     boost::uint8_t get_uint8();
     boost::uint16_t get_uint16();
     boost::uint32_t get_uint32();

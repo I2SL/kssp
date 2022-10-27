@@ -64,6 +64,38 @@ class DeviceGUID Stage::get_device_guid() {
     return response;
 }
 
+class NetworkInfo Stage::get_network_info() {
+    std::vector<unsigned char> params;
+    params.push_back(0x00); //LimitedResponse true not implemented
+    std::vector<unsigned char> message = Utils::make_message(SSP_HEADER_SIZE + 1, MessageID::NetworkInfo, MessageType::Get, params);
+    ConnectSocket.send(boost::asio::buffer(message));
+
+    while (!ready) {
+        cv.wait(lck);
+    }
+
+    class NetworkInfo response = NetworkInfoQueue.front();
+    NetworkInfoQueue.pop();
+    ready = false;
+
+    return response;
+}
+
+class LEDStatus Stage::get_led_status() {
+    std::vector<unsigned char> message = Utils::make_message_header(SSP_HEADER_SIZE, MessageID::LEDStatus, MessageType::Get);
+    ConnectSocket.send(boost::asio::buffer(message));
+
+    while (!ready) {
+        cv.wait(lck);
+    }
+
+    class LEDStatus response = LEDStatusQueue.front();
+    LEDStatusQueue.pop();
+    ready = false;
+
+    return response;
+}
+
 void Stage::set_user_password(const std::string& password) {
     boost::uint16_t password_length = password.size();
     boost::uint16_t message_length = SSP_HEADER_SIZE + 2 + password_length;
@@ -84,30 +116,6 @@ void Stage::set_device_password(const std::string& password) {
     ConnectSocket.send(boost::asio::buffer(message));
 }
 
-void Stage::handshake() {
-    class DeviceInfo init = get_device_info();
-    set_user_password(init.device_password);
-    get_motor_info();
-    get_device_guid();
-}
-
-class NetworkInfo Stage::get_network_info() {
-    std::vector<unsigned char> params;
-    params.push_back(0x00); //LimitedResponse true not implemented
-    std::vector<unsigned char> message = Utils::make_message(SSP_HEADER_SIZE + 1, MessageID::NetworkInfo, MessageType::Get, params);
-    ConnectSocket.send(boost::asio::buffer(message));
-
-    while (!ready) {
-        cv.wait(lck);
-    }
-
-    class NetworkInfo response = NetworkInfoQueue.front();
-    NetworkInfoQueue.pop();
-    ready = false;
-
-    return response;
-}
-
 void Stage::set_position_speed_acceleration(const boost::uint8_t motor_address, const float position, const float speed, const float acceleration) {
     boost::uint16_t message_length = 20;
     std::vector<unsigned char> params;
@@ -118,6 +126,21 @@ void Stage::set_position_speed_acceleration(const boost::uint8_t motor_address, 
     params = Utils::push_float(params, acceleration);
     std::vector<unsigned char> message = Utils::make_message(message_length, MessageID::Action, MessageType::Set, params);
     ConnectSocket.send(boost::asio::buffer(message));
+}
+
+void Stage::set_led_status(boost::uint8_t master_status, boost::uint8_t slave_status) {
+    std::vector<unsigned char> params;
+    params.push_back(master_status);
+    params.push_back(slave_status);
+    std::vector<unsigned char> message = Utils::make_message(SSP_HEADER_SIZE + 2, MessageID::LEDStatus, MessageType::Set, params);
+    ConnectSocket.send(boost::asio::buffer(message));
+}
+
+void Stage::handshake() {
+    class DeviceInfo init = get_device_info();
+    set_user_password(init.device_password);
+    get_motor_info();
+    get_device_guid();
 }
 
 void Stage::event_queue_manager() {
@@ -154,6 +177,9 @@ void Stage::event_queue_manager() {
                     }
                     else if (message_id == (unsigned short int)MessageID::NetworkInfo) {
                         on_receive_network_info_response();
+                    }
+                    else if (message_id == (unsigned short int)MessageID::LEDStatus) {
+                        on_receive_led_status_response();
                     }
                     else if (message_id == (unsigned short int)MessageID::Notification) {
                         printf("Got Notification from device.\n");
@@ -296,6 +322,16 @@ void Stage::on_receive_network_info_response() {
             device_addr
             );
     NetworkInfoQueue.push(response);
+    ready = true;
+    cv.notify_all();
+}
+
+void Stage::on_receive_led_status_response() {
+    boost::uint8_t master_status = get_uint8();
+    boost::uint8_t slave_status = get_uint8();
+
+    class LEDStatus response(master_status, slave_status);
+    LEDStatusQueue.push(response);
     ready = true;
     cv.notify_all();
 }
