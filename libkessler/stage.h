@@ -44,6 +44,7 @@ public:
     void set_position_speed_acceleration(boost::uint8_t motor_address, float position, float speed, float acceleration);
     void shutdown();
 private:
+    bool active = true;
     boost::asio::io_service service;
     boost::asio::ip::tcp::socket ConnectSocket;
     std::queue<class DeviceInfo> DeviceInfoQueue;

@@ -144,7 +144,7 @@ void Stage::handshake() {
 }
 
 void Stage::event_queue_manager() {
-    while (true) {
+    while (active) {
         event_mtx.lock();
         try {
             boost::uint8_t message_lead;
@@ -414,6 +414,7 @@ unsigned char* Stage::get_block(boost::uint16_t len) {
 }
 
 void Stage::shutdown() {
+    active = false;
     boost::system::error_code ec;
     ConnectSocket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
     ConnectSocket.close();

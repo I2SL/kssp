@@ -7,6 +7,11 @@ using namespace std;
 
 int main ()
 {
+    Stage kessler("192.168.50.1", 5520);
+    kessler.handshake();
+    std::cout << kessler.get_device_info().to_string();
+
+    printf("\n");
     printf("CONTROLS:\n");
     printf("---------\n");
     printf("Tilt Up: 'W'\n");
@@ -36,9 +41,6 @@ int main ()
     bool right_pressed = false;
     int speed = 0;
     float speed_p = 0;
-
-    Stage kessler("192.168.50.1", 5520);
-    kessler.handshake();
 
     while (running)
     {
@@ -189,6 +191,7 @@ int main ()
             kessler.set_position_speed_acceleration(1, 25000, 0, SLIDE_MAX_ACC);
             kessler.set_position_speed_acceleration(2, 25000, 0, PAN_MAX_ACC);
             kessler.set_position_speed_acceleration(3, 25000, 0, TILT_MAX_ACC);
+            kessler.shutdown();
             running = false;
         }
 
