@@ -17,5 +17,8 @@ target_link_libraries(libkessler ${CONAN_LIBS})
 add_executable(driver tests/driver.cpp)
 target_link_libraries(driver libkessler)
 
+add_executable(wasd_controller tests/wasd_controller.cpp)
+target_link_libraries(wasd_controller libkessler ${CONAN_LIBS})
+
 add_executable(libkessler-test libkessler/stage.test.cpp)
 target_link_libraries(libkessler-test libkessler ${CONAN_LIBS})
