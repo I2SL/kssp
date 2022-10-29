@@ -35,8 +35,11 @@ int main ()
     bool left_pressed = false;
     bool right_pressed = false;
     int speed = 0;
+    float speed_p = 0;
 
-    //Stage kessler("192.168.50.1", 5520);
+    Stage kessler("192.168.50.1", 5520);
+    kessler.handshake();
+
     while (running)
     {
         w_pressed = GetAsyncKeyState(0x57);
@@ -47,10 +50,13 @@ int main ()
         down_pressed = GetAsyncKeyState(0x28);
         left_pressed = GetAsyncKeyState(0x25);
         right_pressed = GetAsyncKeyState(0x27);
+        speed_p = (float)speed / 100;
+
 
         if (w_pressed) {
             if(!tilt_up) {
                 if (!s_pressed) {
+                    kessler.set_position_speed_acceleration(3, 25000, TILT_MAX_SPEED*speed_p, TILT_MAX_ACC);
                     tilt_up = true;
                     cout << "Start Tilt Up" << endl;
                 }
@@ -61,6 +67,7 @@ int main ()
                 tilt_up = false;
                 if (!tilt_down) {
                     cout << "Stop Tilt" << endl;
+                    kessler.set_position_speed_acceleration(3, 25000, 0, TILT_MAX_ACC);
                 }
             }
         }
@@ -68,6 +75,7 @@ int main ()
         if (s_pressed) {
             if(!tilt_down) {
                 if (!w_pressed) {
+                    kessler.set_position_speed_acceleration(3, -25000, TILT_MAX_SPEED*speed_p, TILT_MAX_ACC);
                     tilt_down = true;
                     cout << "Start Tilt Down" << endl;
                 }
@@ -77,6 +85,7 @@ int main ()
             if(tilt_down) {
                 tilt_down = false;
                 if (!tilt_up) {
+                    kessler.set_position_speed_acceleration(3, -25000, 0, TILT_MAX_ACC);
                     cout << "Stop Tilt" << endl;
                 }
             }
@@ -85,6 +94,7 @@ int main ()
         if (a_pressed) {
             if(!pan_left) {
                 if (!d_pressed) {
+                    kessler.set_position_speed_acceleration(2, -25000, PAN_MAX_SPEED*speed_p, PAN_MAX_ACC);
                     pan_left = true;
                     cout << "Start Pan Left" << endl;
                 }
@@ -94,6 +104,7 @@ int main ()
             if(pan_left) {
                 pan_left = false;
                 if (!pan_right) {
+                    kessler.set_position_speed_acceleration(2, -25000, 0, PAN_MAX_ACC);
                     cout << "Stop Pan Left" << endl;
                 }
             }
@@ -102,6 +113,7 @@ int main ()
         if (d_pressed) {
             if(!pan_right) {
                 if (!a_pressed) {
+                    kessler.set_position_speed_acceleration(2, 25000, PAN_MAX_SPEED*speed_p, PAN_MAX_ACC);
                     pan_right = true;
                     cout << "Start Pan Right" << endl;
                 }
@@ -111,6 +123,7 @@ int main ()
             if(pan_right) {
                 pan_right = false;
                 if (!pan_left) {
+                    kessler.set_position_speed_acceleration(2, 25000, 0, PAN_MAX_ACC);
                     cout << "Stop Pan" << endl;
                 }
             }
@@ -137,6 +150,7 @@ int main ()
         if (left_pressed) {
             if(!slide_left) {
                 if (!right_pressed) {
+                    kessler.set_position_speed_acceleration(1, -25000, SLIDE_MAX_SPEED*speed_p, SLIDE_MAX_ACC);
                     slide_left = true;
                     cout << "Start Slide Left" << endl;
                 }
@@ -146,6 +160,7 @@ int main ()
             if(slide_left) {
                 slide_left = false;
                 if (!slide_right) {
+                    kessler.set_position_speed_acceleration(1, -25000, 0, SLIDE_MAX_ACC);
                     cout << "Stop Slide" << endl;
                 }
             }
@@ -154,6 +169,7 @@ int main ()
         if (right_pressed) {
             if(!slide_right) {
                 if (!left_pressed) {
+                    kessler.set_position_speed_acceleration(1, 25000, SLIDE_MAX_SPEED*speed_p, SLIDE_MAX_ACC);
                     slide_right = true;
                     cout << "Start Slide Right" << endl;
                 }
@@ -163,12 +179,16 @@ int main ()
             if(slide_right) {
                 slide_right = false;
                 if (!slide_left) {
+                    kessler.set_position_speed_acceleration(1, 25000, 0, SLIDE_MAX_ACC);
                     cout << "Stop Slide" << endl;
                 }
             }
         }
 
         if (GetAsyncKeyState(VK_SPACE)) {
+            kessler.set_position_speed_acceleration(1, 25000, 0, SLIDE_MAX_ACC);
+            kessler.set_position_speed_acceleration(2, 25000, 0, PAN_MAX_ACC);
+            kessler.set_position_speed_acceleration(3, 25000, 0, TILT_MAX_ACC);
             running = false;
         }
 
