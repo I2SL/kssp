@@ -65,8 +65,7 @@ class DeviceGUID Stage::get_device_guid() {
 }
 
 class NetworkInfo Stage::get_network_info() {
-    std::vector<unsigned char> params;
-    params.push_back(0x00); //LimitedResponse true not implemented
+    std::vector<unsigned char> params = {0x00}; //LimitedResponse true not implemented
     std::vector<unsigned char> message = Utils::make_message(SSP_HEADER_SIZE + 1, MessageID::NetworkInfo, MessageType::Get, params);
     ConnectSocket.send(boost::asio::buffer(message));
 
@@ -129,9 +128,7 @@ void Stage::set_position_speed_acceleration(const boost::uint8_t motor_address, 
 }
 
 void Stage::set_led_status(boost::uint8_t master_status, boost::uint8_t slave_status) {
-    std::vector<unsigned char> params;
-    params.push_back(master_status);
-    params.push_back(slave_status);
+    std::vector<unsigned char> params = {master_status, slave_status};
     std::vector<unsigned char> message = Utils::make_message(SSP_HEADER_SIZE + 2, MessageID::LEDStatus, MessageType::Set, params);
     ConnectSocket.send(boost::asio::buffer(message));
 }
@@ -144,32 +141,25 @@ void Stage::handshake() {
 }
 
 void Stage::reset_device() {
-    std::vector<unsigned char> params;
-    params.push_back(ActionID::ResetDevice);
+    std::vector<unsigned char> params = {ActionID::ResetDevice};
     std::vector<unsigned char> message = Utils::make_message(SSP_HEADER_SIZE + 1, MessageID::Action, MessageType::Set, params);
     ConnectSocket.send(boost::asio::buffer(message));
 }
 
 void Stage::reset_axis(boost::uint8_t motor_address) {
-    std::vector<unsigned char> params;
-    params.push_back(ActionID::ResetAxis);
-    params.push_back(motor_address);
+    std::vector<unsigned char> params = {ActionID::ResetAxis, motor_address};
     std::vector<unsigned char> message = Utils::make_message(SSP_HEADER_SIZE + 2, MessageID::Action, MessageType::Set, params);
     ConnectSocket.send(boost::asio::buffer(message));
 }
 
 void Stage::mark_begin_position(boost::uint8_t motor_address) {
-    std::vector<unsigned char> params;
-    params.push_back(ActionID::MarkBeginPosition);
-    params.push_back(motor_address);
+    std::vector<unsigned char> params = {ActionID::MarkBeginPosition, motor_address};
     std::vector<unsigned char> message = Utils::make_message(SSP_HEADER_SIZE + 2, MessageID::Action, MessageType::Set, params);
     ConnectSocket.send(boost::asio::buffer(message));
 }
 
 void Stage::mark_end_position(boost::uint8_t motor_address) {
-    std::vector<unsigned char> params;
-    params.push_back(ActionID::MarkEndPosition);
-    params.push_back(motor_address);
+    std::vector<unsigned char> params = {ActionID::MarkEndPosition, motor_address};
     std::vector<unsigned char> message = Utils::make_message(SSP_HEADER_SIZE + 2, MessageID::Action, MessageType::Set, params);
     ConnectSocket.send(boost::asio::buffer(message));
 }
@@ -182,7 +172,6 @@ void Stage::event_queue_manager() {
             message_lead = get_uint8();
 
             if (message_lead == SSP_PROTOCOL_VERSION) {
-                printf("Got a header\n");
                 boost::uint16_t message_length;
                 boost::uint16_t message_id;
                 boost::uint8_t message_type;
@@ -190,11 +179,6 @@ void Stage::event_queue_manager() {
                 message_length = get_uint16();
                 message_id = get_uint16();
                 message_type = get_uint8();
-
-                printf("Protocol: %hd\n", (short)message_lead);
-                printf("Length: %hd\n", message_length);
-                printf("ID: %hd\n", message_id);
-                printf("Type: %hd\n", (short)message_type);
 
                 if (message_type == MessageType::Response || message_type == MessageType::Ongoing) {
                     if (message_id == (unsigned short int)MessageID::DeviceInfo) {
@@ -217,7 +201,6 @@ void Stage::event_queue_manager() {
                         printf("Notification Type: %hd\n", get_uint8());
                     }
                 }
-
             }
         }
         catch (std::exception& e) {

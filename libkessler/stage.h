@@ -22,6 +22,13 @@
 #include "enums/messageid.h"
 #include "enums/messagetype.h"
 #include "enums/noteid.h"
+#include "notifications/aux_input_status.h"
+#include "notifications/error_status.h"
+#include "notifications/motor_calibrated.h"
+#include "notifications/motor_position.h"
+#include "notifications/motor_status.h"
+#include "notifications/playback_status.h"
+#include "notifications/unsupported_message.h"
 #include "responses/device_guid.h"
 #include "responses/device_info.h"
 #include "responses/led_status.h"
@@ -51,12 +58,21 @@ private:
     bool active = true;
     boost::asio::io_service service;
     boost::asio::ip::tcp::socket ConnectSocket;
+
     std::queue<class DeviceInfo> DeviceInfoQueue;
     std::queue<class Motor> MotorQueue;
     std::queue<class MotorInfo> MotorInfoQueue;
     std::queue<class DeviceGUID> DeviceGUIDQueue;
     std::queue<class NetworkInfo> NetworkInfoQueue;
     std::queue<class LEDStatus> LEDStatusQueue;
+    std::queue<class AuxInputStatus> AuxInputStatusQueue;
+    std::queue<class ErrorStatus> ErrorStatusQueue;
+    std::queue<class MotorCalibrated> MotorCalibratedQueue;
+    std::queue<class MotorPosition> MotorPositionQueue;
+    std::queue<class MotorStatus> MotorStatusQueue;
+    std::queue<class PlaybackStatus> PlaybackStatusQueue;
+    std::queue<class UnsupportedMessage> UnsupportedMessageQueue;
+
     std::mutex event_mtx;
     std::mutex receive_mtx;
     std::unique_lock<std::mutex> lck;

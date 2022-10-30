@@ -1,0 +1,12 @@
+#pragma once
+
+#ifndef LIBKESSLER_UNSUPPORTED_MESSAGE_H
+#define LIBKESSLER_UNSUPPORTED_MESSAGE_H
+
+
+class UnsupportedMessage {
+
+};
+
+
+#endif //LIBKESSLER_UNSUPPORTED_MESSAGE_H

@@ -10,7 +10,7 @@ add_library(
         libkessler/responses/device_info.cpp
         libkessler/responses/device_guid.cpp
         libkessler/responses/motor_info.cpp
-        libkessler/responses/network_info.cpp libkessler/responses/network_info.h libkessler/responses/led_status.cpp libkessler/responses/led_status.h)
+        libkessler/responses/network_info.cpp libkessler/responses/network_info.h libkessler/responses/led_status.cpp libkessler/responses/led_status.h libkessler/notifications/motor_status.cpp libkessler/notifications/motor_status.h libkessler/notifications/playback_status.cpp libkessler/notifications/playback_status.h libkessler/notifications/error_status.cpp libkessler/notifications/error_status.h libkessler/notifications/motor_position.cpp libkessler/notifications/motor_position.h libkessler/notifications/motor_calibrated.cpp libkessler/notifications/motor_calibrated.h libkessler/notifications/aux_input_status.cpp libkessler/notifications/aux_input_status.h libkessler/notifications/unsupported_message.cpp libkessler/notifications/unsupported_message.h)
 target_link_libraries(libkessler wsock32 ws2_32)
 target_link_libraries(libkessler ${CONAN_LIBS})
 
