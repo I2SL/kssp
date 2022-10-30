@@ -42,6 +42,10 @@ public:
     void set_led_status(boost::uint8_t master_status, boost::uint8_t slave_status);
     void handshake();
     void set_position_speed_acceleration(boost::uint8_t motor_address, float position, float speed, float acceleration);
+    void reset_device();
+    void reset_axis(boost::uint8_t motor_address);
+    void mark_begin_position(boost::uint8_t motor_address);
+    void mark_end_position(boost::uint8_t motor_address);
     void shutdown();
 private:
     bool active = true;

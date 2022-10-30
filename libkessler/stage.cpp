@@ -143,6 +143,37 @@ void Stage::handshake() {
     get_device_guid();
 }
 
+void Stage::reset_device() {
+    std::vector<unsigned char> params;
+    params.push_back(ActionID::ResetDevice);
+    std::vector<unsigned char> message = Utils::make_message(SSP_HEADER_SIZE + 1, MessageID::Action, MessageType::Set, params);
+    ConnectSocket.send(boost::asio::buffer(message));
+}
+
+void Stage::reset_axis(boost::uint8_t motor_address) {
+    std::vector<unsigned char> params;
+    params.push_back(ActionID::ResetAxis);
+    params.push_back(motor_address);
+    std::vector<unsigned char> message = Utils::make_message(SSP_HEADER_SIZE + 2, MessageID::Action, MessageType::Set, params);
+    ConnectSocket.send(boost::asio::buffer(message));
+}
+
+void Stage::mark_begin_position(boost::uint8_t motor_address) {
+    std::vector<unsigned char> params;
+    params.push_back(ActionID::MarkBeginPosition);
+    params.push_back(motor_address);
+    std::vector<unsigned char> message = Utils::make_message(SSP_HEADER_SIZE + 2, MessageID::Action, MessageType::Set, params);
+    ConnectSocket.send(boost::asio::buffer(message));
+}
+
+void Stage::mark_end_position(boost::uint8_t motor_address) {
+    std::vector<unsigned char> params;
+    params.push_back(ActionID::MarkEndPosition);
+    params.push_back(motor_address);
+    std::vector<unsigned char> message = Utils::make_message(SSP_HEADER_SIZE + 2, MessageID::Action, MessageType::Set, params);
+    ConnectSocket.send(boost::asio::buffer(message));
+}
+
 void Stage::event_queue_manager() {
     while (active) {
         event_mtx.lock();

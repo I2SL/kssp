@@ -26,9 +26,19 @@ This implementation uses the `boost` endian library, which does not yet include 
 ## Not Implemented
 The following features are not yet implemented:
 
-### NetworkInfo
-* `Set`
-* `Get` with `LimitedResponse = 1`parameter.
+### Get/Set Messages
+* **NetworkInfo**
+  * `Set`
+  * `Get` with `LimitedResponse = 1`parameter.
+* **TrajectoryData**
+* **SlaveInfo**
+
+### Action Messages
+* **StartPlayback**
+* **StopPlayback**
+* **RapidToFirstKeyFrame**
+* **TakePicture**
+* **SetupPlayback**
 
 
 # References
