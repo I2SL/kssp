@@ -125,6 +125,7 @@ BOOST_AUTO_TEST_SUITE(MockStageTests)
     {
         this->accept_and_say_hello();
         Stage instance("127.0.0.1", 5555);
+        instance.shutdown();
     }
 
     BOOST_FIXTURE_TEST_CASE(SendDeviceInfo, MockServer)
@@ -173,7 +174,9 @@ BOOST_AUTO_TEST_SUITE(MockStageTests)
             this->client->send(boost::asio::buffer(sample_message));
         });
         Stage instance("127.0.0.1", 5555);
-        std::cout << instance.get_device_info().to_string();
+        class DeviceInfo testinfo = instance.get_device_info();
+        BOOST_CHECK(testinfo.aux_input_status==11);
+        instance.shutdown();
     }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -185,6 +188,7 @@ BOOST_AUTO_TEST_SUITE(StageTests)
         Stage instance("192.168.50.1", 5520);
         class DeviceInfo test = instance.get_device_info();
         std::cout << test.to_string();
+        instance.shutdown();
         BOOST_CHECK(true);
     }
 
@@ -194,6 +198,7 @@ BOOST_AUTO_TEST_SUITE(StageTests)
         instance.get_device_info();
         class MotorInfo test = instance.get_motor_info();
         std::cout << test.to_string();
+        instance.shutdown();
         BOOST_CHECK(test.motors[0].motor_count == 1);
     }
 
@@ -204,6 +209,7 @@ BOOST_AUTO_TEST_SUITE(StageTests)
         instance.get_motor_info();
         class DeviceGUID test = instance.get_device_guid();
         std::cout << test.to_string();
+        instance.shutdown();
         BOOST_CHECK(true);
     }
 
@@ -219,6 +225,7 @@ BOOST_AUTO_TEST_SUITE(StageTests)
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         instance.set_position_speed_acceleration(1, -25000, 0, 50);
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        instance.shutdown();
         BOOST_CHECK(true);
     }
 
@@ -234,6 +241,7 @@ BOOST_AUTO_TEST_SUITE(StageTests)
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         instance.set_position_speed_acceleration(2, -25000, 0, 50);
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        instance.shutdown();
         BOOST_CHECK(true);
     }
 
@@ -249,6 +257,7 @@ BOOST_AUTO_TEST_SUITE(StageTests)
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         instance.set_position_speed_acceleration(3, -25000, 0, 50);
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        instance.shutdown();
         BOOST_CHECK(true);
     }
 
@@ -266,6 +275,7 @@ BOOST_AUTO_TEST_SUITE(StageTests)
         instance.set_device_password(empty);
         instance.set_user_password(empty);
         newinfo = instance.get_device_info();
+        instance.shutdown();
         BOOST_CHECK(newinfo.device_password == empty);
     }
 
@@ -275,6 +285,7 @@ BOOST_AUTO_TEST_SUITE(StageTests)
         instance.handshake();
         class NetworkInfo result = instance.get_network_info();
         std::cout << result.to_string();
+        instance.shutdown();
         BOOST_CHECK(true);
     }
 
@@ -299,6 +310,7 @@ BOOST_AUTO_TEST_SUITE(StageTests)
         status = instance.get_led_status();
         BOOST_CHECK(status.master_status == 0);
         std::cout << status.to_string();
+        instance.shutdown();
     }
 
 BOOST_AUTO_TEST_SUITE_END()
