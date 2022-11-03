@@ -1,4 +1,5 @@
 #include <iostream>
+#include<time>
 #include <thread>
 
 #include "../libkessler/stage.h"
@@ -14,6 +15,7 @@ int main ()
     printf("\n");
     printf("CONTROLS:\n");
     printf("---------\n");
+    printf("Flashlight: 'F'\n");
     printf("Tilt Up: 'W'\n");
     printf("Tilt Down: 'S'\n");
     printf("Pan Left: 'A'\n");
@@ -43,9 +45,12 @@ int main ()
     bool right_pressed = false;
     int speed = 0;
     float speed_p = 0;
+    clock_t last_ping = clock();
+    float since_last_ping;
 
     while (running)
     {
+        since_last_ping = (float)(clock() - last_ping)/CLOCKS_PER_SEC;
         w_pressed = GetAsyncKeyState(0x57);
         s_pressed = GetAsyncKeyState(0x53);
         a_pressed = GetAsyncKeyState(0x41);
@@ -64,6 +69,7 @@ int main ()
                     kessler.set_position_speed_acceleration(3, 25000, TILT_MAX_SPEED*speed_p, TILT_MAX_ACC);
                     tilt_up = true;
                     cout << "Start Tilt Up" << endl;
+                    last_ping = clock();
                 }
             }
         }
@@ -73,6 +79,7 @@ int main ()
                 if (!tilt_down) {
                     cout << "Stop Tilt" << endl;
                     kessler.set_position_speed_acceleration(3, 25000, 0, TILT_MAX_ACC);
+                    last_ping = clock();
                 }
             }
         }
@@ -83,6 +90,7 @@ int main ()
                     kessler.set_position_speed_acceleration(3, -25000, TILT_MAX_SPEED*speed_p, TILT_MAX_ACC);
                     tilt_down = true;
                     cout << "Start Tilt Down" << endl;
+                    last_ping = clock();
                 }
             }
         }
@@ -92,6 +100,7 @@ int main ()
                 if (!tilt_up) {
                     kessler.set_position_speed_acceleration(3, -25000, 0, TILT_MAX_ACC);
                     cout << "Stop Tilt" << endl;
+                    last_ping = clock();
                 }
             }
         }
@@ -102,6 +111,7 @@ int main ()
                     kessler.set_position_speed_acceleration(2, -25000, PAN_MAX_SPEED*speed_p, PAN_MAX_ACC);
                     pan_left = true;
                     cout << "Start Pan Left" << endl;
+                    last_ping = clock();
                 }
             }
         }
@@ -111,6 +121,7 @@ int main ()
                 if (!pan_right) {
                     kessler.set_position_speed_acceleration(2, -25000, 0, PAN_MAX_ACC);
                     cout << "Stop Pan Left" << endl;
+                    last_ping = clock();
                 }
             }
         }
@@ -121,6 +132,7 @@ int main ()
                     kessler.set_position_speed_acceleration(2, 25000, PAN_MAX_SPEED*speed_p, PAN_MAX_ACC);
                     pan_right = true;
                     cout << "Start Pan Right" << endl;
+                    last_ping = clock();
                 }
             }
         }
@@ -130,6 +142,7 @@ int main ()
                 if (!pan_left) {
                     kessler.set_position_speed_acceleration(2, 25000, 0, PAN_MAX_ACC);
                     cout << "Stop Pan" << endl;
+                    last_ping = clock();
                 }
             }
         }
@@ -158,6 +171,7 @@ int main ()
                     kessler.set_position_speed_acceleration(1, -25000, SLIDE_MAX_SPEED*speed_p, SLIDE_MAX_ACC);
                     slide_left = true;
                     cout << "Start Slide Left" << endl;
+                    last_ping = clock();
                 }
             }
         }
@@ -167,6 +181,7 @@ int main ()
                 if (!slide_right) {
                     kessler.set_position_speed_acceleration(1, -25000, 0, SLIDE_MAX_ACC);
                     cout << "Stop Slide" << endl;
+                    last_ping = clock();
                 }
             }
         }
@@ -177,6 +192,7 @@ int main ()
                     kessler.set_position_speed_acceleration(1, 25000, SLIDE_MAX_SPEED*speed_p, SLIDE_MAX_ACC);
                     slide_right = true;
                     cout << "Start Slide Right" << endl;
+                    last_ping = clock();
                 }
             }
         }
@@ -186,6 +202,7 @@ int main ()
                 if (!slide_left) {
                     kessler.set_position_speed_acceleration(1, 25000, 0, SLIDE_MAX_ACC);
                     cout << "Stop Slide" << endl;
+                    last_ping = clock();
                 }
             }
         }
@@ -195,13 +212,21 @@ int main ()
                 flashlight = false;
                 kessler.set_led_status(0, 0);
                 cout << "Flashlight Off" << endl;
+                last_ping = clock();
             }
             else {
                 flashlight = true;
                 kessler.set_led_status(1, 0);
                 cout << "Flashlight On" << endl;
+                last_ping = clock();
             }
 
+        }
+
+        if (since_last_ping > 10) {
+            cout << "Pinging Device..." << endl;
+            kessler.get_network_info();
+            last_ping = clock();
         }
 
         if (GetAsyncKeyState(VK_SPACE)) {
