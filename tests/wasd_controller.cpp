@@ -1,5 +1,5 @@
 #include <iostream>
-#include<time>
+#include <ctime>
 #include <thread>
 
 #include "../libkessler/stage.h"
