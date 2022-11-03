@@ -1,5 +1,6 @@
-//
-// Created by schla on 10/30/2022.
-//
-
 #include "motor_position.h"
+
+MotorPosition::MotorPosition(boost::uint8_t motor_address, float position):
+    motor_address(motor_address),
+    position(position)
+{}

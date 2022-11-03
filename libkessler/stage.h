@@ -54,6 +54,13 @@ public:
     void mark_begin_position(boost::uint8_t motor_address);
     void mark_end_position(boost::uint8_t motor_address);
     void shutdown();
+    std::queue<class AuxInputStatus> AuxInputStatusQueue;
+    std::queue<class ErrorStatus> ErrorStatusQueue;
+    std::queue<class MotorCalibrated> MotorCalibratedQueue;
+    std::queue<class MotorPosition> MotorPositionQueue;
+    std::queue<class MotorStatus> MotorStatusQueue;
+    std::queue<class PlaybackStatus> PlaybackStatusQueue;
+    std::queue<class UnsupportedMessage> UnsupportedMessageQueue;
 private:
     bool active = true;
     boost::asio::io_service service;
@@ -65,13 +72,6 @@ private:
     std::queue<class DeviceGUID> DeviceGUIDQueue;
     std::queue<class NetworkInfo> NetworkInfoQueue;
     std::queue<class LEDStatus> LEDStatusQueue;
-    std::queue<class AuxInputStatus> AuxInputStatusQueue;
-    std::queue<class ErrorStatus> ErrorStatusQueue;
-    std::queue<class MotorCalibrated> MotorCalibratedQueue;
-    std::queue<class MotorPosition> MotorPositionQueue;
-    std::queue<class MotorStatus> MotorStatusQueue;
-    std::queue<class PlaybackStatus> PlaybackStatusQueue;
-    std::queue<class UnsupportedMessage> UnsupportedMessageQueue;
 
     std::mutex event_mtx;
     std::mutex receive_mtx;
@@ -84,6 +84,13 @@ private:
     void on_receive_device_guid_response();
     void on_receive_network_info_response();
     void on_receive_led_status_response();
+    void on_receive_aux_input_notification();
+    void on_receive_error_status_notification();
+    void on_receive_motor_calibrated_notification();
+    void on_receive_motor_position_notification();
+    void on_receive_motor_status_notification();
+    void on_receive_playback_status_notification();
+    void on_receive_unsupported_message_notification(boost::uint16_t length);
     boost::uint8_t get_uint8();
     boost::uint16_t get_uint16();
     boost::uint32_t get_uint32();

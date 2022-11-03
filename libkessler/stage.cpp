@@ -197,8 +197,28 @@ void Stage::event_queue_manager() {
                         on_receive_led_status_response();
                     }
                     else if (message_id == (unsigned short int)MessageID::Notification) {
-                        printf("Got Notification from device.\n");
-                        printf("Notification Type: %hd\n", get_uint8());
+                        boost::uint8_t notification_type = get_uint8();
+                        if (notification_type == NoteID::AuxInputStatus) {
+                            on_receive_aux_input_notification();
+                        }
+                        else if (notification_type == NoteID::ErrorStatus) {
+                            on_receive_error_status_notification();
+                        }
+                        else if (notification_type == NoteID::MotorCalibrated) {
+                            on_receive_motor_calibrated_notification();
+                        }
+                        else if (notification_type == NoteID::MotorPosition) {
+                            on_receive_motor_position_notification();
+                        }
+                        else if (notification_type == NoteID::MotorStatus) {
+                            on_receive_motor_status_notification();
+                        }
+                        else if (notification_type == NoteID::PlaybackStatus) {
+                            on_receive_playback_status_notification();
+                        }
+                        else if (notification_type == NoteID::UnsupportedMessage) {
+                            on_receive_unsupported_message_notification(message_length - SSP_HEADER_SIZE);
+                        }
                     }
                 }
             }
@@ -348,6 +368,60 @@ void Stage::on_receive_led_status_response() {
     LEDStatusQueue.push(response);
     ready = true;
     cv.notify_all();
+}
+
+void Stage::on_receive_aux_input_notification() {
+    boost::uint8_t status = get_uint8();
+    class AuxInputStatus notification(status);
+    AuxInputStatusQueue.push(notification);
+}
+
+void Stage::on_receive_error_status_notification() {
+    boost::uint8_t error_code = get_uint8();
+    boost::uint8_t motor_address = get_uint8();
+    class ErrorStatus notification(error_code, motor_address);
+    ErrorStatusQueue.push(notification);
+}
+
+void Stage::on_receive_motor_calibrated_notification() {
+    boost::uint8_t motor_address = get_uint8();
+    float end_position = get_float();
+    class MotorCalibrated notification(motor_address, end_position);
+    MotorCalibratedQueue.push(notification);
+}
+
+void Stage::on_receive_motor_position_notification() {
+    boost::uint8_t motor_address = get_uint8();
+    float position = get_float();
+    class MotorPosition notification(motor_address, position);
+    MotorPositionQueue.push(notification);
+}
+
+void Stage::on_receive_motor_status_notification() {
+    boost::uint8_t motor_count = get_uint8();
+    boost::uint8_t online = get_uint8();
+    boost::uint8_t motor_type = get_uint8();
+    float max_max_setup_speed = get_float();
+    float max_max_move_speed = get_float();
+    float max_max_acceleration = get_float();
+    class MotorStatus notification(motor_count, online, motor_type, max_max_setup_speed, max_max_move_speed, max_max_acceleration);
+    MotorStatusQueue.push(notification);
+}
+
+void Stage::on_receive_playback_status_notification() {
+    boost::uint8_t playback_status = get_uint8();
+    float elapsed_time = get_float();
+    boost::uint8_t motor_count = get_uint8();
+    boost::uint8_t motor_address = get_uint8();
+    float position = get_float();
+    class PlaybackStatus notification(playback_status, elapsed_time, motor_count, motor_address, position);
+    PlaybackStatusQueue.push(notification);
+}
+
+void Stage::on_receive_unsupported_message_notification(boost::uint16_t length) {
+    unsigned char* message = get_block(length);
+    class UnsupportedMessage notification(message);
+    UnsupportedMessageQueue.push(notification);
 }
 
 boost::uint8_t Stage::get_uint8() {
