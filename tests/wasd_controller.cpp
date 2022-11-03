@@ -31,10 +31,12 @@ int main ()
     bool tilt_down = false;
     bool slide_right = false;
     bool slide_left = false;
+    bool flashlight = false;
     bool w_pressed = false;
     bool s_pressed = false;
     bool a_pressed = false;
     bool d_pressed = false;
+    bool f_pressed = false;
     bool up_pressed = false;
     bool down_pressed = false;
     bool left_pressed = false;
@@ -48,6 +50,7 @@ int main ()
         s_pressed = GetAsyncKeyState(0x53);
         a_pressed = GetAsyncKeyState(0x41);
         d_pressed = GetAsyncKeyState(0x44);
+        f_pressed = GetAsyncKeyState(0x46);
         up_pressed = GetAsyncKeyState(0x26);
         down_pressed = GetAsyncKeyState(0x28);
         left_pressed = GetAsyncKeyState(0x25);
@@ -185,6 +188,20 @@ int main ()
                     cout << "Stop Slide" << endl;
                 }
             }
+        }
+
+        if (f_pressed) {
+            if (flashlight) {
+                flashlight = false;
+                kessler.set_led_status(0, 0);
+                cout << "Flashlight Off" << endl;
+            }
+            else {
+                flashlight = true;
+                kessler.set_led_status(1, 0);
+                cout << "Flashlight On" << endl;
+            }
+
         }
 
         if (GetAsyncKeyState(VK_SPACE)) {
