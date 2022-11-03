@@ -7,7 +7,7 @@
 
 class UnsupportedMessage {
 public:
-    UnsupportedMessage(unsigned char* message);
+    explicit UnsupportedMessage(unsigned char* message);
     unsigned char* message;
 };
 

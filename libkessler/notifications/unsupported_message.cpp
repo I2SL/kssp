@@ -1,3 +1,3 @@
 #include "unsupported_message.h"
 
-UnsupportedMessage::UnsupportedMessage(unsigned char *message): message(message) {}
+UnsupportedMessage::UnsupportedMessage(unsigned char* message): message(message) {}
