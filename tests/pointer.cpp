@@ -337,9 +337,9 @@ int main () {
         double theta_prime = get_theta_prime(phi, theta, y0, r);
         double phi_prime = get_phi_prime(phi, theta, y0, r);
 
-        printf("Calculated Coordinates in radians (theta, phi):\n");
-        printf("EBS: (%d, %d)\n", theta, phi);
-        printf("FBC: (%d, %d)\n", theta_prime, phi_prime);
+        printf("Calculated Coordinates in degrees (theta, phi):\n");
+        printf("EBS: (%.2d, %.2d)\n", theta * 180 / M_PI, phi * 180 / M_PI);
+        printf("FBC: (%.2d, %.2d)\n", theta_prime * 180 / M_PI, phi_prime * 180 / M_PI);
 
         printf("Moving motor...\n");
         float pan_position = end_pan * (float)(0.5 + theta_prime / M_PI);
