@@ -300,7 +300,7 @@ int main () {
     double px;
     double f;
     double y0;
-    double r = 1;
+    double r;
     int ny;
     int nx;
     int y;
@@ -338,16 +338,26 @@ int main () {
         double phi_prime = get_phi_prime(phi, theta, y0, r);
 
         printf("Calculated Coordinates in degrees (theta, phi):\n");
-        printf("EBS: (%.2d, %.2d)\n", theta * 180 / M_PI, phi * 180 / M_PI);
-        printf("FBC: (%.2d, %.2d)\n", theta_prime * 180 / M_PI, phi_prime * 180 / M_PI);
+        printf("EBS: (%.2f, %.2f)\n", theta * 180 / M_PI, phi * 180 / M_PI);
+        printf("FBC: (%.2f, %.2f)\n", theta_prime * 180 / M_PI, phi_prime * 180 / M_PI);
+        printf("\n");
 
-        printf("Moving motor...\n");
         float pan_position = end_pan * (float)(0.5 + theta_prime / M_PI);
         float tilt_position = 3 * end_tilt * (float)(theta_prime / M_PI) / 2;
-        mtx.lock();
-        kessler.set_position_speed_acceleration(2, pan_position, PAN_MAX_SPEED, PAN_MAX_ACC);
-        kessler.set_position_speed_acceleration(3, tilt_position, TILT_MAX_SPEED, TILT_MAX_ACC);
-        mtx.unlock();
+
+        printf("Target motor positions:\n");
+        printf("Pan: %.2f (Range: 0 - %.2f)\n", pan_position, end_pan);
+        printf("Tilt: %.2f (Range: 0 - %.2f)\n", tilt_position, end_tilt);
+
+        std::string input;
+        printf("Move to target? (y/n)\n");
+        std::cin >> input;
+        if (input == std::string("y")) {
+            mtx.lock();
+            kessler.set_position_speed_acceleration(2, pan_position, PAN_MAX_SPEED, PAN_MAX_ACC);
+            kessler.set_position_speed_acceleration(3, tilt_position, TILT_MAX_SPEED, TILT_MAX_ACC);
+            mtx.unlock();
+        }
     }
     active = false;
     pinger.join();
