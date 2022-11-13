@@ -342,7 +342,7 @@ int main () {
         printf("FBC: (%.2f, %.2f)\n", theta_prime * 180 / M_PI, phi_prime * 180 / M_PI);
         printf("\n");
 
-        float pan_position = end_pan * (float)(0.5 + theta_prime / M_PI);
+        float pan_position = end_pan * (float)(0.5 + phi_prime / M_PI);
         float tilt_position = 3 * end_tilt * (float)(theta_prime / M_PI) / 2;
 
         printf("Target motor positions:\n");
