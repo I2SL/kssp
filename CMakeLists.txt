@@ -17,6 +17,9 @@ target_link_libraries(libkessler ${CONAN_LIBS})
 add_executable(driver tests/driver.cpp)
 target_link_libraries(driver libkessler)
 
+add_executable(basic_pointer tests/basic_pointer.cpp)
+target_link_libraries(basic_pointer libkessler ${CONAN_LIBS})
+
 add_executable(pointer tests/pointer.cpp)
 target_link_libraries(pointer libkessler ${CONAN_LIBS})
 
