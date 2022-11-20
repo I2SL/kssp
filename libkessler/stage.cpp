@@ -185,7 +185,7 @@ void Stage::event_queue_manager() {
                         on_receive_device_info_response();
                     }
                     else if (message_id == (unsigned short int)MessageID::MotorInfo) {
-                        on_receive_motor_info_response(message_type);
+                        on_receive_motor_info_response(message_type, message_length);
                     }
                     else if (message_id == (unsigned short int)MessageID::DeviceGUID) {
                         on_receive_device_guid_response();
@@ -205,7 +205,7 @@ void Stage::event_queue_manager() {
                             on_receive_error_status_notification();
                         }
                         else if (notification_type == NoteID::MotorCalibrated) {
-                            on_receive_motor_calibrated_notification();
+                            on_receive_motor_calibrated_notification(message_length);
                         }
                         else if (notification_type == NoteID::MotorPosition) {
                             on_receive_motor_position_notification();
@@ -292,10 +292,19 @@ void Stage::on_receive_device_info_response() {
     cv.notify_all();
 }
 
-void Stage::on_receive_motor_info_response(boost::uint8_t message_type) {
+void Stage::on_receive_motor_info_response(boost::uint8_t message_type, boost::uint16_t message_length) {
     boost::uint8_t motor_count = get_uint8();
     boost::uint8_t motor_address = get_uint8();
     float position = get_float();
+    if (message_length != 28) {
+        try {
+            get_float();
+            throw UnexpectedLengthException(11, message_length, 28);
+        }
+        catch (UnexpectedLengthException& e) {
+            std::cerr << "Exception: " << e.what() << std::endl;
+        }
+    }
     float end_position = get_float();
     float max_max_setup_speed = get_float();
     float max_max_move_speed = get_float();
@@ -383,11 +392,27 @@ void Stage::on_receive_error_status_notification() {
     ErrorStatusQueue.push(notification);
 }
 
-void Stage::on_receive_motor_calibrated_notification() {
+void Stage::on_receive_motor_calibrated_notification(boost::uint16_t message_length) {
     boost::uint8_t motor_address = get_uint8();
+    if (message_length != 12) {
+        try {
+            get_float();
+            throw UnexpectedLengthException(129, message_length, 12,17);
+        }
+        catch (UnexpectedLengthException& e) {
+            std::cerr << "Exception: " << e.what() << std::endl;
+        }
+    }
     float end_position = get_float();
     class MotorCalibrated notification(motor_address, end_position);
     MotorCalibratedQueue.push(notification);
+//    unsigned char* bytes = get_block(9);
+//    for (int i=0 ; i<9 ; i++ )
+//    {
+//        std::cout << std::setw(2) << std::setfill('0') << std::hex << (int) bytes[i]<<"\t";
+//    }
+//    class MotorCalibrated notification(0, 0);
+//    MotorCalibratedQueue.push(notification);
 }
 
 void Stage::on_receive_motor_position_notification() {
@@ -466,9 +491,8 @@ float Stage::get_float() {
     boost::asio::mutable_buffers_1 bufs = int32sb.prepare(4);
     size_t n = ConnectSocket.receive(bufs);
     int32sb.commit(n);
-    out = Utils::int32_to_float(
-            boost::endian::load_big_s32(Utils::buffer_to_char_array(int32sb))
-    );
+    boost::int32_t out_as_int = boost::endian::load_big_s32(Utils::buffer_to_char_array(int32sb));
+    out = Utils::int32_to_float(out_as_int);
     int32sb.consume(n);
 
     return out;

@@ -175,6 +175,7 @@ BOOST_AUTO_TEST_SUITE(MockStageTests)
         });
         Stage instance("127.0.0.1", 5555);
         class DeviceInfo testinfo = instance.get_device_info();
+        std::cout << testinfo.to_string();
         BOOST_CHECK(testinfo.aux_input_status==11);
         instance.shutdown();
     }

@@ -219,17 +219,20 @@ void controller (Stage& kessler)
     }
 }
 
-void calibrate(boost::uint8_t motor_address, Stage& kessler) {
+float calibrate(boost::uint8_t motor_address, Stage& kessler) {
     bool start = false;
     bool end = false;
     bool q_pressed = false;
+    while(!kessler.MotorCalibratedQueue.empty()) kessler.MotorCalibratedQueue.pop();
     printf("Press `Q` to mark Motor %hd start position.\n", motor_address);
     while (!start) {
         q_pressed = GetAsyncKeyState(0x51);
         if (q_pressed) {
+            mtx.lock();
             kessler.mark_begin_position(motor_address);
             printf("Start position marked.\n");
             start = true;
+            mtx.unlock();
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
@@ -238,13 +241,25 @@ void calibrate(boost::uint8_t motor_address, Stage& kessler) {
     while (!end) {
         q_pressed = GetAsyncKeyState(0x51);
         if (q_pressed) {
+            mtx.lock();
             kessler.mark_end_position(motor_address);
             printf("End position marked.\n");
             end = true;
+            mtx.unlock();
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
-    printf("Motor %hd calibration complete.\n", motor_address);
+    while(kessler.MotorCalibratedQueue.empty()){
+        continue;
+    }
+
+    class MotorCalibrated info = kessler.MotorCalibratedQueue.front();
+    boost::uint8_t addr = info.motor_address;
+    float end_pos = info.end_position;
+    printf("Calibration complete. Motor: %hd, End: %.2f\n", addr, end_pos);
+    kessler.MotorCalibratedQueue.pop();
+
+    return end_pos;
 }
 
 void ping(Stage& kessler) {
@@ -281,8 +296,11 @@ int main () {
     Stage kessler("192.168.50.1", 5520);
     kessler.handshake();
     std::cout << kessler.get_device_info().to_string();
+    kessler.reset_axis(0);
     std::thread driver(controller, std::ref(kessler));
 
+    printf("Move Slide motor to start position and press 'Q'. Then move Slide motor to end position and press `Q`.\n");
+    calibrate(1, kessler);
     printf("Move Pan motor to start position and press 'Q'. Then move Pan motor to end position and press `Q`.\n");
     calibrate(2, kessler);
     printf("Move Tilt motor to start position and press 'Q'. Then move Tilt motor to end position and press `Q`.\n");
@@ -291,6 +309,7 @@ int main () {
     driver.join();
 
     class MotorInfo info = kessler.get_motor_info();
+    std::cout << info.to_string();
     float end_pan = info.motors[1].end_position;
     float end_tilt = info.motors[2].end_position;
 

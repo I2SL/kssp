@@ -40,6 +40,10 @@ The following features are not yet implemented:
 * **TakePicture**
 * **SetupPlayback**
 
+## Known Issues
+1) The documentation implies each `MotorInfo` response and `MotorCalibrated` response should have 28 and 12 bytes, respectively. However, these responses have 32 and 16 bytes when running firmware `1.0.1.5`. If these messages are longer than expected, this program assumes a phantom `startPosition` float is sent before the `endPosition` float. An `UnexpectedLengthException` will be thrown.
+2) When it has the incorrect length, the `MotorCalibrated` response for Motor 1 returns `endPosition = 0`. `MotorCalibrated` responses for other motors work as expected. Use `MotorInfo` to receive the correct `endPosition`.
+
 
 # References
 1) https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1204r0.html#tests-unit

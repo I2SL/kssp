@@ -207,8 +207,10 @@ void controller (Stage& kessler)
         }
 
         if (since_last_ping > 10) {
+            mtx.lock();
             kessler.get_network_info();
             last_ping = clock();
+            mtx.unlock();
         }
 
         if (GetAsyncKeyState(VK_SPACE)) {
@@ -219,17 +221,20 @@ void controller (Stage& kessler)
     }
 }
 
-void calibrate(boost::uint8_t motor_address, Stage& kessler) {
+float calibrate(boost::uint8_t motor_address, Stage& kessler) {
     bool start = false;
     bool end = false;
     bool q_pressed = false;
+    while(!kessler.MotorCalibratedQueue.empty()) kessler.MotorCalibratedQueue.pop();
     printf("Press `Q` to mark Motor %hd start position.\n", motor_address);
     while (!start) {
         q_pressed = GetAsyncKeyState(0x51);
         if (q_pressed) {
+            mtx.lock();
             kessler.mark_begin_position(motor_address);
             printf("Start position marked.\n");
             start = true;
+            mtx.unlock();
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
@@ -238,13 +243,25 @@ void calibrate(boost::uint8_t motor_address, Stage& kessler) {
     while (!end) {
         q_pressed = GetAsyncKeyState(0x51);
         if (q_pressed) {
+            mtx.lock();
             kessler.mark_end_position(motor_address);
             printf("End position marked.\n");
             end = true;
+            mtx.unlock();
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
-    printf("Motor %hd calibration complete.\n", motor_address);
+    while(kessler.MotorCalibratedQueue.empty()){
+        continue;
+    }
+
+    class MotorCalibrated info = kessler.MotorCalibratedQueue.front();
+    boost::uint8_t addr = info.motor_address;
+    float end_pos = info.end_position;
+    printf("Calibration complete. Motor: %hd, End: %.2f\n", addr, end_pos);
+    kessler.MotorCalibratedQueue.pop();
+
+    return end_pos;
 }
 
 void ping(Stage& kessler) {
@@ -265,25 +282,29 @@ int main () {
     Stage kessler("192.168.50.1", 5520);
     kessler.handshake();
     std::cout << kessler.get_device_info().to_string();
+    kessler.reset_axis(0);
     std::thread driver(controller, std::ref(kessler));
 
+    printf("Move Slide motor to start position and press 'Q'. Then move Slide motor to end position and press `Q`.\n");
+    float end_slide = calibrate(1, kessler);
     printf("Move Pan motor to start position and press 'Q'. Then move Pan motor to end position and press `Q`.\n");
-    calibrate(2, kessler);
+    float end_pan = calibrate(2, kessler);
     printf("Move Tilt motor to start position and press 'Q'. Then move Tilt motor to end position and press `Q`.\n");
-    calibrate(3, kessler);
+    float end_tilt = calibrate(3, kessler);
     printf("Calibration complete. Press space to exit manual control.\n");
     driver.join();
 
     class MotorInfo info = kessler.get_motor_info();
-    float end_pan = info.motors[1].end_position;
-    float end_tilt = info.motors[2].end_position;
+    end_slide = info.motors[0].end_position;
+    end_pan = info.motors[1].end_position;
+    end_tilt = info.motors[2].end_position;
 
     printf("Target motor ranges:\n");
+    printf("Slide: (Range: 0 - %.2f)\n", end_slide);
     printf("Pan: (Range: 0 - %.2f)\n", end_pan);
     printf("Tilt: (Range: 0 - %.2f)\n", end_tilt);
 
     while(!kessler.MotorPositionQueue.empty()) kessler.MotorPositionQueue.pop();
-
     std::thread pinger(ping, std::ref(kessler));
     int addr = 0;
     float pos = 0;
@@ -307,22 +328,25 @@ int main () {
             if (addr == 2) {
                 kessler.set_position_speed_acceleration(2, pos, scale*PAN_MAX_SPEED, scale*PAN_MAX_ACC);
             }
-            else {
+            else if (addr == 3) {
                 kessler.set_position_speed_acceleration(3, pos, scale*TILT_MAX_SPEED, scale*TILT_MAX_ACC);
             }
+            else {
+                kessler.set_position_speed_acceleration(1, pos, scale*SLIDE_MAX_SPEED, scale*SLIDE_MAX_ACC);
+            }
             mtx.unlock();
+            printf("Waiting for motor position notification...\n");
+            while (kessler.MotorPositionQueue.empty()) {
+                continue;
+            }
+            class MotorPosition done = kessler.MotorPositionQueue.front();
+            kessler.MotorPositionQueue.pop();
+            printf("Received Position:\n");
+            printf("------------------\n");
+            printf("Motor Address: %hd\n", done.motor_address);
+            printf("Position: %.2f\n", done.position);
+            //std::cout << kessler.get_motor_info().to_string();
         }
-
-        printf("Waiting for motor position notification...\n");
-        while (kessler.MotorPositionQueue.empty()) {
-            continue;
-        }
-        class MotorPosition done = kessler.MotorPositionQueue.front();
-        kessler.MotorPositionQueue.pop();
-        printf("Received Position:\n");
-        printf("------------------\n");
-        printf("Motor Address: %hd\n", done.motor_address);
-        printf("Position: %.2f\n", done.position);
     }
     active = false;
     pinger.join();
