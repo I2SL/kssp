@@ -14,7 +14,8 @@ DeviceInfo::DeviceInfo(
         std::string device_password,
         boost::uint8_t aux_input_status,
         float delay_time_remaining,
-        float elapsed_time
+        float elapsed_time,
+        boost::uint32_t photo_count
         ):
     device_type(device_type),
     device_addr(device_addr),
@@ -29,7 +30,8 @@ DeviceInfo::DeviceInfo(
     device_password(device_password),
     aux_input_status(aux_input_status),
     delay_time_remaining(delay_time_remaining),
-    elapsed_time(elapsed_time)
+    elapsed_time(elapsed_time),
+    photo_count(photo_count)
 {
 
 }
@@ -51,5 +53,6 @@ std::string DeviceInfo::to_string() {
     result += fmt::format("Aux Input Status: {}\n", aux_input_status);
     result += fmt::format("Delay Time Remaining: {}\n", delay_time_remaining);
     result += fmt::format("Elapsed Time: {}\n", elapsed_time);
+    result += fmt::format("Photo Count: {}\n", photo_count);
     return result;
 }

@@ -185,7 +185,7 @@ void Stage::event_queue_manager() {
                         on_receive_device_info_response();
                     }
                     else if (message_id == (unsigned short int)MessageID::MotorInfo) {
-                        on_receive_motor_info_response(message_type, message_length);
+                        on_receive_motor_info_response(message_type);
                     }
                     else if (message_id == (unsigned short int)MessageID::DeviceGUID) {
                         on_receive_device_guid_response();
@@ -205,7 +205,7 @@ void Stage::event_queue_manager() {
                             on_receive_error_status_notification();
                         }
                         else if (notification_type == NoteID::MotorCalibrated) {
-                            on_receive_motor_calibrated_notification(message_length);
+                            on_receive_motor_calibrated_notification();
                         }
                         else if (notification_type == NoteID::MotorPosition) {
                             on_receive_motor_position_notification();
@@ -231,34 +231,20 @@ void Stage::event_queue_manager() {
 }
 
 void Stage::on_receive_device_info_response() {
-    boost::uint8_t device_type;
-    boost::uint8_t device_addr;
-    boost::uint8_t playback_mode;
-    boost::uint8_t playback_status;
-    boost::uint8_t firmware_version_major;
-    boost::uint8_t firmware_version_minor;
-    boost::uint8_t firmware_version_release;
-    boost::uint8_t firmware_version_build;
-    boost::uint8_t network_id;
-    boost::uint8_t hardware_id;
     std::string device_password;
-    boost::uint8_t aux_input_status;
-    float delay_time_remaining;
-    float elapsed_time;
-    boost::uint16_t string_length;
 
-    device_type = get_uint8();
-    device_addr = get_uint8();
-    playback_mode = get_uint8();
-    playback_status = get_uint8();
-    firmware_version_major = get_uint8();
-    firmware_version_minor = get_uint8();
-    firmware_version_release = get_uint8();
-    firmware_version_build = get_uint8();
-    network_id = get_uint8();
-    hardware_id = get_uint8();
+    boost::uint8_t device_type = get_uint8();
+    boost::uint8_t device_addr = get_uint8();
+    boost::uint8_t playback_mode = get_uint8();
+    boost::uint8_t playback_status = get_uint8();
+    boost::uint8_t firmware_version_major = get_uint8();
+    boost::uint8_t firmware_version_minor = get_uint8();
+    boost::uint8_t firmware_version_release = get_uint8();
+    boost::uint8_t firmware_version_build = get_uint8();
+    boost::uint8_t network_id = get_uint8();
+    boost::uint8_t hardware_id = get_uint8();
 
-    string_length = get_uint16();
+    boost::uint16_t string_length = get_uint16();
     if (string_length > 0) {
         device_password = get_string(string_length);
     }
@@ -266,9 +252,10 @@ void Stage::on_receive_device_info_response() {
         device_password = std::string("");
     }
 
-    aux_input_status = get_uint8();
-    delay_time_remaining = get_float();
-    elapsed_time = get_float();
+    boost::uint8_t aux_input_status = get_uint8();
+    float delay_time_remaining = get_float();
+    float elapsed_time = get_float();
+    boost::uint32_t photo_count = get_uint32();
 
 
     class DeviceInfo response(
@@ -285,26 +272,19 @@ void Stage::on_receive_device_info_response() {
             device_password,
             aux_input_status,
             delay_time_remaining,
-            elapsed_time
+            elapsed_time,
+            photo_count
             );
     DeviceInfoQueue.push(response);
     ready = true;
     cv.notify_all();
 }
 
-void Stage::on_receive_motor_info_response(boost::uint8_t message_type, boost::uint16_t message_length) {
+void Stage::on_receive_motor_info_response(boost::uint8_t message_type) {
     boost::uint8_t motor_count = get_uint8();
     boost::uint8_t motor_address = get_uint8();
     float position = get_float();
-    if (message_length != 28) {
-        try {
-            get_float();
-            throw UnexpectedLengthException(11, message_length, 28);
-        }
-        catch (UnexpectedLengthException& e) {
-            std::cerr << "Exception: " << e.what() << std::endl;
-        }
-    }
+    float begin_position = get_float();
     float end_position = get_float();
     float max_max_setup_speed = get_float();
     float max_max_move_speed = get_float();
@@ -314,6 +294,7 @@ void Stage::on_receive_motor_info_response(boost::uint8_t message_type, boost::u
             motor_count,
             motor_address,
             position,
+            begin_position,
             end_position,
             max_max_setup_speed,
             max_max_move_speed,
@@ -392,19 +373,11 @@ void Stage::on_receive_error_status_notification() {
     ErrorStatusQueue.push(notification);
 }
 
-void Stage::on_receive_motor_calibrated_notification(boost::uint16_t message_length) {
+void Stage::on_receive_motor_calibrated_notification() {
     boost::uint8_t motor_address = get_uint8();
-    if (message_length != 12) {
-        try {
-            get_float();
-            throw UnexpectedLengthException(129, message_length, 12,17);
-        }
-        catch (UnexpectedLengthException& e) {
-            std::cerr << "Exception: " << e.what() << std::endl;
-        }
-    }
+    float begin_position = get_float();
     float end_position = get_float();
-    class MotorCalibrated notification(motor_address, end_position);
+    class MotorCalibrated notification(motor_address, begin_position, end_position);
     MotorCalibratedQueue.push(notification);
 //    unsigned char* bytes = get_block(9);
 //    for (int i=0 ; i<9 ; i++ )
@@ -424,22 +397,24 @@ void Stage::on_receive_motor_position_notification() {
 
 void Stage::on_receive_motor_status_notification() {
     boost::uint8_t motor_count = get_uint8();
+    boost::uint8_t motor_addr = get_uint8();
     boost::uint8_t online = get_uint8();
     boost::uint8_t motor_type = get_uint8();
     float max_max_setup_speed = get_float();
     float max_max_move_speed = get_float();
     float max_max_acceleration = get_float();
-    class MotorStatus notification(motor_count, online, motor_type, max_max_setup_speed, max_max_move_speed, max_max_acceleration);
+    class MotorStatus notification(motor_count, motor_addr, online, motor_type, max_max_setup_speed, max_max_move_speed, max_max_acceleration);
     MotorStatusQueue.push(notification);
 }
 
 void Stage::on_receive_playback_status_notification() {
     boost::uint8_t playback_status = get_uint8();
     float elapsed_time = get_float();
+    float photo_count = get_float();
     boost::uint8_t motor_count = get_uint8();
     boost::uint8_t motor_address = get_uint8();
     float position = get_float();
-    class PlaybackStatus notification(playback_status, elapsed_time, motor_count, motor_address, position);
+    class PlaybackStatus notification(playback_status, elapsed_time, photo_count, motor_count, motor_address, position);
     PlaybackStatusQueue.push(notification);
 }
 

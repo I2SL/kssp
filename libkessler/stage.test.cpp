@@ -109,7 +109,8 @@ BOOST_AUTO_TEST_SUITE(MockStageTests)
                 "hello",
                 11,
                 12.1,
-                13.1
+                13.1,
+                14
                 );
         std::cout << instance.to_string();
         BOOST_CHECK(instance.device_type == 1);
@@ -130,7 +131,7 @@ BOOST_AUTO_TEST_SUITE(MockStageTests)
 
     BOOST_FIXTURE_TEST_CASE(SendDeviceInfo, MockServer)
     {
-        unsigned char sample_message[39];
+        unsigned char sample_message[43];
         sample_message[0] = SSP_PROTOCOL_VERSION;
         sample_message[1] = 0x00;
         sample_message[2] = SSP_HEADER_SIZE;
@@ -170,6 +171,10 @@ BOOST_AUTO_TEST_SUITE(MockStageTests)
         sample_message[36] = 0x51;
         sample_message[37] = 0x99;
         sample_message[38] = 0x9A;
+        sample_message[39] = 0xC1;
+        sample_message[40] = 0x51;
+        sample_message[41] = 0x99;
+        sample_message[42] = 0x9A;
         this->accept().then([this, &sample_message](boost::unique_future<void> f) {
             this->client->send(boost::asio::buffer(sample_message));
         });

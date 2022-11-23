@@ -37,32 +37,6 @@
 #include "responses/network_info.h"
 #include "utils.hpp"
 
-class UnexpectedLengthException : public std::exception {
-private:
-    boost::uint16_t message_length;
-    boost::uint16_t expected_length;
-    boost::uint16_t message_id;
-    boost::uint8_t note_id;
-    std::string message;
-
-public:
-    UnexpectedLengthException(boost::uint16_t message_id, boost::uint16_t message_length, boost::uint16_t expected_length) :
-        message_id(message_id),
-        message_length(message_length),
-        expected_length(expected_length),
-        note_id(0),
-        message(fmt::format("Received message has unexpected length:\n\tMessage ID: {}\n\tMessage Length: {} bytes\n\tExpected Length: {} bytes\n", message_id, message_length, expected_length)) {}
-    UnexpectedLengthException(boost::uint16_t message_id, boost::uint16_t message_length, boost::uint16_t expected_length, boost::uint8_t note_id) :
-        message_id(message_id),
-        message_length(message_length),
-        expected_length(expected_length),
-        note_id(note_id),
-        message(fmt::format("Received message has unexpected length:\n\tMessage ID: {}\n\tNotification ID: {}\n\tMessage Length: {} bytes\n\tExpected Length: {} bytes\n", message_id, note_id, message_length, expected_length)) {}
-    const char * what () {
-        return message.c_str();
-    }
-};
-
 class Stage{
 public:
     Stage(const std::string &host, int port);
@@ -107,13 +81,13 @@ private:
     bool ready = false;
     void event_queue_manager();
     void on_receive_device_info_response();
-    void on_receive_motor_info_response(boost::uint8_t message_type, boost::uint16_t message_length);
+    void on_receive_motor_info_response(boost::uint8_t message_type);
     void on_receive_device_guid_response();
     void on_receive_network_info_response();
     void on_receive_led_status_response();
     void on_receive_aux_input_notification();
     void on_receive_error_status_notification();
-    void on_receive_motor_calibrated_notification(boost::uint16_t message_length);
+    void on_receive_motor_calibrated_notification();
     void on_receive_motor_position_notification();
     void on_receive_motor_status_notification();
     void on_receive_playback_status_notification();

@@ -14,6 +14,7 @@ public:
     Motor(boost::uint8_t motor_count,
           boost::uint8_t motor_address,
           float position,
+          float begin_position,
           float end_position,
           float max_max_setup_speed,
           float max_max_move_speed,
@@ -21,6 +22,7 @@ public:
     boost::uint8_t motor_count;
     boost::uint8_t motor_address;
     float position;
+    float begin_position;
     float end_position;
     float max_max_setup_speed;
     float max_max_move_speed;

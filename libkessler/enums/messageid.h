@@ -9,7 +9,7 @@ enum MessageID {
     DevicePassword = 0x11,
     TrajectoryData = 0x12,
     DeviceGUID = 0x1F,
-    SlaveInfo = 0x25,
+    SoftwareID = 0x26,
     Action = 0x80,
     Notification = 0x81
 };
@@ -23,7 +23,7 @@ static const MessageID AllMessageIDs[] = {
         DevicePassword,
         TrajectoryData,
         DeviceGUID,
-        SlaveInfo,
+        SoftwareID,
         Action,
         Notification
 };

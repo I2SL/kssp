@@ -9,12 +9,14 @@ class PlaybackStatus {
 public:
     PlaybackStatus(boost::uint8_t playback_status,
                    float elapsed_time,
+                   float photo_count,
                    boost::uint8_t motor_count,
                    boost::uint8_t motor_address,
                    float position
                    );
     boost::uint8_t playback_status;
     float elapsed_time;
+    float photo_count;
     boost::uint8_t motor_count;
     boost::uint8_t motor_address;
     float position;

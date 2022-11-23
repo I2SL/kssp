@@ -24,7 +24,8 @@ public:
             std::string device_password,
             boost::uint8_t aux_input_status,
             float delay_time_remaining,
-            float elapsed_time
+            float elapsed_time,
+            boost::uint32_t photo_count
             );
     boost::uint8_t device_type;
     boost::uint8_t device_addr;
@@ -40,6 +41,7 @@ public:
     boost::uint8_t aux_input_status;
     float delay_time_remaining;
     float elapsed_time;
+    boost::uint32_t photo_count;
     std::string to_string();
 };
 

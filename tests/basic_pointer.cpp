@@ -221,7 +221,7 @@ void controller (Stage& kessler)
     }
 }
 
-float calibrate(boost::uint8_t motor_address, Stage& kessler) {
+void calibrate(boost::uint8_t motor_address, Stage& kessler) {
     bool start = false;
     bool end = false;
     bool q_pressed = false;
@@ -257,11 +257,10 @@ float calibrate(boost::uint8_t motor_address, Stage& kessler) {
 
     class MotorCalibrated info = kessler.MotorCalibratedQueue.front();
     boost::uint8_t addr = info.motor_address;
+    float start_pos = info.begin_position;
     float end_pos = info.end_position;
-    printf("Calibration complete. Motor: %hd, End: %.2f\n", addr, end_pos);
+    printf("Calibration complete. Motor: %hd, Start: %.2f, End: %.2f\n", addr, start_pos, end_pos);
     kessler.MotorCalibratedQueue.pop();
-
-    return end_pos;
 }
 
 void ping(Stage& kessler) {
@@ -286,23 +285,26 @@ int main () {
     std::thread driver(controller, std::ref(kessler));
 
     printf("Move Slide motor to start position and press 'Q'. Then move Slide motor to end position and press `Q`.\n");
-    float end_slide = calibrate(1, kessler);
+    calibrate(1, kessler);
     printf("Move Pan motor to start position and press 'Q'. Then move Pan motor to end position and press `Q`.\n");
-    float end_pan = calibrate(2, kessler);
+    calibrate(2, kessler);
     printf("Move Tilt motor to start position and press 'Q'. Then move Tilt motor to end position and press `Q`.\n");
-    float end_tilt = calibrate(3, kessler);
+    calibrate(3, kessler);
     printf("Calibration complete. Press space to exit manual control.\n");
     driver.join();
 
     class MotorInfo info = kessler.get_motor_info();
-    end_slide = info.motors[0].end_position;
-    end_pan = info.motors[1].end_position;
-    end_tilt = info.motors[2].end_position;
+    float begin_slide = info.motors[0].begin_position;
+    float end_slide = info.motors[0].end_position;
+    float begin_pan = info.motors[1].begin_position;
+    float end_pan = info.motors[1].end_position;
+    float begin_tilt = info.motors[2].begin_position;
+    float end_tilt = info.motors[2].end_position;
 
     printf("Target motor ranges:\n");
-    printf("Slide: (Range: 0 - %.2f)\n", end_slide);
-    printf("Pan: (Range: 0 - %.2f)\n", end_pan);
-    printf("Tilt: (Range: 0 - %.2f)\n", end_tilt);
+    printf("Slide: (Range: %.2f - %.2f)\n", begin_slide, end_slide);
+    printf("Pan: (Range: %.2f - %.2f)\n", begin_pan, end_pan);
+    printf("Tilt: (Range: %.2f - %.2f)\n", begin_tilt, end_tilt);
 
     while(!kessler.MotorPositionQueue.empty()) kessler.MotorPositionQueue.pop();
     std::thread pinger(ping, std::ref(kessler));
@@ -345,7 +347,6 @@ int main () {
             printf("------------------\n");
             printf("Motor Address: %hd\n", done.motor_address);
             printf("Position: %.2f\n", done.position);
-            //std::cout << kessler.get_motor_info().to_string();
         }
     }
     active = false;

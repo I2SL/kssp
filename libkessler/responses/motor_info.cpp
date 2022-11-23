@@ -6,6 +6,7 @@ Motor::Motor(
             boost::uint8_t motor_count,
             boost::uint8_t motor_address,
             float position,
+            float begin_position,
             float end_position,
             float max_max_setup_speed,
             float max_max_move_speed,
@@ -14,6 +15,7 @@ Motor::Motor(
         motor_count(motor_count),
         motor_address(motor_address),
         position(position),
+        begin_position(begin_position),
         end_position(end_position),
         max_max_setup_speed(max_max_setup_speed),
         max_max_move_speed(max_max_move_speed),
@@ -28,6 +30,7 @@ std::string Motor::to_string() {
     result += fmt::format("Motor Count: {}\n", motor_count);
     result += fmt::format("Motor Address: {}\n", motor_address);
     result += fmt::format("Position: {}\n", position);
+    result += fmt::format("Begin Position: {}\n", begin_position);
     result += fmt::format("End Position: {}\n", end_position);
     result += fmt::format("Max Setup Speed: {}\n", max_max_setup_speed);
     result += fmt::format("Max Move Speed: {}\n", max_max_move_speed);

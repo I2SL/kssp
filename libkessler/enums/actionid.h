@@ -10,7 +10,8 @@ enum ActionID {
     RapidToFirstKeyFrame = 0x07,
     TakePicture = 0x09,
     SetupPlayback = 0x0F,
-    SetPositionSpeedAcceleration = 0x1C
+    SetPositionSpeedAcceleration = 0x1C,
+    BumpPositionSpeedAcceleration = 0x28
 };
 
 static const ActionID AllActionIDs[] = {
@@ -23,5 +24,6 @@ static const ActionID AllActionIDs[] = {
         RapidToFirstKeyFrame,
         TakePicture,
         SetupPlayback,
-        SetPositionSpeedAcceleration
+        SetPositionSpeedAcceleration,
+        BumpPositionSpeedAcceleration
 };

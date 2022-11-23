@@ -219,7 +219,7 @@ void controller (Stage& kessler)
     }
 }
 
-float calibrate(boost::uint8_t motor_address, Stage& kessler) {
+void calibrate(boost::uint8_t motor_address, Stage& kessler) {
     bool start = false;
     bool end = false;
     bool q_pressed = false;
@@ -255,11 +255,10 @@ float calibrate(boost::uint8_t motor_address, Stage& kessler) {
 
     class MotorCalibrated info = kessler.MotorCalibratedQueue.front();
     boost::uint8_t addr = info.motor_address;
+    float start_pos = info.begin_position;
     float end_pos = info.end_position;
-    printf("Calibration complete. Motor: %hd, End: %.2f\n", addr, end_pos);
+    printf("Calibration complete. Motor: %hd, Start: %.2f, End: %.2f\n", addr, start_pos, end_pos);
     kessler.MotorCalibratedQueue.pop();
-
-    return end_pos;
 }
 
 void ping(Stage& kessler) {
@@ -310,8 +309,12 @@ int main () {
 
     class MotorInfo info = kessler.get_motor_info();
     std::cout << info.to_string();
+    float begin_pan = info.motors[1].begin_position;
     float end_pan = info.motors[1].end_position;
+    float begin_tilt = info.motors[2].begin_position;
     float end_tilt = info.motors[2].end_position;
+    end_pan -= begin_pan;
+    end_tilt -= begin_tilt;
 
     std::thread pinger(ping, std::ref(kessler));
     double hfovx;
@@ -361,7 +364,7 @@ int main () {
         printf("FBC: (%.2f, %.2f)\n", theta_prime * 180 / M_PI, phi_prime * 180 / M_PI);
         printf("\n");
 
-        float pan_position = end_pan * (float)(0.5 + phi_prime / M_PI);
+        float pan_position = end_pan * (float)(phi_prime / M_PI) + (float)0.5 * end_pan;
         float tilt_position = 3 * end_tilt * (float)(theta_prime / M_PI) / 2;
 
         printf("Target motor positions:\n");

@@ -31,7 +31,7 @@ The following features are not yet implemented:
   * `Set`
   * `Get` with `LimitedResponse = 1`parameter.
 * **TrajectoryData**
-* **SlaveInfo**
+* **SoftwareID**
 
 ### Action Messages
 * **StartPlayback**
@@ -39,15 +39,15 @@ The following features are not yet implemented:
 * **RapidToFirstKeyFrame**
 * **TakePicture**
 * **SetupPlayback**
+* **BumpPositionSpeedAcceleration**
 
 ## Known Issues
-1) The documentation implies each `MotorInfo` response and `MotorCalibrated` response should have 28 and 12 bytes, respectively. However, these responses have 32 and 16 bytes when running firmware `1.0.1.5`. If these messages are longer than expected, this program assumes a phantom `startPosition` float is sent before the `endPosition` float. An `UnexpectedLengthException` will be thrown.
-2) When it has the incorrect length, the `MotorCalibrated` response for Motor 1 returns `endPosition = 0`. `MotorCalibrated` responses for other motors work as expected. Use `MotorInfo` to receive the correct `endPosition`.
+1) When running firmware `1.0.1.5`, the effective `beginPosition` is 0, and the effective `endPosition` is `endPosition` - `beginPosition`.
 
 
 # References
 1) https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1204r0.html#tests-unit
 2) https://medium.com/swlh/cpm-an-awesome-dependency-manager-for-c-with-cmake-3c53f4376766
 3) https://blog.jetbrains.com/clion/2019/05/getting-started-with-the-conan-clion-plugin/
-4) https://support.kesslercrane.com/hc/en-us/articles/210577103-HOW-TO-CineDrive-API-Instructions
+4) https://support.kesslercrane.com/hc/en-us/articles/9569257629083-Cineshooter-API
 5) https://gist.github.com/vladon/8b487e41cb3b49e172db
