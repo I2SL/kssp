@@ -25,9 +25,6 @@ void controller (Stage& kessler)
 
     bool running = true;
     int speed = 0;
-    float speed_p = 0;
-    clock_t last_ping = clock();
-    float since_last_ping;
 
     int prev_tilt_dir = 0;
     int prev_pan_dir = 0;
@@ -35,7 +32,6 @@ void controller (Stage& kessler)
 
     while (running)
     {
-        since_last_ping = (float)(clock() - last_ping)/CLOCKS_PER_SEC;
         const bool w_pressed = GetAsyncKeyState(0x57);
         const bool s_pressed = GetAsyncKeyState(0x53);
         const bool a_pressed = GetAsyncKeyState(0x41);
@@ -44,7 +40,7 @@ void controller (Stage& kessler)
         const bool down_pressed = GetAsyncKeyState(0x28);
         const bool left_pressed = GetAsyncKeyState(0x25);
         const bool right_pressed = GetAsyncKeyState(0x27);
-        speed_p = (float)speed / 100;
+        const float speed_p = (float)speed / 100;
 
         int tilt_dir = 0;
         if (w_pressed) tilt_dir = 1;
@@ -53,7 +49,6 @@ void controller (Stage& kessler)
         if (prev_tilt_dir != tilt_dir) {
             kessler.set_position_speed_acceleration(3, 25000 * (float)tilt_dir, TILT_MAX_SPEED * speed_p, TILT_MAX_ACC);
             prev_tilt_dir = tilt_dir;
-            last_ping = clock();
         }
 
         int pan_dir = 0;
@@ -63,7 +58,6 @@ void controller (Stage& kessler)
         if (prev_pan_dir != pan_dir) {
             kessler.set_position_speed_acceleration(2, 25000 * (float)pan_dir, PAN_MAX_SPEED * speed_p, PAN_MAX_ACC);
             prev_pan_dir = pan_dir;
-            last_ping = clock();
         }
 
         int slide_dir = 0;
@@ -73,7 +67,6 @@ void controller (Stage& kessler)
         if (prev_slide_dir != slide_dir) {
             kessler.set_position_speed_acceleration(1, 25000 * (float)slide_dir, PAN_MAX_SPEED * speed_p, PAN_MAX_ACC);
             prev_slide_dir = slide_dir;
-            last_ping = clock();
         }
 
         int speed_dir = 0;
@@ -82,11 +75,6 @@ void controller (Stage& kessler)
 
         speed = std::clamp(speed + 1 * speed_dir, 0, 100);
         if (speed_dir != 0) printf("Speed: %d\n", speed);
-
-        if (since_last_ping > 10) {
-            kessler.get_network_info();
-            last_ping = clock();
-        }
 
         if (GetAsyncKeyState(VK_SPACE)) {
             running = false;
@@ -174,6 +162,7 @@ int main () {
     std::cout << kessler.get_device_info().to_string();
     kessler.reset_axis(0);
     std::thread driver(controller, std::ref(kessler));
+    std::thread pinger(ping, std::ref(kessler));
 
     printf("Move Slide motor to start position and press 'Q'. Then move Slide motor to end position and press `Q`.\n");
     calibrate(1, kessler);
@@ -193,7 +182,6 @@ int main () {
     end_pan -= begin_pan;
     end_tilt -= begin_tilt;
 
-    std::thread pinger(ping, std::ref(kessler));
     double hfovx;
     double hfovy;
     double px;
