@@ -47,7 +47,7 @@ void controller (Stage& kessler)
         if (s_pressed) tilt_dir = -1;
 
         if (prev_tilt_dir != tilt_dir) {
-            kessler.set_position_speed_acceleration(3, 25000 * (float)tilt_dir, TILT_MAX_SPEED * speed_p, TILT_MAX_ACC);
+            kessler.set_position_speed_acceleration(3, 25000 * (float)tilt_dir, TILT_MAX_SPEED * speed_p * abs(tilt_dir), TILT_MAX_ACC);
             prev_tilt_dir = tilt_dir;
         }
 
@@ -56,7 +56,7 @@ void controller (Stage& kessler)
         if (a_pressed) pan_dir = -1;
 
         if (prev_pan_dir != pan_dir) {
-            kessler.set_position_speed_acceleration(2, 25000 * (float)pan_dir, PAN_MAX_SPEED * speed_p, PAN_MAX_ACC);
+            kessler.set_position_speed_acceleration(2, 25000 * (float)pan_dir, PAN_MAX_SPEED * speed_p * abs(pan_dir), PAN_MAX_ACC);
             prev_pan_dir = pan_dir;
         }
 
@@ -65,7 +65,7 @@ void controller (Stage& kessler)
         if (left_pressed) slide_dir = -1;
 
         if (prev_slide_dir != slide_dir) {
-            kessler.set_position_speed_acceleration(1, 25000 * (float)slide_dir, PAN_MAX_SPEED * speed_p, PAN_MAX_ACC);
+            kessler.set_position_speed_acceleration(1, 25000 * (float)slide_dir, PAN_MAX_SPEED * speed_p * abs(slide_dir), PAN_MAX_ACC);
             prev_slide_dir = slide_dir;
         }
 
