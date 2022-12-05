@@ -24,187 +24,64 @@ void controller (Stage& kessler)
     printf("Stop: Space\n");
 
     bool running = true;
-    bool pan_right = false;
-    bool pan_left = false;
-    bool tilt_up = false;
-    bool tilt_down = false;
-    bool slide_right = false;
-    bool slide_left = false;
-    bool flashlight = false;
-    bool w_pressed = false;
-    bool s_pressed = false;
-    bool a_pressed = false;
-    bool d_pressed = false;
-    bool f_pressed = false;
-    bool up_pressed = false;
-    bool down_pressed = false;
-    bool left_pressed = false;
-    bool right_pressed = false;
     int speed = 0;
     float speed_p = 0;
     clock_t last_ping = clock();
     float since_last_ping;
 
+    int prev_tilt_dir = 0;
+    int prev_pan_dir = 0;
+    int prev_slide_dir = 0;
+
     while (running)
     {
         since_last_ping = (float)(clock() - last_ping)/CLOCKS_PER_SEC;
-        w_pressed = GetAsyncKeyState(0x57);
-        s_pressed = GetAsyncKeyState(0x53);
-        a_pressed = GetAsyncKeyState(0x41);
-        d_pressed = GetAsyncKeyState(0x44);
-        f_pressed = GetAsyncKeyState(0x46);
-        up_pressed = GetAsyncKeyState(0x26);
-        down_pressed = GetAsyncKeyState(0x28);
-        left_pressed = GetAsyncKeyState(0x25);
-        right_pressed = GetAsyncKeyState(0x27);
+        const bool w_pressed = GetAsyncKeyState(0x57);
+        const bool s_pressed = GetAsyncKeyState(0x53);
+        const bool a_pressed = GetAsyncKeyState(0x41);
+        const bool d_pressed = GetAsyncKeyState(0x44);
+        const bool up_pressed = GetAsyncKeyState(0x26);
+        const bool down_pressed = GetAsyncKeyState(0x28);
+        const bool left_pressed = GetAsyncKeyState(0x25);
+        const bool right_pressed = GetAsyncKeyState(0x27);
         speed_p = (float)speed / 100;
 
+        int tilt_dir = 0;
+        if (w_pressed) tilt_dir = 1;
+        if (s_pressed) tilt_dir = -1;
 
-        if (w_pressed) {
-            if(!tilt_up) {
-                if (!s_pressed) {
-                    kessler.set_position_speed_acceleration(3, 25000, TILT_MAX_SPEED*speed_p, TILT_MAX_ACC);
-                    tilt_up = true;
-                    last_ping = clock();
-                }
-            }
-        }
-        else {
-            if(tilt_up) {
-                tilt_up = false;
-                if (!tilt_down) {
-                    kessler.set_position_speed_acceleration(3, 25000, 0, TILT_MAX_ACC);
-                    last_ping = clock();
-                }
-            }
+        if (prev_tilt_dir != tilt_dir) {
+            kessler.set_position_speed_acceleration(3, 25000 * (float)tilt_dir, TILT_MAX_SPEED * speed_p, TILT_MAX_ACC);
+            prev_tilt_dir = tilt_dir;
+            last_ping = clock();
         }
 
-        if (s_pressed) {
-            if(!tilt_down) {
-                if (!w_pressed) {
-                    kessler.set_position_speed_acceleration(3, -25000, TILT_MAX_SPEED*speed_p, TILT_MAX_ACC);
-                    tilt_down = true;
-                    last_ping = clock();
-                }
-            }
-        }
-        else {
-            if(tilt_down) {
-                tilt_down = false;
-                if (!tilt_up) {
-                    kessler.set_position_speed_acceleration(3, -25000, 0, TILT_MAX_ACC);
-                    last_ping = clock();
-                }
-            }
+        int pan_dir = 0;
+        if (d_pressed) pan_dir = 1;
+        if (a_pressed) pan_dir = -1;
+
+        if (prev_pan_dir != pan_dir) {
+            kessler.set_position_speed_acceleration(2, 25000 * (float)pan_dir, PAN_MAX_SPEED * speed_p, PAN_MAX_ACC);
+            prev_pan_dir = pan_dir;
+            last_ping = clock();
         }
 
-        if (a_pressed) {
-            if(!pan_left) {
-                if (!d_pressed) {
-                    kessler.set_position_speed_acceleration(2, -25000, PAN_MAX_SPEED*speed_p, PAN_MAX_ACC);
-                    pan_left = true;
-                    last_ping = clock();
-                }
-            }
-        }
-        else {
-            if(pan_left) {
-                pan_left = false;
-                if (!pan_right) {
-                    kessler.set_position_speed_acceleration(2, -25000, 0, PAN_MAX_ACC);
-                    last_ping = clock();
-                }
-            }
+        int slide_dir = 0;
+        if (right_pressed) slide_dir = 1;
+        if (left_pressed) slide_dir = -1;
+
+        if (prev_slide_dir != slide_dir) {
+            kessler.set_position_speed_acceleration(1, 25000 * (float)slide_dir, PAN_MAX_SPEED * speed_p, PAN_MAX_ACC);
+            prev_slide_dir = slide_dir;
+            last_ping = clock();
         }
 
-        if (d_pressed) {
-            if(!pan_right) {
-                if (!a_pressed) {
-                    kessler.set_position_speed_acceleration(2, 25000, PAN_MAX_SPEED*speed_p, PAN_MAX_ACC);
-                    pan_right = true;
-                    last_ping = clock();
-                }
-            }
-        }
-        else {
-            if(pan_right) {
-                pan_right = false;
-                if (!pan_left) {
-                    kessler.set_position_speed_acceleration(2, 25000, 0, PAN_MAX_ACC);
-                    last_ping = clock();
-                }
-            }
-        }
+        int speed_dir = 0;
+        if (up_pressed) speed_dir = 1;
+        if (down_pressed) speed_dir = -1;
 
-        if (up_pressed) {
-            if (!down_pressed) {
-                if (speed < 100) {
-                    speed += 1;
-                }
-                printf("Speed: %d\n", speed);
-            }
-        }
-
-        if (down_pressed) {
-            if (!up_pressed) {
-                if (speed > 0) {
-                    speed -= 1;
-                }
-                printf("Speed: %d\n", speed);
-            }
-        }
-
-        if (left_pressed) {
-            if(!slide_left) {
-                if (!right_pressed) {
-                    kessler.set_position_speed_acceleration(1, -25000, SLIDE_MAX_SPEED*speed_p, SLIDE_MAX_ACC);
-                    slide_left = true;
-                    last_ping = clock();
-                }
-            }
-        }
-        else {
-            if(slide_left) {
-                slide_left = false;
-                if (!slide_right) {
-                    kessler.set_position_speed_acceleration(1, -25000, 0, SLIDE_MAX_ACC);
-                    last_ping = clock();
-                }
-            }
-        }
-
-        if (right_pressed) {
-            if(!slide_right) {
-                if (!left_pressed) {
-                    kessler.set_position_speed_acceleration(1, 25000, SLIDE_MAX_SPEED*speed_p, SLIDE_MAX_ACC);
-                    slide_right = true;
-                    last_ping = clock();
-                }
-            }
-        }
-        else {
-            if(slide_right) {
-                slide_right = false;
-                if (!slide_left) {
-                    kessler.set_position_speed_acceleration(1, 25000, 0, SLIDE_MAX_ACC);
-                    last_ping = clock();
-                }
-            }
-        }
-
-        if (f_pressed) {
-            if (flashlight) {
-                flashlight = false;
-                kessler.set_led_status(0, 0);
-                last_ping = clock();
-            }
-            else {
-                flashlight = true;
-                kessler.set_led_status(1, 0);
-                last_ping = clock();
-            }
-
-        }
+        speed = std::clamp(speed + 1 * speed_dir, 0, 100);
+        if (speed_dir != 0) printf("Speed: %d\n", speed);
 
         if (since_last_ping > 10) {
             kessler.get_network_info();
