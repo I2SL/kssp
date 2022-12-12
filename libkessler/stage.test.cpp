@@ -57,14 +57,14 @@ BOOST_AUTO_TEST_SUITE(MockStageTests)
 
     BOOST_AUTO_TEST_CASE(TestSizeOfEmptyVector) {
         std::vector<unsigned char> test{};
-        BOOST_CHECK(test.size()==0);
+        BOOST_CHECK(test.empty());
     }
 
     BOOST_AUTO_TEST_CASE(TestVectorStringConversion) {
         std::string original = std::string("");
         std::vector<unsigned char> original_vect = Utils::string_to_char_vector(original);
         std::string original2 = Utils::char_vector_to_string(original_vect);
-        printf("Vector Size: %d\n", original_vect.size());
+        printf("Vector Size: %llu\n", original_vect.size());
         BOOST_CHECK(original==original2);
     }
 
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_SUITE(MockStageTests)
         std::string original = std::string("");
         std::vector<unsigned char> original_vect = {'h', 'i'};
         original_vect.insert(std::end(original_vect), std::begin(original), std::end(original));
-        BOOST_CHECK(original.size()==0);
+        BOOST_CHECK(original.empty());
         BOOST_CHECK(original_vect.size() == 2);
     }
 
@@ -86,7 +86,9 @@ BOOST_AUTO_TEST_SUITE(MockStageTests)
 
     BOOST_AUTO_TEST_CASE(TestFloattoInt32toFloat) {
         float input = -233.42;
-        boost::int32_t input_as_int = reinterpret_cast <int&>(input);
+        boost::int32_t input_as_int;
+        std::memcpy(&input_as_int, &input, sizeof(input));
+        std::cout << input_as_int << std::endl;
         unsigned char* test;
         boost::endian::store_big_s32(test, input_as_int);
         boost::int32_t output_as_int = boost::endian::load_big_s32(test);
@@ -269,7 +271,7 @@ BOOST_AUTO_TEST_SUITE(StageTests)
 
     BOOST_AUTO_TEST_CASE(SetDevicePassword) {
         std::string password("hello world!");
-        std::string empty("");
+        std::string empty;
         Stage instance("192.168.50.1", 5520);
         instance.get_device_info();
         instance.get_motor_info();
