@@ -29,5 +29,10 @@ target_link_libraries(wasd_calibrator libkessler ${CONAN_LIBS})
 add_executable(wasd_controller tests/wasd_controller.cpp)
 target_link_libraries(wasd_controller libkessler ${CONAN_LIBS})
 
+add_executable(solvertest tests/solvertest.cpp)
+target_link_libraries(solvertest libkessler ${CONAN_LIBS})
+
 add_executable(libkessler-test libkessler/stage.test.cpp)
 target_link_libraries(libkessler-test libkessler ${CONAN_LIBS})
+
+
