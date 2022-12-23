@@ -63,3 +63,4 @@ The following features are not yet implemented:
 3) https://blog.jetbrains.com/clion/2019/05/getting-started-with-the-conan-clion-plugin/
 4) https://support.kesslercrane.com/hc/en-us/articles/9569257629083-Cineshooter-API
 5) https://gist.github.com/vladon/8b487e41cb3b49e172db
+6) http://ceres-solver.org/
