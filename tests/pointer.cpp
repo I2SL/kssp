@@ -1,10 +1,3 @@
-#pragma once
-
-#include <iostream>
-#include <cmath>
-#include <thread>
-
-#include "../libkessler/stage.h"
 #include "pointer_utils.hpp"
 
 int main () {

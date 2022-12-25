@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <ctime>
+#include <iostream>
 #include <thread>
 #include <tuple>
 
