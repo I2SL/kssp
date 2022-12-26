@@ -13,6 +13,26 @@
 
 #include "../libkessler/stage.h"
 
+double get_hfov(double focal_len, double dist, int npx, double px_size) {
+    return atan((1/dist + 1/focal_len) * npx * px_size / 2);
+}
+
+double get_phi(int x, int nx, double hfov, double phi0) {
+    return atan(2 * x * tan(hfov) / nx) + phi0;
+}
+
+double get_theta(int y, int ny, double hfov, double theta0) {
+    return atan((float)ny / 2 / (float)y / tan(hfov)) + theta0;
+}
+
+double get_phi_prime(double phi, double theta, double y0, double r, double phi0p) {
+    return phi - (y0 / r) * (cos(phi) / sin(theta)) + phi0p;
+}
+
+double get_theta_prime(double phi, double theta, double y0, double r, double theta0p) {
+    return theta - (y0 / r) * cos(theta) * sin(phi) + theta0p;
+}
+
 // Use Ceres to solve system of equations for calibration
 using ceres::AutoDiffCostFunction;
 using ceres::CostFunction;
@@ -70,7 +90,7 @@ struct F4 {
 DEFINE_string(minimizer,
               "trust_region",
               "Minimizer type to use, choices are: line_search & trust_region");
-std::tuple<float, float, float, float> solve(double yhfov, double xhfov, int Nx, int Ny, double sep, double panstart, double panend, double tiltstart, double tiltend, double r1, int x1, int y1, double theta1m, double phi1m, double r2, int x2, int y2, double theta2m, double phi2m) {
+std::tuple<float, float, float, float> solve(double hfovx, double hfovy, int Nx, int Ny, double sep, double panstart, double panend, double tiltstart, double tiltend, double r1, int x1, int y1, double theta1m, double phi1m, double r2, int x2, int y2, double theta2m, double phi2m) {
     double theta0 = 0;
     double phi0 = 0;
     double theta0p = 0;
@@ -79,10 +99,10 @@ std::tuple<float, float, float, float> solve(double yhfov, double xhfov, int Nx,
     // Add residual terms to the problem using the autodiff
     // wrapper to get the derivatives automatically. The parameters, x1 through
     // x4, are modified in place.
-    double phinorm1 = atan(2 * x1 * tan(xhfov) / Nx);
-    double thetanorm1 = atan((float)Ny / 2 / (float)y1 / tan(yhfov));
-    double phinorm2 = atan(2 * x2 * tan(xhfov) / Nx);
-    double thetanorm2 = atan((float)Ny / 2 / (float)y2 / tan(yhfov));
+    double phinorm1 = atan(2 * x1 * tan(hfovx) / Nx);
+    double thetanorm1 = atan((float)Ny / 2 / (float)y1 / tan(hfovy));
+    double phinorm2 = atan(2 * x2 * tan(hfovx) / Nx);
+    double thetanorm2 = atan((float)Ny / 2 / (float)y2 / tan(hfovy));
     double theta1p = EIGEN_PI * 2 * theta1m / 3 / (tiltend - tiltstart);
     double phi1p = EIGEN_PI * ((phi1m / (panend - panstart)) - 0.5);
     double theta2p = EIGEN_PI * 2 * theta2m / 3 / (tiltend - tiltstart);
@@ -317,22 +337,6 @@ std::tuple<double, double, double, int, int> get_calibration_point(Stage& kessle
     std::cin >> y;
     std::tuple<double, double, double, int, int> ret{(double)tilt_position, (double)pan_position, r, x, y};
     return ret;
-}
-
-double get_phi(int x, int nx, double hfov, double phi0) {
-    return atan(2 * x * tan(hfov) / nx) + phi0;
-}
-
-double get_theta(int y, int ny, double hfov, double theta0) {
-    return atan((float)ny / 2 / (float)y / tan(hfov)) + theta0;
-}
-
-double get_phi_prime(double phi, double theta, double y0, double r, double phi0p) {
-    return phi - (y0 / r) * (cos(phi) / sin(theta)) + phi0p;
-}
-
-double get_theta_prime(double phi, double theta, double y0, double r, double theta0p) {
-    return theta - (y0 / r) * cos(theta) * sin(phi) + theta0p;
 }
 
 float get_pan_position(float begin_pan, float end_pan, double phi_prime) {

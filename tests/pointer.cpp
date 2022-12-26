@@ -4,8 +4,6 @@ int main () {
     std::mutex mtx;
     bool active = true;
     std::string correction("n");
-    double hfovx;
-    double hfovy;
     double px;
     double f;
     double y0;
@@ -26,9 +24,10 @@ int main () {
     printf("Enter pixel size in microns:\n");
     std::cin >> px;
     px *= pow(10, -6);
-
-    hfovx = atan(px * nx / f / 2);
-    hfovy = atan(px * ny / f / 2);
+    printf("Enter focal point distance in meters:\n");
+    std::cin >> r;
+    double hfovx = get_hfov(f, r, nx, px);
+    double hfovy = get_hfov(f, r, ny, px);
 
     Stage kessler("192.168.50.1", 5520);
     kessler.handshake();
@@ -59,7 +58,7 @@ int main () {
         int x1, y1, x2, y2;
         std::tie(theta1m, phi1m, r1, x1, y1) = get_calibration_point(kessler, mtx);
         std::tie(theta2m, phi2m, r2, x2, y2) = get_calibration_point(kessler, mtx);
-        std::tie(theta0, phi0, theta0p, phi0p) = solve(hfovy, hfovx, nx, ny, y0, begin_pan, end_pan, begin_tilt, end_tilt, r1, x1, y1, theta1m, phi1m, r2, x2, y2, theta2m, phi2m);
+        std::tie(theta0, phi0, theta0p, phi0p) = solve(hfovx, hfovy, nx, ny, y0, begin_pan, end_pan, begin_tilt, end_tilt, r1, x1, y1, theta1m, phi1m, r2, x2, y2, theta2m, phi2m);
     }
     printf("Calibration complete. Press space to exit manual control.\n");
     driver.join();
