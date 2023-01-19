@@ -3,7 +3,6 @@
 int main () {
     std::mutex mtx;
     bool active = true;
-    std::string correction("n");
     float begin_pan, end_pan, begin_tilt, end_tilt, theta0, phi0, theta0p, phi0p;
     double hfovx, hfovy, y0, r;
     int nx, ny, x, y;
