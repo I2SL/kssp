@@ -28,7 +28,6 @@ add_library(
         libkessler/notifications/aux_input_status.h
         libkessler/notifications/unsupported_message.cpp
         libkessler/notifications/unsupported_message.h)
-target_link_libraries(libkessler wsock32 ws2_32)
 target_link_libraries(libkessler ${CONAN_LIBS})
 
 add_executable(basic_pointer tests/basic_pointer.cpp)
