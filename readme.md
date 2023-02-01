@@ -56,6 +56,19 @@ The following features are not yet implemented:
 ## Known Issues
 1) When running firmware `1.0.1.5`, the effective `beginPosition` is 0, and the effective `endPosition` is `endPosition` - `beginPosition`.
 
+## Tests
+The `tests` directory contains executables related to running the stage and tracking objects. This brings in packages that are not required for operating the stage, so eventually this will be split into a separate project.
+### Executables
+* `basic_pointer.cpp`
+* `live_tracker.cpp`
+* `pointer.cpp`
+* `wasd_calibrator.cpp`
+* `wasd_controller.cpp`
+
+### Auxiliary Files
+* `calibrator.hpp`
+* `ebs_tracking_utils.hpp`
+* `pointer_utils.hpp`
 
 # References
 1) https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1204r0.html#tests-unit
