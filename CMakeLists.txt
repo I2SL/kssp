@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
+
 add_library(
         libkessler libkessler/stage.cpp
         libkessler/responses/device_info.cpp
@@ -28,24 +29,29 @@ add_library(
         libkessler/notifications/aux_input_status.h
         libkessler/notifications/unsupported_message.cpp
         libkessler/notifications/unsupported_message.h)
-target_link_libraries(libkessler ${CONAN_LIBS})
+
+find_package(X11 REQUIRED)
+include_directories(${X11_INCLUDE_DIR})
+link_directories(${X11_LIBRARIES})
+
+target_link_libraries(libkessler ${CONAN_LIBS} ${X11_LIBRARIES})
 
 add_executable(basic_pointer tests/basic_pointer.cpp)
-target_link_libraries(basic_pointer libkessler ${CONAN_LIBS})
+target_link_libraries(basic_pointer libkessler ${CONAN_LIBS} ${X11_LIBRARIES})
 
 add_executable(pointer tests/pointer.cpp)
-target_link_libraries(pointer libkessler ${CONAN_LIBS})
+target_link_libraries(pointer libkessler ${CONAN_LIBS} ${X11_LIBRARIES})
 
 add_executable(wasd_calibrator tests/wasd_calibrator.cpp)
-target_link_libraries(wasd_calibrator libkessler ${CONAN_LIBS})
+target_link_libraries(wasd_calibrator libkessler ${CONAN_LIBS} ${X11_LIBRARIES})
 
 add_executable(wasd_controller tests/wasd_controller.cpp)
-target_link_libraries(wasd_controller libkessler ${CONAN_LIBS})
+target_link_libraries(wasd_controller libkessler ${CONAN_LIBS} ${X11_LIBRARIES})
 
 add_executable(live_tracker tests/live_tracker.cpp)
-target_link_libraries(live_tracker libkessler ${CONAN_LIBS})
+target_link_libraries(live_tracker libkessler ${CONAN_LIBS} ${X11_LIBRARIES})
 
 add_executable(libkessler-test libkessler/stage.test.cpp)
-target_link_libraries(libkessler-test libkessler ${CONAN_LIBS})
+target_link_libraries(libkessler-test libkessler ${CONAN_LIBS} ${X11_LIBRARIES})
 
 

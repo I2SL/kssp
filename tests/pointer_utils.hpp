@@ -10,6 +10,8 @@
 #include <ceres/ceres.h>
 #include <gflags/gflags.h>
 #include <glog/logging.h>
+#include <X11/Xlib.h>
+#include <X11/keysym.h>
 
 #include "../libkessler/stage.h"
 
@@ -175,6 +177,16 @@ std::tuple<float, float, float, float> solve(double hfovx, double hfovy, int Nx,
     return errors;
 }
 
+bool key_is_pressed(KeySym ks) {
+    Display *dpy = XOpenDisplay(":0");
+    char keys_return[32];
+    XQueryKeymap(dpy, keys_return);
+    KeyCode kc2 = XKeysymToKeycode(dpy, ks);
+    bool isPressed = !!(keys_return[kc2 >> 3] & (1 << (kc2 & 7)));
+    XCloseDisplay(dpy);
+    return isPressed;
+}
+
 // Drive stage with manual controls
 void controller (Stage& kessler)
 {
@@ -201,14 +213,14 @@ void controller (Stage& kessler)
 
     while (running)
     {
-        const bool w_pressed = GetAsyncKeyState(0x57);
-        const bool s_pressed = GetAsyncKeyState(0x53);
-        const bool a_pressed = GetAsyncKeyState(0x41);
-        const bool d_pressed = GetAsyncKeyState(0x44);
-        const bool up_pressed = GetAsyncKeyState(0x26);
-        const bool down_pressed = GetAsyncKeyState(0x28);
-        const bool left_pressed = GetAsyncKeyState(0x25);
-        const bool right_pressed = GetAsyncKeyState(0x27);
+        const bool w_pressed = key_is_pressed(XK_W);
+        const bool s_pressed = key_is_pressed(XK_S);
+        const bool a_pressed = key_is_pressed(XK_A);
+        const bool d_pressed = key_is_pressed(XK_D);
+        const bool up_pressed = key_is_pressed(XK_Up);
+        const bool down_pressed = key_is_pressed(XK_Down);
+        const bool left_pressed = key_is_pressed(XK_Left);
+        const bool right_pressed = key_is_pressed(XK_Right);
         const float speed_p = (float)speed / 100;
 
         int tilt_dir = 0;
@@ -245,7 +257,7 @@ void controller (Stage& kessler)
         speed = std::clamp(speed + 1 * speed_dir, 0, 100);
         if (speed_dir != 0) printf("Speed: %d\n", speed);
 
-        if (GetAsyncKeyState(VK_SPACE)) {
+        if (key_is_pressed(XK_space)) {
             running = false;
         }
 
