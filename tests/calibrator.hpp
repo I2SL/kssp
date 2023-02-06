@@ -29,7 +29,6 @@ std::tuple<int, int, double, double, double, float, float, float, float, float, 
 
     kessler.reset_axis(0);
     std::thread driver(controller, std::ref(kessler));
-    std::thread pinger(ping, std::ref(kessler), std::ref(mtx), std::ref(active));
 
     printf("Move Slide motor to start position and press 'Q'. Then move Slide motor to end position and press `Q`.\n");
     calibrate(1, kessler, mtx);
@@ -57,7 +56,6 @@ std::tuple<int, int, double, double, double, float, float, float, float, float, 
     }
     printf("Calibration complete. Press space to exit manual control.\n");
     driver.join();
-    pinger.join();
 
     std::tuple<int, int, double, double, double, float, float, float, float, float, float, float, float> cal_params(nx, ny, hfovx, hfovy, y0, begin_pan, end_pan, begin_tilt, end_tilt, theta0, phi0, theta0p, phi0p);
     return cal_params;
