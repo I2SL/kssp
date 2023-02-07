@@ -1,8 +1,7 @@
 #include "pointer_utils.hpp"
 
-std::tuple<int, int, double, double, double, float, float, float, float, float, float, float, float> calibrate_stage (Stage& kessler) {
+std::tuple<int, int, double, double, double, float, float, float, float, float, float> calibrate_stage (Stage& kessler) {
     std::mutex mtx;
-    bool active = true;
     std::string correction("n");
     double px;
     double f;
@@ -46,17 +45,17 @@ std::tuple<int, int, double, double, double, float, float, float, float, float, 
 
     printf("Calibrate for systematic errors? (y/n)\n");
     std::cin >> correction;
-    float theta0, phi0, theta0p, phi0p = 0;
+    float theta0pm, phi0pm = 0;
     if (correction == "y") {
-        double r1, theta1m, phi1m, r2, theta2m, phi2m;
-        int x1, y1, x2, y2;
+        double r1;
+        float theta1m, phi1m;
+        int x1, y1;
         std::tie(theta1m, phi1m, r1, x1, y1) = get_calibration_point(kessler, mtx);
-        std::tie(theta2m, phi2m, r2, x2, y2) = get_calibration_point(kessler, mtx);
-        std::tie(theta0, phi0, theta0p, phi0p) = solve(hfovx, hfovy, nx, ny, y0, begin_pan, end_pan, begin_tilt, end_tilt, r1, x1, y1, theta1m, phi1m, r2, x2, y2, theta2m, phi2m);
+        std::tie(theta0pm, phi0pm) = find_errors(hfovx, hfovy, nx, ny, y0, begin_pan, end_pan, begin_tilt, end_tilt, r1, x1, y1, theta1m, phi1m);
     }
     printf("Calibration complete. Press space to exit manual control.\n");
     driver.join();
 
-    std::tuple<int, int, double, double, double, float, float, float, float, float, float, float, float> cal_params(nx, ny, hfovx, hfovy, y0, begin_pan, end_pan, begin_tilt, end_tilt, theta0, phi0, theta0p, phi0p);
+    std::tuple<int, int, double, double, double, float, float, float, float, float, float> cal_params(nx, ny, hfovx, hfovy, y0, begin_pan, end_pan, begin_tilt, end_tilt, theta0pm, phi0pm);
     return cal_params;
 }

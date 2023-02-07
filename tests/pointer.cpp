@@ -3,7 +3,7 @@
 int main () {
     std::mutex mtx;
     bool active = true;
-    float begin_pan, end_pan, begin_tilt, end_tilt, theta0, phi0, theta0p, phi0p;
+    float begin_pan, end_pan, begin_tilt, end_tilt, theta0pm, phi0pm;
     double hfovx, hfovy, y0, r;
     int nx, ny, x, y;
 
@@ -11,7 +11,7 @@ int main () {
     kessler.handshake();
     std::cout << kessler.get_device_info().to_string();
     std::thread pinger(ping, std::ref(kessler), std::ref(mtx), std::ref(active));
-    std::tie(nx, ny, hfovx, hfovy, y0, begin_pan, end_pan, begin_tilt, end_tilt, theta0, phi0, theta0p, phi0p) = calibrate_stage(std::ref(kessler));
+    std::tie(nx, ny, hfovx, hfovy, y0, begin_pan, end_pan, begin_tilt, end_tilt, theta0pm, phi0pm) = calibrate_stage(std::ref(kessler));
 
     while (true) {
         printf("Enter target distance (or 0 to quit):\n");
@@ -24,18 +24,18 @@ int main () {
         printf("Enter target y coordinate:\n");
         std::cin >> y;
 
-        double theta = get_theta(y, ny, hfovy, theta0);
-        double phi = get_phi(x, nx, hfovx, phi0);
-        double theta_prime = get_theta_prime(phi, theta, y0, r, theta0p);
-        double phi_prime = get_phi_prime(phi, theta, y0, r, phi0p);
+        double theta = get_theta(y, ny, hfovy);
+        double phi = get_phi(x, nx, hfovx);
+        double theta_prime = get_theta_prime(phi, theta, y0, r);
+        double phi_prime = get_phi_prime(phi, theta, y0, r);
 
         printf("Calculated Coordinates in degrees (theta, phi):\n");
-        printf("EBS: (%.2Lf, %.2Lf)\n", theta * 180 / EIGEN_PI, phi * 180 / EIGEN_PI);
-        printf("FBC: (%.2Lf, %.2Lf)\n", theta_prime * 180 / EIGEN_PI, phi_prime * 180 / EIGEN_PI);
+        printf("EBS: (%.2f, %.2f)\n", theta * 180 / PI, phi * 180 / PI);
+        printf("FBC: (%.2f, %.2f)\n", theta_prime * 180 / PI, phi_prime * 180 / PI);
         printf("\n");
 
-        float pan_position = get_pan_position(begin_pan, end_pan, phi_prime);
-        float tilt_position = get_tilt_position(begin_tilt, end_tilt, theta_prime);
+        float pan_position = get_pan_position(begin_pan, end_pan, phi_prime, phi0pm);
+        float tilt_position = get_tilt_position(begin_tilt, end_tilt, theta_prime, theta0pm);
 
         printf("Target motor positions:\n");
         printf("Pan: %.2f (Range: 0 - %.2f)\n", pan_position, end_pan);

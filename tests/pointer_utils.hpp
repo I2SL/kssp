@@ -7,172 +7,48 @@
 #include <thread>
 #include <tuple>
 
-#include <ceres/ceres.h>
-#include <gflags/gflags.h>
-#include <glog/logging.h>
-
 #include "../libkessler/stage.h"
 
 double get_hfov(double focal_len, double dist, int npx, double px_size) {
     return atan((1/dist + 1/focal_len) * npx * px_size / 2);
 }
 
-double get_phi(int x, int nx, double hfov, double phi0) {
-    return atan(2 * x * tan(hfov) / nx) + phi0;
+double get_phi(int x, int nx, double hfov) {
+    return atan(2 * x * tan(hfov) / nx);
 }
 
-double get_theta(int y, int ny, double hfov, double theta0) {
-    return atan((float)ny / 2 / (float)y / tan(hfov)) + theta0;
+double get_theta(int y, int ny, double hfov) {
+    return atan((float)ny / 2 / (float)y / tan(hfov));
 }
 
-double get_phi_prime(double phi, double theta, double y0, double r, double phi0p) {
-    return phi - (y0 / r) * (cos(phi) / sin(theta)) + phi0p;
+double get_phi_prime(double phi, double theta, double y0, double r) {
+    return phi - (y0 / r) * (cos(phi) / sin(theta));
 }
 
-double get_theta_prime(double phi, double theta, double y0, double r, double theta0p) {
-    return theta - (y0 / r) * cos(theta) * sin(phi) + theta0p;
+double get_theta_prime(double phi, double theta, double y0, double r) {
+    return theta - (y0 / r) * cos(theta) * sin(phi);
 }
 
-// Use Ceres to solve system of equations for calibration
-using ceres::AutoDiffCostFunction;
-using ceres::CostFunction;
-using ceres::Problem;
-using ceres::Solve;
-using ceres::Solver;
-struct F1 {
-    double phinorm1;
-    double sep;
-    double r1;
-    double thetanorm1;
-    double phi1p;
-    template <typename T>
-    bool operator()(const T* const theta0, const T* const phi0, const T* const phi0p, T* residual) const {
-        residual[0] = phinorm1 + phi0[0] - (sep * cos(phinorm1 + phi0[0]) / r1 / sin(thetanorm1 + theta0[0])) + phi0p[0] - phi1p;
-        return true;
+float get_pan_position(float begin_pan, float end_pan, double phi_prime, float phi0pm) {
+    float true_end = end_pan - begin_pan;
+    float nom_position = true_end * ((float)((phi_prime / PI) + 0.5)) + phi0pm;
+    if (true_end < 0) {
+        float first_pass = std::min<float>(0, nom_position);
+        return std::max<float>(true_end, first_pass);
     }
-};
-struct F2 {
-    double thetanorm1;
-    double sep;
-    double phinorm1;
-    double r1;
-    double theta1p;
-    template <typename T>
-    bool operator()(const T* const theta0, const T* const phi0, const T* const theta0p, T* residual) const {
-        residual[0] = thetanorm1 + theta0[0] - (sep * cos(thetanorm1 + theta0[0]) * sin(phinorm1 + phi0[0]) / r1) - theta0p[0] - theta1p;
-        return true;
+    float first_pass = std::max<float>(0, nom_position);
+    return std::min<float>(true_end, first_pass);
+}
+
+float get_tilt_position(float begin_tilt, float end_tilt, double theta_prime, float theta0pm) {
+    float true_end = end_tilt - begin_tilt;
+    float nom_position = 3 * true_end * (float)(theta_prime / PI) / 2 + theta0pm;
+    if (true_end < 0) {
+        float first_pass = std::min<float>(0, nom_position);
+        return std::max<float>(true_end, first_pass);
     }
-};
-struct F3 {
-    double phinorm2;
-    double sep;
-    double r2;
-    double thetanorm2;
-    double phi2p;
-    template <typename T>
-    bool operator()(const T* const theta0, const T* const phi0, const T* const phi0p, T* residual) const {
-        residual[0] = phinorm2 + phi0[0] - (sep * cos(phinorm2 + phi0[0]) / r2 / sin(thetanorm2 + theta0[0])) + phi0p[0] - phi2p;
-        return true;
-    }
-};
-struct F4 {
-    double thetanorm2;
-    double sep;
-    double phinorm2;
-    double r2;
-    double theta2p;
-    template <typename T>
-    bool operator()(const T* const theta0, const T* const phi0, const T* const theta0p, T* residual) const {
-        residual[0] = thetanorm2 + theta0[0] - (sep * cos(thetanorm2 + theta0[0]) * sin(phinorm2 + phi0[0]) / r2) - theta0p[0] - theta2p;
-        return true;
-    }
-};
-DEFINE_string(minimizer,
-              "trust_region",
-              "Minimizer type to use, choices are: line_search & trust_region");
-std::tuple<float, float, float, float> solve(double hfovx, double hfovy, int Nx, int Ny, double sep, double panstart, double panend, double tiltstart, double tiltend, double r1, int x1, int y1, double theta1m, double phi1m, double r2, int x2, int y2, double theta2m, double phi2m) {
-    double theta0 = 0;
-    double phi0 = 0;
-    double theta0p = 0;
-    double phi0p = 0;
-    Problem problem;
-    // Add residual terms to the problem using the autodiff
-    // wrapper to get the derivatives automatically. The parameters, x1 through
-    // x4, are modified in place.
-    double phinorm1 = atan(2 * x1 * tan(hfovx) / Nx);
-    double thetanorm1 = atan((float)Ny / 2 / (float)y1 / tan(hfovy));
-    double phinorm2 = atan(2 * x2 * tan(hfovx) / Nx);
-    double thetanorm2 = atan((float)Ny / 2 / (float)y2 / tan(hfovy));
-    double theta1p = EIGEN_PI * 2 * theta1m / 3 / (tiltend - tiltstart);
-    double phi1p = EIGEN_PI * ((phi1m / (panend - panstart)) - 0.5);
-    double theta2p = EIGEN_PI * 2 * theta2m / 3 / (tiltend - tiltstart);
-    double phi2p = EIGEN_PI * ((phi2m / (panend - panstart)) - 0.5);
-
-    F1 * f1 = new F1;
-    f1->phinorm1 = phinorm1;
-    f1->sep = sep;
-    f1->r1 = r1;
-    f1->thetanorm1 = thetanorm1;
-    f1->phi1p = phi1p;
-
-    F2 * f2 = new F2;
-    f2->phinorm1 = phinorm1;
-    f2->sep = sep;
-    f2->r1 = r1;
-    f2->thetanorm1 = thetanorm1;
-    f2->theta1p = theta1p;
-
-    F3 * f3 = new F3;
-    f3->phinorm2 = phinorm2;
-    f3->sep = sep;
-    f3->r2 = r2;
-    f3->thetanorm2 = thetanorm2;
-    f3->phi2p = phi2p;
-
-    F4 * f4 = new F4;
-    f4->phinorm2 = phinorm2;
-    f4->sep = sep;
-    f4->r2 = r2;
-    f4->thetanorm2 = thetanorm2;
-    f4->theta2p = theta2p;
-
-    problem.AddResidualBlock(
-            new AutoDiffCostFunction<F1, 1, 1, 1, 1>(f1), nullptr, &theta0, &phi0, &phi0p);
-    problem.AddResidualBlock(
-            new AutoDiffCostFunction<F2, 1, 1, 1, 1>(f2), nullptr, &theta0, &phi0, &theta0p);
-    problem.AddResidualBlock(
-            new AutoDiffCostFunction<F3, 1, 1, 1, 1>(f3), nullptr, &theta0, &phi0, &phi0p);
-    problem.AddResidualBlock(
-            new AutoDiffCostFunction<F4, 1, 1, 1, 1>(f4), nullptr, &theta0, &phi0, &theta0p);
-    Solver::Options options;
-    LOG_IF(FATAL,
-           !ceres::StringToMinimizerType(CERES_GET_FLAG(FLAGS_minimizer),
-                                         &options.minimizer_type))
-    << "Invalid minimizer: " << CERES_GET_FLAG(FLAGS_minimizer)
-    << ", valid options are: trust_region and line_search.";
-    options.max_num_iterations = 100;
-    options.linear_solver_type = ceres::DENSE_QR;
-    options.minimizer_progress_to_stdout = true;
-    // clang-format off
-    std::cout << "Initial theta0 = " << theta0
-              << ", phi0 = " << phi0
-              << ", theta0p = " << theta0p
-              << ", phi0p = " << phi0p
-              << "\n";
-    // clang-format on
-    // Run the solver!
-    Solver::Summary summary;
-    Solve(options, &problem, &summary);
-    std::cout << summary.FullReport() << "\n";
-    // clang-format off
-    std::cout << "Final theta0 = " << theta0
-              << ", phi0 = " << phi0
-              << ", theta0p = " << theta0p
-              << ", phi0p = " << phi0p
-              << "\n";
-    // clang-format on
-    std::tuple<float, float, float, float> errors((float)theta0, (float)phi0, (float)theta0p, (float)phi0p);
-    return errors;
+    float first_pass = std::max<float>(0, nom_position);
+    return std::min<float>(true_end, first_pass);
 }
 
 // Drive stage with manual controls
@@ -310,7 +186,20 @@ void ping(Stage& kessler, std::mutex& mtx, bool& active) {
     }
 }
 
-std::tuple<double, double, double, int, int> get_calibration_point(Stage& kessler, std::mutex& mtx) {
+std::tuple<float, float> find_errors(double hfovx, double hfovy, int nx, int ny, double y0, float begin_pan, float end_pan, float begin_tilt, float end_tilt, double r1, int x1, int y1, float theta1m, float phi1m) {
+    double phi = get_phi(x1, nx, hfovx);
+    double theta = get_theta(y1, ny, hfovy);
+    double phi_prime = get_phi_prime(phi, theta, y0, r1);
+    double theta_prime = get_theta_prime(phi, theta, y0, r1);
+    float est_pan = get_pan_position(begin_pan, end_pan, phi_prime, 0);
+    float est_tilt = get_tilt_position(begin_tilt, end_tilt, theta_prime, 0);
+    float pan_error = phi1m - est_pan;
+    float tilt_error = theta1m - est_tilt;
+    std::tuple<float, float> ret = {tilt_error, pan_error};
+    return ret;
+}
+
+std::tuple<float, float, double, int, int> get_calibration_point(Stage& kessler, std::mutex& mtx) {
     float pan_position;
     float tilt_position;
     double r;
@@ -335,28 +224,7 @@ std::tuple<double, double, double, int, int> get_calibration_point(Stage& kessle
     std::cin >> x;
     printf("Enter target y coordinate:\n");
     std::cin >> y;
-    std::tuple<double, double, double, int, int> ret{(double)tilt_position, (double)pan_position, r, x, y};
+    std::tuple<float, float, double, int, int> ret{tilt_position, pan_position, r, x, y};
     return ret;
 }
 
-float get_pan_position(float begin_pan, float end_pan, double phi_prime) {
-    float true_end = end_pan - begin_pan;
-    float nom_position = true_end * (float)(phi_prime / EIGEN_PI) + (float)0.5 * true_end;
-    if (true_end < 0) {
-        float first_pass = std::min<float>(0, nom_position);
-        return std::max<float>(true_end, first_pass);
-    }
-    float first_pass = std::max<float>(0, nom_position);
-    return std::min<float>(true_end, first_pass);
-}
-
-float get_tilt_position(float begin_tilt, float end_tilt, double theta_prime) {
-    float true_end = end_tilt - begin_tilt;
-    float nom_position = 3 * true_end * (float)(theta_prime / EIGEN_PI) / 2;
-    if (true_end < 0) {
-        float first_pass = std::min<float>(0, nom_position);
-        return std::max<float>(true_end, first_pass);
-    }
-    float first_pass = std::max<float>(0, nom_position);
-    return std::min<float>(true_end, first_pass);
-}
