@@ -31,24 +31,12 @@ double get_theta_prime(double phi, double theta, double y0, double r) {
 
 float get_pan_position(float begin_pan, float end_pan, double phi_prime, float phi0pm) {
     float true_end = end_pan - begin_pan;
-    float nom_position = true_end * ((float)((phi_prime / PI) + 0.5)) + phi0pm;
-    if (true_end < 0) {
-        float first_pass = std::min<float>(0, nom_position);
-        return std::max<float>(true_end, first_pass);
-    }
-    float first_pass = std::max<float>(0, nom_position);
-    return std::min<float>(true_end, first_pass);
+    return true_end * ((float)((phi_prime / PI) + 0.5)) + phi0pm;
 }
 
 float get_tilt_position(float begin_tilt, float end_tilt, double theta_prime, float theta0pm) {
     float true_end = end_tilt - begin_tilt;
-    float nom_position = 3 * true_end * (float)(theta_prime / PI) / 2 + theta0pm;
-    if (true_end < 0) {
-        float first_pass = std::min<float>(0, nom_position);
-        return std::max<float>(true_end, first_pass);
-    }
-    float first_pass = std::max<float>(0, nom_position);
-    return std::min<float>(true_end, first_pass);
+    return 3 * true_end * (float)(theta_prime / PI) / 2 + theta0pm;
 }
 
 // Drive stage with manual controls
@@ -57,7 +45,6 @@ void controller (Stage& kessler)
     printf("\n");
     printf("CONTROLS:\n");
     printf("---------\n");
-    printf("Flashlight: 'F'\n");
     printf("Tilt Up: 'W'\n");
     printf("Tilt Down: 'S'\n");
     printf("Pan Left: 'A'\n");
@@ -195,6 +182,8 @@ std::tuple<float, float> find_errors(double hfovx, double hfovy, int nx, int ny,
     float est_tilt = get_tilt_position(begin_tilt, end_tilt, theta_prime, 0);
     float pan_error = phi1m - est_pan;
     float tilt_error = theta1m - est_tilt;
+    printf("Estimated Tilt/Pan: (%.2f, %.2f)\n", est_tilt, est_pan);
+    printf("Actual Tilt/Pan: (%.2f, %.2f)\n", theta1m, phi1m);
     std::tuple<float, float> ret = {tilt_error, pan_error};
     return ret;
 }
