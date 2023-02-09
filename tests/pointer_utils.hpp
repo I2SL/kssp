@@ -272,7 +272,7 @@ void calibrate(boost::uint8_t motor_address, Stage& kessler, std::mutex& mtx) {
     while(!kessler.MotorCalibratedQueue.empty()) kessler.MotorCalibratedQueue.pop();
     printf("Press `Q` to mark Motor %hd start position.\n", motor_address);
     while (!start) {
-        bool q_pressed = GetAsyncKeyState(0x51);
+        bool q_pressed = key_is_pressed(XK_Q);
         if (q_pressed) {
             mtx.lock();
             kessler.mark_begin_position(motor_address);
@@ -285,7 +285,7 @@ void calibrate(boost::uint8_t motor_address, Stage& kessler, std::mutex& mtx) {
 
     printf("Press `Q` to mark Motor %hd end position.\n", motor_address);
     while (!end) {
-        bool q_pressed = GetAsyncKeyState(0x51);
+        bool q_pressed = key_is_pressed(XK_Q);
         if (q_pressed) {
             mtx.lock();
             kessler.mark_end_position(motor_address);
@@ -330,7 +330,7 @@ std::tuple<double, double, double, int, int> get_calibration_point(Stage& kessle
     int y;
     printf("Center camera on known target and press `Q`.\n");
     while (true) {
-        bool q_pressed = GetAsyncKeyState(0x51);
+        bool q_pressed = key_is_pressed(XK_Q);
         if (q_pressed) {
             mtx.lock();
             class MotorInfo info = kessler.get_motor_info();

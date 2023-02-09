@@ -1,13 +1,27 @@
 # Prerequisites
-1) Install cmake `sudo apt-get -y install cmake`
-2) Install gcc `sudo apt-get -y install gcc`
-3) Install g++ `sudo apt-get -y install g++`
-4) Install libx11-dev `sudo apt-get -y libx11-dev`
-5) Install conan `pip install conan`
-   * This step requires Python  (`sudo apt-get -y python3`) and pip (`sudo apt-get -y pip`).
-6) Generate Conan profile `conan profile new default --detect`
+1) Install cmake `sudo apt install cmake`
+2) Install g++ `sudo apt install g++`
+3) Install libx11-dev `sudo apt install libx11-dev`
+4) Install conan `pip install conan`
+   * This step requires Python  (`sudo apt install python3`) and pip (`sudo apt install pip`).
+5) Generate Conan profile `conan profile new default --detect`
+6) Ensure profile (located at `~/.conan/profiles`) matches 
+   ```
+      [settings]
+      os=Linux
+      os_build=Linux
+      arch=x86_64
+      arch_build=x86_64
+      compiler=gcc
+      compiler.version=9
+      compiler.libcxx=libstdc++11
+      build_type=Debug
+      [options]
+      [build_requires]
+      [env]
+    ```
 7) `cd cmake-build-debug`
-8) `conan install .. -s build_type=Debug -pr:b=default --build=missing`
+8) `conan install .. -s -pr:b=default --build=missing`
    
 
 # Notes

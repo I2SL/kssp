@@ -3,6 +3,7 @@
 #ifndef LIBKESSLER_DEVICE_GUID_H
 #define LIBKESSLER_DEVICE_GUID_H
 
+#include <cstring>
 #include <string>
 
 #include <boost/uuid/uuid.hpp>
