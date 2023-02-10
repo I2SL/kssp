@@ -48,7 +48,7 @@ The following features are not yet implemented:
 * **BumpPositionSpeedAcceleration**
 
 ## Known Issues
-1) When running firmware `1.0.1.5`, the effective `beginPosition` is 0, and the effective `endPosition` is `endPosition` - `beginPosition`.
+1) When running firmware `1.0.1.5`, when issuing a position command the effective `beginPosition` is 0, and the effective `endPosition` is `endPosition` - `beginPosition`. The device will still return a position in between `beginPosition` and `endPosition` when it reaches the target.
 
 ## Tests
 The `tests` directory contains executables related to running the stage and tracking objects. This brings in packages that are not required for operating the stage, so eventually this will be split into a separate project.

@@ -1,10 +1,22 @@
 #include <iostream>
 #include <ctime>
 #include <thread>
+#include <X11/Xlib.h>
+#include <X11/keysym.h>
 
 #include "../libkessler/stage.h"
 
 using namespace std;
+
+bool key_is_pressed(KeySym ks) {
+    Display *dpy = XOpenDisplay(":0");
+    char keys_return[32];
+    XQueryKeymap(dpy, keys_return);
+    KeyCode kc2 = XKeysymToKeycode(dpy, ks);
+    bool isPressed = !!(keys_return[kc2 >> 3] & (1 << (kc2 & 7)));
+    XCloseDisplay(dpy);
+    return isPressed;
+}
 
 void controller (Stage& kessler)
 {
@@ -47,15 +59,15 @@ void controller (Stage& kessler)
     while (running)
     {
         since_last_ping = (float)(clock() - last_ping)/CLOCKS_PER_SEC;
-        w_pressed = GetAsyncKeyState(0x57);
-        s_pressed = GetAsyncKeyState(0x53);
-        a_pressed = GetAsyncKeyState(0x41);
-        d_pressed = GetAsyncKeyState(0x44);
-        f_pressed = GetAsyncKeyState(0x46);
-        up_pressed = GetAsyncKeyState(0x26);
-        down_pressed = GetAsyncKeyState(0x28);
-        left_pressed = GetAsyncKeyState(0x25);
-        right_pressed = GetAsyncKeyState(0x27);
+        w_pressed = key_is_pressed(XK_W);
+        s_pressed = key_is_pressed(XK_S);
+        a_pressed = key_is_pressed(XK_A);
+        d_pressed = key_is_pressed(XK_D);
+        f_pressed = key_is_pressed(XK_F);
+        up_pressed = key_is_pressed(XK_Up);
+        down_pressed = key_is_pressed(XK_Down);
+        left_pressed = key_is_pressed(XK_Left);
+        right_pressed = key_is_pressed(XK_Right);
         speed_p = (float)speed / 100;
 
 
@@ -210,11 +222,11 @@ void controller (Stage& kessler)
             last_ping = clock();
         }
 
-        if (GetAsyncKeyState(VK_SPACE)) {
+        if (key_is_pressed(XK_space)) {
             running = false;
         }
 
-        this_thread::sleep_for(std::chrono::milliseconds(100));
+        this_thread::sleep_for(std::chrono::milliseconds(200));
     }
 }
 
@@ -224,24 +236,24 @@ void calibrate(boost::uint8_t motor_address, Stage& kessler) {
     bool q_pressed = false;
     printf("Press `Q` to mark Motor %hd start position.\n", motor_address);
     while (!start) {
-        q_pressed = GetAsyncKeyState(0x51);
+        q_pressed = key_is_pressed(XK_Q);
         if (q_pressed) {
             kessler.mark_begin_position(motor_address);
             printf("Start position marked.\n");
             start = true;
         }
-        this_thread::sleep_for(std::chrono::milliseconds(100));
+        this_thread::sleep_for(std::chrono::milliseconds(200));
     }
 
     printf("Press `Q` to mark Motor %hd end position.\n", motor_address);
     while (!end) {
-        q_pressed = GetAsyncKeyState(0x51);
+        q_pressed = key_is_pressed(XK_Q);
         if (q_pressed) {
             kessler.mark_end_position(motor_address);
             printf("End position marked.\n");
             end = true;
         }
-        this_thread::sleep_for(std::chrono::milliseconds(100));
+        this_thread::sleep_for(std::chrono::milliseconds(200));
     }
     printf("Motor %hd calibration complete.\n", motor_address);
 }
@@ -258,5 +270,6 @@ int main () {
     printf("Move Tilt motor to start position and press 'Q'. Then move Tilt motor to end position and press `Q`.\n");
     calibrate(3, kessler);
     printf("Calibration complete. Press space to exit.\n");
+    cout << kessler.get_motor_info().to_string();
     driver.join();
 }
