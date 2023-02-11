@@ -22,7 +22,7 @@ double get_phi(int x, int nx, double hfov, double phi0) {
 }
 
 double get_theta(int y, int ny, double hfov, double theta0) {
-    return atan((float)ny / 2 / (float)y / tan(hfov)) + theta0;
+    return (double)(EIGEN_PI / 2) - atan(2 * y * tan(hfov) / ny) + theta0;
 }
 
 double get_phi_prime(double phi, double theta, double y0, double r, double phi0p) {
