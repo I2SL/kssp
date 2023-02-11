@@ -7,6 +7,9 @@
 #include <thread>
 #include <tuple>
 
+#include <X11/Xlib.h>
+#include <X11/keysym.h>
+
 #include "../libkessler/stage.h"
 
 double get_hfov(double focal_len, double dist, int npx, double px_size) {
@@ -39,6 +42,16 @@ float get_tilt_position(float begin_tilt, float end_tilt, double theta_prime) {
     return 3 * true_end * (float)(theta_prime / PI) / 2;
 }
 
+bool key_is_pressed(KeySym ks) {
+    Display *dpy = XOpenDisplay(":0");
+    char keys_return[32];
+    XQueryKeymap(dpy, keys_return);
+    KeyCode kc2 = XKeysymToKeycode(dpy, ks);
+    bool isPressed = !!(keys_return[kc2 >> 3] & (1 << (kc2 & 7)));
+    XCloseDisplay(dpy);
+    return isPressed;
+}
+
 // Drive stage with manual controls
 void controller (Stage& kessler)
 {
@@ -64,14 +77,14 @@ void controller (Stage& kessler)
 
     while (running)
     {
-        const bool w_pressed = GetAsyncKeyState(0x57);
-        const bool s_pressed = GetAsyncKeyState(0x53);
-        const bool a_pressed = GetAsyncKeyState(0x41);
-        const bool d_pressed = GetAsyncKeyState(0x44);
-        const bool up_pressed = GetAsyncKeyState(0x26);
-        const bool down_pressed = GetAsyncKeyState(0x28);
-        const bool left_pressed = GetAsyncKeyState(0x25);
-        const bool right_pressed = GetAsyncKeyState(0x27);
+        const bool w_pressed = key_is_pressed(XK_W);
+        const bool s_pressed = key_is_pressed(XK_S);
+        const bool a_pressed = key_is_pressed(XK_A);
+        const bool d_pressed = key_is_pressed(XK_D);
+        const bool up_pressed = key_is_pressed(XK_Up);
+        const bool down_pressed = key_is_pressed(XK_Down);
+        const bool left_pressed = key_is_pressed(XK_Left);
+        const bool right_pressed = key_is_pressed(XK_Right);
         const float speed_p = (float)speed / 100;
 
         int tilt_dir = 0;
@@ -108,7 +121,7 @@ void controller (Stage& kessler)
         speed = std::clamp(speed + 1 * speed_dir, 0, 100);
         if (speed_dir != 0) printf("Speed: %d\n", speed);
 
-        if (GetAsyncKeyState(VK_SPACE)) {
+        if (key_is_pressed(XK_space)) {
             running = false;
         }
 
@@ -123,7 +136,7 @@ void calibrate(boost::uint8_t motor_address, Stage& kessler, std::mutex& mtx) {
     while(!kessler.MotorCalibratedQueue.empty()) kessler.MotorCalibratedQueue.pop();
     printf("Press `Q` to mark Motor %hd start position.\n", motor_address);
     while (!start) {
-        bool q_pressed = GetAsyncKeyState(0x51);
+        bool q_pressed = key_is_pressed(XK_Q);
         if (q_pressed) {
             mtx.lock();
             kessler.mark_begin_position(motor_address);
@@ -136,7 +149,7 @@ void calibrate(boost::uint8_t motor_address, Stage& kessler, std::mutex& mtx) {
 
     printf("Press `Q` to mark Motor %hd end position.\n", motor_address);
     while (!end) {
-        bool q_pressed = GetAsyncKeyState(0x51);
+        bool q_pressed = key_is_pressed(XK_Q);
         if (q_pressed) {
             mtx.lock();
             kessler.mark_end_position(motor_address);
@@ -196,7 +209,7 @@ std::tuple<float, float, double, int, int> get_calibration_point(Stage& kessler,
     int y;
     printf("Center camera on known target and press `Q`.\n");
     while (true) {
-        bool q_pressed = GetAsyncKeyState(0x51);
+        bool q_pressed = key_is_pressed(XK_Q);
         if (q_pressed) {
             mtx.lock();
             class MotorInfo info = kessler.get_motor_info();

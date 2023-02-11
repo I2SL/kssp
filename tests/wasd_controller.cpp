@@ -1,22 +1,10 @@
 #include <iostream>
 #include <ctime>
 #include <thread>
-#include <X11/Xlib.h>
-#include <X11/keysym.h>
 
-#include "../libkessler/stage.h"
+#include "pointer_utils.hpp"
 
 using namespace std;
-
-bool key_is_pressed(KeySym ks) {
-    Display *dpy = XOpenDisplay(":0");
-    char keys_return[32];
-    XQueryKeymap(dpy, keys_return);
-    KeyCode kc2 = XKeysymToKeycode(dpy, ks);
-    bool isPressed = !!(keys_return[kc2 >> 3] & (1 << (kc2 & 7)));
-    XCloseDisplay(dpy);
-    return isPressed;
-}
 
 int main ()
 {
@@ -46,33 +34,23 @@ int main ()
     bool slide_right = false;
     bool slide_left = false;
     bool flashlight = false;
-    bool w_pressed = false;
-    bool s_pressed = false;
-    bool a_pressed = false;
-    bool d_pressed = false;
-    bool f_pressed = false;
-    bool up_pressed = false;
-    bool down_pressed = false;
-    bool left_pressed = false;
-    bool right_pressed = false;
     int speed = 0;
-    float speed_p = 0;
     clock_t last_ping = clock();
     float since_last_ping;
 
     while (running)
     {
         since_last_ping = (float)(clock() - last_ping)/CLOCKS_PER_SEC;
-        w_pressed = key_is_pressed(XK_W);
-        s_pressed = key_is_pressed(XK_S);
-        a_pressed = key_is_pressed(XK_A);
-        d_pressed = key_is_pressed(XK_D);
-        f_pressed = key_is_pressed(XK_F);
-        up_pressed = key_is_pressed(XK_Up);
-        down_pressed = key_is_pressed(XK_Down);
-        left_pressed = key_is_pressed(XK_Left);
-        right_pressed = key_is_pressed(XK_Right);
-        speed_p = (float)speed / 100;
+        bool w_pressed = key_is_pressed(XK_W);
+        bool s_pressed = key_is_pressed(XK_S);
+        bool a_pressed = key_is_pressed(XK_A);
+        bool d_pressed = key_is_pressed(XK_D);
+        bool f_pressed = key_is_pressed(XK_F);
+        bool up_pressed = key_is_pressed(XK_Up);
+        bool down_pressed = key_is_pressed(XK_Down);
+        bool left_pressed = key_is_pressed(XK_Left);
+        bool right_pressed = key_is_pressed(XK_Right);
+        float speed_p = (float)speed / 100;
 
 
         if (w_pressed) {
