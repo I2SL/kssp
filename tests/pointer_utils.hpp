@@ -18,7 +18,7 @@ double get_phi(int x, int nx, double hfov) {
 }
 
 double get_theta(int y, int ny, double hfov) {
-    return atan((float)ny / 2 / (float)y / tan(hfov));
+    return (PI / 2) - atan(2 * y * tan(hfov) / ny);
 }
 
 double get_phi_prime(double phi, double theta, double y0, double r, double error) {
@@ -181,7 +181,7 @@ std::tuple<float, float> find_errors(double hfovx, double hfovy, int nx, int ny,
     double phi_prime_actual = PI * ((phi1m / (end_pan - begin_pan)) - 0.5);
     double theta_prime_actual = 2 * PI * theta1m / (3 * (end_tilt - begin_tilt));
     auto phi_prime_error = (float)(phi_prime_actual - phi_prime_estimate);
-    auto theta_prime_error = (float)(theta_prime_actual - phi_prime_estimate);
+    auto theta_prime_error = (float)(theta_prime_actual - theta_prime_estimate);
     printf("Estimated theta_p/phi_p: (%.2f, %.2f)\n", theta_prime_estimate * 180 / PI, phi_prime_estimate * 180 / PI);
     printf("Actual theta_p/phi_p: (%.2f, %.2f)\n", theta_prime_actual * 180 / PI, phi_prime_actual * 180 / PI);
     std::tuple<float, float> ret = {theta_prime_error, phi_prime_error};
