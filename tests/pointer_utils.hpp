@@ -21,22 +21,22 @@ double get_theta(int y, int ny, double hfov) {
     return atan((float)ny / 2 / (float)y / tan(hfov));
 }
 
-double get_phi_prime(double phi, double theta, double y0, double r) {
-    return phi - (y0 / r) * (cos(phi) / sin(theta));
+double get_phi_prime(double phi, double theta, double y0, double r, double error) {
+    return phi - (y0 / r) * (cos(phi) / sin(theta)) + error;
 }
 
-double get_theta_prime(double phi, double theta, double y0, double r) {
-    return theta - (y0 / r) * cos(theta) * sin(phi);
+double get_theta_prime(double phi, double theta, double y0, double r, double error) {
+    return theta - (y0 / r) * cos(theta) * sin(phi) + error;
 }
 
-float get_pan_position(float begin_pan, float end_pan, double phi_prime, float phi0pm) {
+float get_pan_position(float begin_pan, float end_pan, double phi_prime) {
     float true_end = end_pan - begin_pan;
-    return true_end * ((float)((phi_prime / PI) + 0.5)) + phi0pm;
+    return true_end * ((float)((phi_prime / PI) + 0.5));
 }
 
-float get_tilt_position(float begin_tilt, float end_tilt, double theta_prime, float theta0pm) {
+float get_tilt_position(float begin_tilt, float end_tilt, double theta_prime) {
     float true_end = end_tilt - begin_tilt;
-    return 3 * true_end * (float)(theta_prime / PI) / 2 + theta0pm;
+    return 3 * true_end * (float)(theta_prime / PI) / 2;
 }
 
 // Drive stage with manual controls
@@ -176,15 +176,15 @@ void ping(Stage& kessler, std::mutex& mtx, bool& active) {
 std::tuple<float, float> find_errors(double hfovx, double hfovy, int nx, int ny, double y0, float begin_pan, float end_pan, float begin_tilt, float end_tilt, double r1, int x1, int y1, float theta1m, float phi1m) {
     double phi = get_phi(x1, nx, hfovx);
     double theta = get_theta(y1, ny, hfovy);
-    double phi_prime = get_phi_prime(phi, theta, y0, r1);
-    double theta_prime = get_theta_prime(phi, theta, y0, r1);
-    float est_pan = get_pan_position(begin_pan, end_pan, phi_prime, 0);
-    float est_tilt = get_tilt_position(begin_tilt, end_tilt, theta_prime, 0);
-    float pan_error = phi1m - est_pan;
-    float tilt_error = theta1m - est_tilt;
-    printf("Estimated Tilt/Pan: (%.2f, %.2f)\n", est_tilt, est_pan);
-    printf("Actual Tilt/Pan: (%.2f, %.2f)\n", theta1m, phi1m);
-    std::tuple<float, float> ret = {tilt_error, pan_error};
+    double phi_prime_estimate = get_phi_prime(phi, theta, y0, r1, 0);
+    double theta_prime_estimate = get_theta_prime(phi, theta, y0, r1, 0);
+    double phi_prime_actual = PI * ((phi1m / (end_pan - begin_pan)) - 0.5);
+    double theta_prime_actual = 2 * PI * theta1m / (3 * (end_tilt - begin_tilt));
+    auto phi_prime_error = (float)(phi_prime_actual - phi_prime_estimate);
+    auto theta_prime_error = (float)(theta_prime_actual - phi_prime_estimate);
+    printf("Estimated theta_p/phi_p: (%.2f, %.2f)\n", theta_prime_estimate * 180 / PI, phi_prime_estimate * 180 / PI);
+    printf("Actual theta_p/phi_p: (%.2f, %.2f)\n", theta_prime_actual * 180 / PI, phi_prime_actual * 180 / PI);
+    std::tuple<float, float> ret = {theta_prime_error, phi_prime_error};
     return ret;
 }
 
@@ -200,6 +200,7 @@ std::tuple<float, float, double, int, int> get_calibration_point(Stage& kessler,
         if (q_pressed) {
             mtx.lock();
             class MotorInfo info = kessler.get_motor_info();
+            std::cout << info.to_string();
             pan_position = info.motors[1].position;
             tilt_position = info.motors[2].position;
             mtx.unlock();
