@@ -27,10 +27,16 @@ int main () {
     float begin_tilt = info.motors[2].begin_position;
     float end_tilt = info.motors[2].end_position;
 
-    printf("Target motor ranges:\n");
+    printf("Given target motor ranges:\n");
     printf("Slide: (Range: %.2f - %.2f)\n", begin_slide, end_slide);
     printf("Pan: (Range: %.2f - %.2f)\n", begin_pan, end_pan);
     printf("Tilt: (Range: %.2f - %.2f)\n", begin_tilt, end_tilt);
+    printf("\n");
+
+    printf("Theoretical target motor ranges:\n");
+    printf("Slide: (Range: %.2d - %.2f)\n", 0, end_slide - begin_slide);
+    printf("Pan: (Range: %.2d - %.2f)\n", 0, end_pan - begin_pan);
+    printf("Tilt: (Range: %.2d - %.2f)\n", 0, end_tilt - begin_tilt);
 
     while(!kessler.MotorPositionQueue.empty()) kessler.MotorPositionQueue.pop();
     std::thread pinger(ping, std::ref(kessler), std::ref(mtx), std::ref(active));
@@ -65,7 +71,7 @@ int main () {
             mtx.unlock();
             printf("Waiting for motor position notification...\n");
             while (kessler.MotorPositionQueue.empty()) {
-                continue;
+                // do nothing until notification received
             }
             class MotorPosition done = kessler.MotorPositionQueue.front();
             kessler.MotorPositionQueue.pop();

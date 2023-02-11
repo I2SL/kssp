@@ -1,10 +1,22 @@
 #include <iostream>
 #include <ctime>
 #include <thread>
+#include <X11/Xlib.h>
+#include <X11/keysym.h>
 
 #include "../libkessler/stage.h"
 
 using namespace std;
+
+bool key_is_pressed(KeySym ks) {
+    Display *dpy = XOpenDisplay(":0");
+    char keys_return[32];
+    XQueryKeymap(dpy, keys_return);
+    KeyCode kc2 = XKeysymToKeycode(dpy, ks);
+    bool isPressed = !!(keys_return[kc2 >> 3] & (1 << (kc2 & 7)));
+    XCloseDisplay(dpy);
+    return isPressed;
+}
 
 int main ()
 {
@@ -51,15 +63,15 @@ int main ()
     while (running)
     {
         since_last_ping = (float)(clock() - last_ping)/CLOCKS_PER_SEC;
-        w_pressed = GetAsyncKeyState(0x57);
-        s_pressed = GetAsyncKeyState(0x53);
-        a_pressed = GetAsyncKeyState(0x41);
-        d_pressed = GetAsyncKeyState(0x44);
-        f_pressed = GetAsyncKeyState(0x46);
-        up_pressed = GetAsyncKeyState(0x26);
-        down_pressed = GetAsyncKeyState(0x28);
-        left_pressed = GetAsyncKeyState(0x25);
-        right_pressed = GetAsyncKeyState(0x27);
+        w_pressed = key_is_pressed(XK_W);
+        s_pressed = key_is_pressed(XK_S);
+        a_pressed = key_is_pressed(XK_A);
+        d_pressed = key_is_pressed(XK_D);
+        f_pressed = key_is_pressed(XK_F);
+        up_pressed = key_is_pressed(XK_Up);
+        down_pressed = key_is_pressed(XK_Down);
+        left_pressed = key_is_pressed(XK_Left);
+        right_pressed = key_is_pressed(XK_Right);
         speed_p = (float)speed / 100;
 
 
@@ -229,7 +241,7 @@ int main ()
             last_ping = clock();
         }
 
-        if (GetAsyncKeyState(VK_SPACE)) {
+        if (key_is_pressed(XK_space)) {
             kessler.set_position_speed_acceleration(1, 25000, 0, SLIDE_MAX_ACC);
             kessler.set_position_speed_acceleration(2, 25000, 0, PAN_MAX_ACC);
             kessler.set_position_speed_acceleration(3, 25000, 0, TILT_MAX_ACC);
