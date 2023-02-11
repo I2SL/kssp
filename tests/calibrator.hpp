@@ -52,7 +52,7 @@ std::tuple<int, int, double, double, double, float, float, float, float, float, 
         int x1, y1, x2, y2;
         std::tie(theta1m, phi1m, r1, x1, y1) = get_calibration_point(kessler, mtx);
         std::tie(theta2m, phi2m, r2, x2, y2) = get_calibration_point(kessler, mtx);
-        std::tie(theta0, phi0, theta0p, phi0p) = solve(hfovx, hfovy, nx, ny, y0, begin_pan, end_pan, begin_tilt, end_tilt, r1, x1, y1, theta1m, phi1m, r2, x2, y2, theta2m, phi2m);
+        std::tie(theta0, phi0, theta0p, phi0p) = solve(hfovx, hfovy, nx, ny, y0, begin_pan, end_pan, begin_tilt, end_tilt, r1, x1, y1, theta1m - begin_tilt, phi1m - begin_pan, r2, x2, y2, theta2m - begin_tilt, phi2m - begin_pan);
     }
     printf("Calibration complete. Press space to exit manual control.\n");
     driver.join();
