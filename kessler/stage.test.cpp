@@ -8,7 +8,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-#include "stage.h"
+#include "stage.hpp"
 
 BOOST_AUTO_TEST_SUITE(MockStageTests)
 

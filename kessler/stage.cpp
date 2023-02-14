@@ -1,4 +1,4 @@
-#include "stage.h"
+#include "stage.hpp"
 
 Stage::Stage(const std::string &host, const int port)
     : ConnectSocket(

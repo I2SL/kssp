@@ -10,7 +10,7 @@
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 
-#include "../libkessler/stage.h"
+#include "stage.hpp"
 
 double get_hfov(double focal_len, double dist, int npx, double px_size) {
     return atan((1/dist + 1/focal_len) * npx * px_size / 2);

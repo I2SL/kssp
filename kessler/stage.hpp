@@ -18,7 +18,7 @@
 #include <boost/thread/future.hpp>
 #include <fmt/format.h>
 
-#include "consts.h"
+#include "consts.hpp"
 #include "enums/actionid.h"
 #include "enums/messageid.h"
 #include "enums/messagetype.h"
