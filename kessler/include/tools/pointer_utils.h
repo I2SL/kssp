@@ -16,11 +16,11 @@ double get_hfov(double focal_len, double dist, int npx, double px_size) {
     return atan((1/dist + 1/focal_len) * npx * px_size / 2);
 }
 
-double get_phi(int x, int nx, double hfov) {
+double get_phi(double x, int nx, double hfov) {
     return atan(2 * x * tan(hfov) / nx);
 }
 
-double get_theta(int y, int ny, double hfov) {
+double get_theta(double y, int ny, double hfov) {
     return (PI / 2) - atan(2 * y * tan(hfov) / ny);
 }
 
@@ -186,7 +186,7 @@ void ping(Stage& kessler, std::mutex& mtx, bool& active) {
     }
 }
 
-std::tuple<float, float> find_errors(double hfovx, double hfovy, int nx, int ny, double y0, float begin_pan, float end_pan, float begin_tilt, float end_tilt, double r1, int x1, int y1, float theta1m, float phi1m) {
+std::tuple<float, float> find_errors(double hfovx, double hfovy, int nx, int ny, double y0, float begin_pan, float end_pan, float begin_tilt, float end_tilt, double r1, double x1, double y1, float theta1m, float phi1m) {
     double phi = get_phi(x1, nx, hfovx);
     double theta = get_theta(y1, ny, hfovy);
     double phi_prime_estimate = get_phi_prime(phi, theta, y0, r1, 0);
@@ -201,12 +201,12 @@ std::tuple<float, float> find_errors(double hfovx, double hfovy, int nx, int ny,
     return ret;
 }
 
-std::tuple<float, float, double, int, int> get_calibration_point(Stage& kessler, std::mutex& mtx) {
+std::tuple<float, float, double, double, double> get_calibration_point(Stage& kessler, std::mutex& mtx) {
     float pan_position;
     float tilt_position;
     double r;
-    int x;
-    int y;
+    double x;
+    double y;
     printf("Center camera on known target and press `Q`.\n");
     while (true) {
         bool q_pressed = key_is_pressed(XK_Q);
@@ -227,7 +227,7 @@ std::tuple<float, float, double, int, int> get_calibration_point(Stage& kessler,
     std::cin >> x;
     printf("Enter target y coordinate:\n");
     std::cin >> y;
-    std::tuple<float, float, double, int, int> ret{tilt_position, pan_position, r, x, y};
+    std::tuple<float, float, double, double, double> ret{tilt_position, pan_position, r, x, y};
     return ret;
 }
 

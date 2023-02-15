@@ -49,7 +49,7 @@ std::tuple<int, int, double, double, double, float, float, float, float, float, 
     if (correction == "y") {
         double r1;
         float theta1m, phi1m;
-        int x1, y1;
+        double x1, y1;
         std::tie(theta1m, phi1m, r1, x1, y1) = get_calibration_point(kessler, mtx);
         std::tie(theta_prime_error, phi_prime_error) = find_errors(hfovx, hfovy, nx, ny, y0, begin_pan, end_pan, begin_tilt, end_tilt, r1, x1, y1, theta1m - begin_tilt, phi1m - begin_pan);
     }

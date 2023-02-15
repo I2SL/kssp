@@ -4,8 +4,8 @@ int main () {
     std::mutex mtx;
     bool active = true;
     float begin_pan, end_pan, begin_tilt, end_tilt, theta_prime_error, phi_prime_error;
-    double hfovx, hfovy, y0, r;
-    int nx, ny, x, y;
+    double hfovx, hfovy, y0, r, x, y;
+    int nx, ny;
 
     Stage kessler("192.168.50.1", 5520);
     kessler.handshake();
