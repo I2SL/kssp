@@ -34,12 +34,18 @@ double get_theta_prime(double phi, double theta, double y0, double r, double err
 
 float get_pan_position(float begin_pan, float end_pan, double phi_prime) {
     float true_end = end_pan - begin_pan;
-    return true_end * ((float)((phi_prime / PI) + 0.5));
+    float target = true_end * ((float)((phi_prime / PI) + 0.5));
+    if (abs(target) < abs(true_end))
+        return target;
+    return true_end;
 }
 
 float get_tilt_position(float begin_tilt, float end_tilt, double theta_prime) {
     float true_end = end_tilt - begin_tilt;
-    return 3 * true_end * (float)(theta_prime / PI) / 2;
+    float target = 3 * true_end * (float)(theta_prime / PI) / 2;
+    if (abs(target) < abs(true_end))
+        return target;
+    return true_end;
 }
 
 bool key_is_pressed(KeySym ks) {
