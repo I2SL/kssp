@@ -45,7 +45,8 @@ std::tuple<int, int, double, double, double, float, float, float, float, float, 
 
     printf("Calibrate for systematic errors? (y/n)\n");
     std::cin >> correction;
-    float theta_prime_error, phi_prime_error = 0;
+    float theta_prime_error = 0;
+    float phi_prime_error = 0;
     if (correction == "y") {
         double r1;
         float theta1m, phi1m;
