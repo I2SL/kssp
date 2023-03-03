@@ -31,7 +31,13 @@
     find_package(PkgConfig)
     pkg_check_modules(KESSLER REQUIRED kessler)
     ```
-   
+# Building Examples 
+Using the same Conan prerequisites as above:
+1) `cd` into the `examples` folder
+2) `mkdir build && cd build`
+3) `conan install .. -s -pr:b=default --build=missing`
+4) `cmake -DCMAKE_C_COMPILER=gcc-11 -DCMAKE_CXX_COMPILER=g++-11 ..`
+5) `make`
 
 # Notes
 
