@@ -1,11 +1,12 @@
 # Installation
 1) Install cmake `sudo apt install cmake`
-2) Install g++ `sudo apt install g++`
-3) Install libx11-dev `sudo apt install libx11-dev`
-4) Install conan `pip install conan`
+2) Install gcc-11 `sudo apt install gcc-11`
+3) Install g++-11 `sudo apt install g++-11`
+4) Install libx11-dev `sudo apt install libx11-dev`
+5) Install conan `pip install conan`
    * This step requires Python  (`sudo apt install python3`) and pip (`sudo apt install pip`).
-5) Generate Conan profile `conan profile new default --detect`
-6) Ensure profile (located at `~/.conan/profiles`) matches 
+6) Generate Conan profile `conan profile new default --detect`
+7) Ensure profile (located at `~/.conan/profiles`) matches 
    ```
       [settings]
       os=Linux
@@ -14,18 +15,18 @@
       arch_build=x86_64
       compiler=gcc
       compiler.version=11
-      compiler.libcxx=libstdc++
+      compiler.libcxx=libstdc++11
       build_type=Debug
       [options]
       [build_requires]
       [env]
     ```
-7) `cd` to working directory
-8) `mkdir build && cd build`
-9) `conan install .. -s -pr:b=default --build=missing`
-10) `cmake ..`
-11) `sudo make install`
-12) To include the library in another project, include the following in `CMakeLists.txt`:
+8) `cd` to working directory
+9) `mkdir build && cd build`
+10) `conan install .. -s -pr:b=default --build=missing`
+11) `cmake -DCMAKE_C_COMPILER=gcc-11 -DCMAKE_CXX_COMPILER=g++-11 ..`
+12) `sudo make install`
+13) To include the library in another project, include the following in `CMakeLists.txt`:
     ```cmake
     find_package(PkgConfig)
     pkg_check_modules(KESSLER REQUIRED kessler)
