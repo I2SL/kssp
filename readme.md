@@ -26,11 +26,49 @@
 10) `conan install .. -s -pr:b=default --build=missing`
 11) `cmake -DCMAKE_C_COMPILER=gcc-11 -DCMAKE_CXX_COMPILER=g++-11 ..`
 12) `sudo make install`
-13) To include the library in another project, include the following in `CMakeLists.txt`:
-    ```cmake
-    find_package(PkgConfig)
-    pkg_check_modules(KESSLER REQUIRED kessler)
-    ```
+
+To include the library in another project, include the following in `CMakeLists.txt`:
+```cmake
+find_package(X11 REQUIRED)
+include_directories(${X11_INCLUDE_DIR})
+link_directories(${X11_LIBRARIES})
+
+find_package(PkgConfig)
+pkg_check_modules(KESSLER REQUIRED kessler)
+```
+Then, link the `kessler` and `X11` libraries:
+```cmake
+add_executable(example main.cpp)
+target_link_libraries(example ${X11_LIBRARIES} ${KESSLER_LIBRARIES})
+```
+Note that the `kessler` library also requires `boost 1.81.0` and `fmt 9.1.0` to be linked as well. If using Conan, add
+```cmake
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
+```
+to `CMakeLists.txt`. Then, link the Conan libraries alongside the others:
+```cmake
+add_executable(example main.cpp)
+target_link_libraries(example ${CONAN_LIBS} ${X11_LIBRARIES} ${KESSLER_LIBRARIES})
+```
+The `conanfile.txt` in the root directory should include
+```
+[requires]
+boost/1.81.0
+fmt/9.1.0
+
+[generators]
+cmake
+```
+The project can then be built by running
+```
+mkdir build && cd build
+conan install .. -s -pr:b=default --build=missing
+cmake -DCMAKE_C_COMPILER=gcc-11 -DCMAKE_CXX_COMPILER=g++-11 ..
+make
+```
+See the `examples` directory for executables built using CMake and Conan.
+
 # Building Examples 
 Using the same Conan prerequisites as above:
 1) `cd` into the `examples` folder
