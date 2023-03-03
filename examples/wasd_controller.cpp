@@ -2,7 +2,7 @@
 #include <ctime>
 #include <thread>
 
-#include "../kessler/include/tools/pointer_utils.h"
+#include <kessler/tools/pointer_utils.h>
 
 using namespace std;
 

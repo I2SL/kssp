@@ -100,4 +100,4 @@ private:
     unsigned char* get_block(boost::uint16_t len);
 };
 
-#endif //LIBKESSLER_STAGE_H
+#endif //KESSLER_STAGE_H
