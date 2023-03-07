@@ -1,3 +1,5 @@
+This library is an implementation of the [Cineshooter API](https://support.kesslercrane.com/hc/en-us/articles/9569257629083-Cineshooter-API), written to control a Kessler Second Shooter Pro. See below for installation instructions, usage, and notes of missing features/known issues.
+
 # Installation
 1) Install cmake `sudo apt install cmake`
 2) Install gcc-11 `sudo apt install gcc-11`
@@ -77,17 +79,19 @@ Using the same Conan prerequisites as above:
 4) `cmake -DCMAKE_C_COMPILER=gcc-11 -DCMAKE_CXX_COMPILER=g++-11 ..`
 5) `make`
 
-# Notes
-
+# Usage
+TODO: write an example and explanation
 ## Headers
 The most useful include paths are:
 * `kessler/stage.h`
 * `kessler/tools/calibrator.h`
 * `kessler/tools/pointer_utils.h`
-Note that `calibrator.h` includes both `stage.h` and `pointer_utils.h`.
+  Note that `calibrator.h` includes both `stage.h` and `pointer_utils.h`.
+
+# Notes
 
 ## Float data type
-This implementation uses the `boost` endian library, which does not yet include load and store functions for `float` types. All values that should be floats are read in as `int32` and reinterpreted as floats.
+This implementation uses the `boost` endian library, which does not yet include load and store functions for `float` types. All values that should be floats are read in as `int32` and reinterpreted as floats through `memcpy`.
 
 ## Not Implemented
 The following features are not yet implemented:
@@ -109,10 +113,12 @@ The following features are not yet implemented:
 
 ## Known Issues
 1) When running firmware `1.0.1.5`, when issuing a position command the effective `beginPosition` is 0, and the effective `endPosition` is `endPosition` - `beginPosition`. The device will still return a position in between `beginPosition` and `endPosition` when it reaches the target.
+2) The provided examples crash with a end of file exception when used with firmware `1.0.1.16`. This library was built and tested using firmware `1.0.1.5`.
 
 ## Examples
 The `examples` directory contains executables related to running the stage.
 ### Executables
+TODO: add descriptions of each
 * `basic_pointer.cpp`
 * `pointer.cpp`
 * `wasd_calibrator.cpp`
