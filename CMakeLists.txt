@@ -3,9 +3,7 @@ project(kessler VERSION 0.1.0 DESCRIPTION "Library to drive the Kessler Second S
 
 set(CMAKE_CXX_STANDARD 20)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 include(GNUInstallDirs)
-conan_basic_setup()
 
 add_library(kessler SHARED
         kessler/src/stage.cpp
@@ -25,7 +23,16 @@ add_library(kessler SHARED
 find_package(X11 REQUIRED)
 include_directories(${X11_INCLUDE_DIR})
 link_directories(${X11_LIBRARIES})
-target_link_libraries(kessler ${CONAN_LIBS} ${X11_LIBRARIES})
+
+find_package(fmt 9.1.0 REQUIRED)
+include_directories(${fmt_INCLUDE_DIR})
+link_directories(${fmt_LIBRARIES})
+
+find_package(Boost 1.81.0 REQUIRED)
+include_directories(${Boost_INCLUDE_DIR})
+link_directories(${Boost_LIBRARIES})
+
+target_link_libraries(kessler ${Boost_LIBRARIES} ${fmt_LIBRARIES} ${X11_LIBRARIES})
 
 configure_file(kessler.pc.in kessler.pc @ONLY)
 target_include_directories(kessler PRIVATE include)

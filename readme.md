@@ -2,31 +2,29 @@ This library is an implementation of the [Cineshooter API](https://support.kessl
 
 # Installation
 1) Install cmake `sudo apt install cmake`
-2) Install gcc-11 `sudo apt install gcc-11`
+2) Install gcc-11 
+   * `sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test`
+   * `sudo apt install gcc-11`
 3) Install g++-11 `sudo apt install g++-11`
 4) Install libx11-dev `sudo apt install libx11-dev`
 5) Install conan `pip install conan`
    * This step requires Python  (`sudo apt install python3`) and pip (`sudo apt install pip`).
-6) Generate Conan profile `conan profile new default --detect`
-7) Ensure profile (located at `~/.conan/profiles`) matches 
+6) Generate Conan profile `conan profile detect --force`
+7) Ensure profile (located at `~/.conan2/profiles`) matches 
    ```
-      [settings]
-      os=Linux
-      os_build=Linux
-      arch=x86_64
-      arch_build=x86_64
-      compiler=gcc
-      compiler.version=11
-      compiler.libcxx=libstdc++11
-      build_type=Debug
-      [options]
-      [build_requires]
-      [env]
+    [settings]
+    arch=x86_64
+    build_type=Debug
+    compiler=gcc
+    compiler.cppstd=gnu14
+    compiler.libcxx=libstdc++11
+    compiler.version=11
+    os=Linux
     ```
 8) `cd` to working directory
-9) `mkdir build && cd build`
-10) `conan install .. -s -pr:b=default --build=missing`
-11) `cmake -DCMAKE_C_COMPILER=gcc-11 -DCMAKE_CXX_COMPILER=g++-11 ..`
+9) `conan install . -pr:b=default --output-folder=build --build=missing`
+10) `cd build`
+11) `cmake -DCMAKE_C_COMPILER=gcc-11 -DCMAKE_CXX_COMPILER=g++-11 -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Debug ..`
 12) `sudo make install`
 
 To include the library in another project, include the following in `CMakeLists.txt`:
@@ -35,38 +33,37 @@ find_package(X11 REQUIRED)
 include_directories(${X11_INCLUDE_DIR})
 link_directories(${X11_LIBRARIES})
 
+find_package(fmt 9.1.0 REQUIRED)
+include_directories(${fmt_INCLUDE_DIR})
+link_directories(${fmt_LIBRARIES})
+
+find_package(Boost 1.81.0 REQUIRED)
+include_directories(${Boost_INCLUDE_DIR})
+link_directories(${Boost_LIBRARIES})
+
 find_package(PkgConfig)
 pkg_check_modules(KESSLER REQUIRED kessler)
 ```
-Then, link the `kessler` and `X11` libraries:
+Then, link the `kessler`, `Boost`, `fmt`, and `X11` libraries:
 ```cmake
 add_executable(example main.cpp)
-target_link_libraries(example ${X11_LIBRARIES} ${KESSLER_LIBRARIES})
+target_link_libraries(example ${Boost_LIBRARIES} ${fmt_LIBRARIES} ${X11_LIBRARIES} ${KESSLER_LIBRARIES})
 ```
-Note that the `kessler` library also requires `boost 1.81.0` and `fmt 9.1.0` to be linked as well. If using Conan, add
-```cmake
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
-```
-to `CMakeLists.txt`. Then, link the Conan libraries alongside the others:
-```cmake
-add_executable(example main.cpp)
-target_link_libraries(example ${CONAN_LIBS} ${X11_LIBRARIES} ${KESSLER_LIBRARIES})
-```
-The `conanfile.txt` in the root directory should include
+If using Conan, the `conanfile.txt` file in the root directory should include
 ```
 [requires]
 boost/1.81.0
 fmt/9.1.0
 
 [generators]
-cmake
+CMakeDeps
+CMakeToolchain
 ```
 The project can then be built by running
 ```
-mkdir build && cd build
-conan install .. -s -pr:b=default --build=missing
-cmake -DCMAKE_C_COMPILER=gcc-11 -DCMAKE_CXX_COMPILER=g++-11 ..
+conan install . -pr:b=default --output-folder=build --build=missing
+cd build
+cmake -DCMAKE_C_COMPILER=gcc-11 -DCMAKE_CXX_COMPILER=g++-11 -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake ..
 make
 ```
 See the `examples` directory for executables built using CMake and Conan.
@@ -74,9 +71,9 @@ See the `examples` directory for executables built using CMake and Conan.
 # Building Examples 
 Using the same Conan prerequisites as above:
 1) `cd` into the `examples` folder
-2) `mkdir build && cd build`
-3) `conan install .. -s -pr:b=default --build=missing`
-4) `cmake -DCMAKE_C_COMPILER=gcc-11 -DCMAKE_CXX_COMPILER=g++-11 ..`
+2) `conan install . -pr:b=default --output-folder=build --build=missing`
+3) `cd build`
+4) `cmake -DCMAKE_C_COMPILER=gcc-11 -DCMAKE_CXX_COMPILER=g++-11 -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Debug ..`
 5) `make`
 
 # Usage

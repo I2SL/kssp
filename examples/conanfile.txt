@@ -3,4 +3,5 @@ boost/1.81.0
 fmt/9.1.0
 
 [generators]
-cmake
+CMakeDeps
+CMakeToolchain

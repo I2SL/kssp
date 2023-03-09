@@ -1046,3 +1046,6 @@ dkms.conf
 
 # .idea folder Clion
 *.idea/
+
+# CMakeUserPresets Conan2
+CMakeUserPresets.json
