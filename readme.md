@@ -10,13 +10,13 @@ This library is an implementation of the [Cineshooter API](https://support.kessl
 5) Install conan `pip install conan`
    * This step requires Python  (`sudo apt install python3`) and pip (`sudo apt install pip`).
 6) Generate Conan profile `conan profile detect --force`
-7) Ensure profile (located at `~/.conan2/profiles`) matches 
+7) The conan profile (located at `~/.conan2/profiles`) should resemble 
    ```
     [settings]
     arch=x86_64
     build_type=Debug
     compiler=gcc
-    compiler.cppstd=gnu14
+    compiler.cppstd=gnu17
     compiler.libcxx=libstdc++11
     compiler.version=11
     os=Linux
@@ -25,7 +25,8 @@ This library is an implementation of the [Cineshooter API](https://support.kessl
 9) `conan install . -pr:b=default --output-folder=build --build=missing`
 10) `cd build`
 11) `cmake -DCMAKE_C_COMPILER=gcc-11 -DCMAKE_CXX_COMPILER=g++-11 -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Debug ..`
-12) `sudo make install`
+12) `make`
+13) `sudo make install`
 
 To include the library in another project, include the following in `CMakeLists.txt`:
 ```cmake
@@ -123,8 +124,7 @@ TODO: add descriptions of each
 
 # References
 1) https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1204r0.html#tests-unit
-2) https://medium.com/swlh/cpm-an-awesome-dependency-manager-for-c-with-cmake-3c53f4376766
-3) https://blog.jetbrains.com/clion/2019/05/getting-started-with-the-conan-clion-plugin/
-4) https://support.kesslercrane.com/hc/en-us/articles/9569257629083-Cineshooter-API
-5) https://gist.github.com/vladon/8b487e41cb3b49e172db
-6) https://gist.github.com/Yousha/3830712334ac30a90eb6041b932b68d7
+2) https://docs.conan.io/2/tutorial.html
+3) https://support.kesslercrane.com/hc/en-us/articles/9569257629083-Cineshooter-API
+4) https://gist.github.com/vladon/8b487e41cb3b49e172db
+5) https://gist.github.com/Yousha/3830712334ac30a90eb6041b932b68d7
