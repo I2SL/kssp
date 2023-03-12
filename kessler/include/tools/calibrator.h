@@ -1,6 +1,6 @@
 #include "pointer_utils.h"
 
-std::tuple<int, int, double, double, double, float, float, float, float, float, float> calibrate_stage (Stage& kessler) {
+std::tuple<int, int, double, double, double, float, float, float, float, float, float> calibrate_stage (Stage* kessler) {
     std::mutex mtx;
     std::string correction("n");
     std::string prev_calibration("n");
@@ -27,12 +27,12 @@ std::tuple<int, int, double, double, double, float, float, float, float, float, 
     double hfovx = get_hfov(f, r, nx, px);
     double hfovy = get_hfov(f, r, ny, px);
 
-    std::thread driver(controller, std::ref(kessler));
+    std::thread driver(controller, kessler);
     printf("Use current calibration? (y/n)\n");
     std::cin >> prev_calibration;
 
     if (prev_calibration != "y") {
-        kessler.reset_axis(0);
+        kessler->reset_axis(0);
         printf("Move Slide motor to start position and press 'Q'. Then move Slide motor to end position and press `Q`.\n");
         calibrate(1, kessler, mtx);
         printf("Move Pan motor to start position and press 'Q'. Then move Pan motor to end position and press `Q`.\n");
@@ -41,7 +41,7 @@ std::tuple<int, int, double, double, double, float, float, float, float, float, 
         calibrate(3, kessler, mtx);
     }
 
-    class MotorInfo info = kessler.get_motor_info();
+    class MotorInfo info = kessler->get_motor_info();
     std::cout << info.to_string();
     float begin_pan = info.motors[1].begin_position;
     float end_pan = info.motors[1].end_position;

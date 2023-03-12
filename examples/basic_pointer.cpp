@@ -8,14 +8,14 @@ int main () {
     kessler.handshake();
     std::cout << kessler.get_device_info().to_string();
     kessler.reset_axis(0);
-    std::thread driver(controller, std::ref(kessler));
+    std::thread driver(controller, &kessler);
 
     printf("Move Slide motor to start position and press 'Q'. Then move Slide motor to end position and press `Q`.\n");
-    calibrate(1, kessler, mtx);
+    calibrate(1, &kessler, mtx);
     printf("Move Pan motor to start position and press 'Q'. Then move Pan motor to end position and press `Q`.\n");
-    calibrate(2, kessler, mtx);
+    calibrate(2, &kessler, mtx);
     printf("Move Tilt motor to start position and press 'Q'. Then move Tilt motor to end position and press `Q`.\n");
-    calibrate(3, kessler, mtx);
+    calibrate(3, &kessler, mtx);
     printf("Calibration complete. Press space to exit manual control.\n");
     driver.join();
 
@@ -39,7 +39,7 @@ int main () {
     printf("Tilt: (Range: %.2d - %.2f)\n", 0, end_tilt - begin_tilt);
 
     while(!kessler.MotorPositionQueue.empty()) kessler.MotorPositionQueue.pop();
-    std::thread pinger(ping, std::ref(kessler), std::ref(mtx), std::ref(active));
+    std::thread pinger(ping, &kessler, std::ref(mtx), std::ref(active));
     int addr = 0;
     float pos = 0;
     float scale = 0;

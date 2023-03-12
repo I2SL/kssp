@@ -10,8 +10,8 @@ int main () {
     Stage kessler("192.168.50.1", 5520);
     kessler.handshake();
     std::cout << kessler.get_device_info().to_string();
-    std::thread pinger(ping, std::ref(kessler), std::ref(mtx), std::ref(active));
-    std::tie(nx, ny, hfovx, hfovy, y0, begin_pan, end_pan, begin_tilt, end_tilt, theta_prime_error, phi_prime_error) = calibrate_stage(std::ref(kessler));
+    std::thread pinger(ping, &kessler, std::ref(mtx), std::ref(active));
+    std::tie(nx, ny, hfovx, hfovy, y0, begin_pan, end_pan, begin_tilt, end_tilt, theta_prime_error, phi_prime_error) = calibrate_stage(&kessler);
 
     while (true) {
         printf("Enter target distance (or 0 to quit):\n");

@@ -59,7 +59,7 @@ bool key_is_pressed(KeySym ks) {
 }
 
 // Drive stage with manual controls
-void controller (Stage& kessler)
+void controller (Stage* kessler)
 {
     printf("\n");
     printf("CONTROLS:\n");
@@ -98,7 +98,7 @@ void controller (Stage& kessler)
         if (s_pressed) tilt_dir = -1;
 
         if (prev_tilt_dir != tilt_dir) {
-            kessler.set_position_speed_acceleration(3, 25000 * (float)tilt_dir, TILT_MAX_SPEED * speed_p * (float)abs(tilt_dir), TILT_MAX_ACC);
+            kessler->set_position_speed_acceleration(3, 25000 * (float)tilt_dir, TILT_MAX_SPEED * speed_p * (float)abs(tilt_dir), TILT_MAX_ACC);
             prev_tilt_dir = tilt_dir;
         }
 
@@ -107,7 +107,7 @@ void controller (Stage& kessler)
         if (a_pressed) pan_dir = -1;
 
         if (prev_pan_dir != pan_dir) {
-            kessler.set_position_speed_acceleration(2, 25000 * (float)pan_dir, PAN_MAX_SPEED * speed_p * (float)abs(pan_dir), PAN_MAX_ACC);
+            kessler->set_position_speed_acceleration(2, 25000 * (float)pan_dir, PAN_MAX_SPEED * speed_p * (float)abs(pan_dir), PAN_MAX_ACC);
             prev_pan_dir = pan_dir;
         }
 
@@ -116,7 +116,7 @@ void controller (Stage& kessler)
         if (left_pressed) slide_dir = -1;
 
         if (prev_slide_dir != slide_dir) {
-            kessler.set_position_speed_acceleration(1, 25000 * (float)slide_dir, PAN_MAX_SPEED * speed_p * (float)abs(slide_dir), PAN_MAX_ACC);
+            kessler->set_position_speed_acceleration(1, 25000 * (float)slide_dir, PAN_MAX_SPEED * speed_p * (float)abs(slide_dir), PAN_MAX_ACC);
             prev_slide_dir = slide_dir;
         }
 
@@ -136,16 +136,16 @@ void controller (Stage& kessler)
 }
 
 // Calibrate a given motor
-void calibrate(boost::uint8_t motor_address, Stage& kessler, std::mutex& mtx) {
+void calibrate(boost::uint8_t motor_address, Stage* kessler, std::mutex& mtx) {
     bool start = false;
     bool end = false;
-    while(!kessler.MotorCalibratedQueue.empty()) kessler.MotorCalibratedQueue.pop();
+    while(!kessler->MotorCalibratedQueue.empty()) kessler->MotorCalibratedQueue.pop();
     printf("Press `Q` to mark Motor %hd start position.\n", motor_address);
     while (!start) {
         bool q_pressed = key_is_pressed(XK_Q);
         if (q_pressed) {
             mtx.lock();
-            kessler.mark_begin_position(motor_address);
+            kessler->mark_begin_position(motor_address);
             printf("Start position marked.\n");
             start = true;
             mtx.unlock();
@@ -158,34 +158,34 @@ void calibrate(boost::uint8_t motor_address, Stage& kessler, std::mutex& mtx) {
         bool q_pressed = key_is_pressed(XK_Q);
         if (q_pressed) {
             mtx.lock();
-            kessler.mark_end_position(motor_address);
+            kessler->mark_end_position(motor_address);
             printf("End position marked.\n");
             end = true;
             mtx.unlock();
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
-    while(kessler.MotorCalibratedQueue.empty()){
+    while(kessler->MotorCalibratedQueue.empty()){
         //do nothing until message received
     }
 
-    class MotorCalibrated info = kessler.MotorCalibratedQueue.front();
+    class MotorCalibrated info = kessler->MotorCalibratedQueue.front();
     boost::uint8_t addr = info.motor_address;
     float start_pos = info.begin_position;
     float end_pos = info.end_position;
     printf("Calibration complete. Motor: %hd, Start: %.2f, End: %.2f\n", addr, start_pos, end_pos);
-    kessler.MotorCalibratedQueue.pop();
+    kessler->MotorCalibratedQueue.pop();
 }
 
 // Ping device every 10 seconds
-void ping(Stage& kessler, std::mutex& mtx, bool& active) {
+void ping(Stage* kessler, std::mutex& mtx, bool& active) {
     clock_t last_ping = clock();
     float since_last_ping;
     while (active) {
         since_last_ping = (float)(clock() - last_ping)/CLOCKS_PER_SEC;
         if (since_last_ping > 10) {
             mtx.lock();
-            kessler.get_network_info();
+            kessler->get_network_info();
             last_ping = clock();
             mtx.unlock();
         }
@@ -207,7 +207,7 @@ std::tuple<float, float> find_errors(double hfovx, double hfovy, int nx, int ny,
     return ret;
 }
 
-std::tuple<float, float, double, double, double> get_calibration_point(Stage& kessler, std::mutex& mtx) {
+std::tuple<float, float, double, double, double> get_calibration_point(Stage* kessler, std::mutex& mtx) {
     float pan_position;
     float tilt_position;
     double r;
@@ -218,7 +218,7 @@ std::tuple<float, float, double, double, double> get_calibration_point(Stage& ke
         bool q_pressed = key_is_pressed(XK_Q);
         if (q_pressed) {
             mtx.lock();
-            class MotorInfo info = kessler.get_motor_info();
+            class MotorInfo info = kessler->get_motor_info();
             std::cout << info.to_string();
             pan_position = info.motors[1].position;
             tilt_position = info.motors[2].position;
