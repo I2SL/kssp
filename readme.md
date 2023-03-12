@@ -7,14 +7,14 @@ This library is an implementation of the [Cineshooter API](https://support.kessl
    * `sudo apt install gcc-11`
 3) Install g++-11 `sudo apt install g++-11`
 4) Install libx11-dev `sudo apt install libx11-dev`
-5) Install conan `pip install conan`
+5) Install conan `sudo pip install conan`
    * This step requires Python  (`sudo apt install python3`) and pip (`sudo apt install pip`).
 6) Generate Conan profile `conan profile detect --force`
 7) The conan profile (located at `~/.conan2/profiles`) should resemble 
    ```
     [settings]
     arch=x86_64
-    build_type=Debug
+    build_type=Release
     compiler=gcc
     compiler.cppstd=gnu17
     compiler.libcxx=libstdc++11
@@ -24,7 +24,7 @@ This library is an implementation of the [Cineshooter API](https://support.kessl
 8) `cd` to working directory
 9) `conan install . -pr:b=default --output-folder=build --build=missing`
 10) `cd build`
-11) `cmake -DCMAKE_C_COMPILER=gcc-11 -DCMAKE_CXX_COMPILER=g++-11 -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Debug ..`
+11) `cmake -DCMAKE_C_COMPILER=gcc-11 -DCMAKE_CXX_COMPILER=g++-11 -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release ..`
 12) `make`
 13) `sudo make install`
 
@@ -64,7 +64,7 @@ The project can then be built by running
 ```
 conan install . -pr:b=default --output-folder=build --build=missing
 cd build
-cmake -DCMAKE_C_COMPILER=gcc-11 -DCMAKE_CXX_COMPILER=g++-11 -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake ..
+cmake -DCMAKE_C_COMPILER=gcc-11 -DCMAKE_CXX_COMPILER=g++-11 -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=<Debug or Release> ..
 make
 ```
 See the `examples` directory for executables built using CMake and Conan.
@@ -74,7 +74,7 @@ Using the same Conan prerequisites as above:
 1) `cd` into the `examples` folder
 2) `conan install . -pr:b=default --output-folder=build --build=missing`
 3) `cd build`
-4) `cmake -DCMAKE_C_COMPILER=gcc-11 -DCMAKE_CXX_COMPILER=g++-11 -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Debug ..`
+4) `cmake -DCMAKE_C_COMPILER=gcc-11 -DCMAKE_CXX_COMPILER=g++-11 -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release ..`
 5) `make`
 
 # Usage
@@ -92,7 +92,7 @@ The most useful include paths are:
 This implementation uses the `boost` endian library, which does not yet include load and store functions for `float` types. All values that should be floats are read in as `int32` and reinterpreted as floats through `memcpy`.
 
 ## Not Implemented
-The following features are not yet implemented:
+The following features are not implemented:
 
 ### Get/Set Messages
 * **NetworkInfo**
