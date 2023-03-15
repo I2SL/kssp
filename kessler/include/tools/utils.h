@@ -9,23 +9,14 @@
 class Utils {
 public:
     static unsigned char* buffer_to_char_array(const boost::asio::streambuf &buffer) {
-        auto* output = (unsigned char*)malloc(buffer.size());
+        auto output = (unsigned char*)malloc(buffer.size());
         memcpy(output, boost::asio::buffer_cast<const void*>(buffer.data()), buffer.size());
-
         return output;
     }
 
     static float int32_to_float(const boost::int32_t input) {
         float output;
         std::memcpy(&output, &input, sizeof(input));
-
-        return output;
-    }
-
-    static unsigned char* string_to_uchars(const std::string& input) {
-        unsigned char* output;
-        const char* chars = input.c_str();
-        std::memcpy(&output, &chars, sizeof(chars));
 
         return output;
     }
@@ -54,19 +45,6 @@ public:
         message.insert(std::end(message), std::begin(parameters), std::end(parameters));
 
         return message;
-    }
-
-    static std::string char_vector_to_string(const std::vector<unsigned char>& input) {
-        std::string output(input.begin(), input.end());
-        return output;
-    }
-
-    static std::vector<unsigned char> string_to_char_vector(const std::string& input) {
-        std::vector<unsigned char> output;
-        for (unsigned char letter : input) {
-            output.push_back(letter);
-        }
-        return output;
     }
 
     static std::vector<unsigned char> push_unit16(std::vector<unsigned char> vect, const boost::uint16_t num) {

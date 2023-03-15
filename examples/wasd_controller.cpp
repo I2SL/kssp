@@ -36,11 +36,10 @@ int main ()
     bool flashlight = false;
     int speed = 0;
     clock_t last_ping = clock();
-    float since_last_ping;
 
     while (running)
     {
-        since_last_ping = (float)(clock() - last_ping)/CLOCKS_PER_SEC;
+        float since_last_ping = (float)(clock() - last_ping)/CLOCKS_PER_SEC;
         bool w_pressed = key_is_pressed(XK_W);
         bool s_pressed = key_is_pressed(XK_S);
         bool a_pressed = key_is_pressed(XK_A);

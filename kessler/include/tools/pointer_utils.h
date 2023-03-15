@@ -21,31 +21,23 @@ double get_phi(double x, int nx, double hfov) {
 }
 
 double get_theta(double y, int ny, double hfov) {
-    return (PI / 2) - atan(2 * y * tan(hfov) / ny);
+    return (M_PI / 2) - atan(2 * y * tan(hfov) / ny);
 }
 
-double get_phi_prime(double phi, double theta, double y0, double r, double error) {
-    return phi - (y0 / r) * (cos(phi) / sin(theta)) + error;
+double get_phi_prime(double phi, double theta, double sep, double r, double error) {
+    return phi - (sep / r) * (cos(phi) / sin(theta)) + error;
 }
 
-double get_theta_prime(double phi, double theta, double y0, double r, double error) {
-    return theta - (y0 / r) * cos(theta) * sin(phi) + error;
+double get_theta_prime(double phi, double theta, double sep, double r, double error) {
+    return theta - (sep / r) * cos(theta) * sin(phi) + error;
 }
 
-float get_pan_position(float begin_pan, float end_pan, double phi_prime) {
-    float true_end = end_pan - begin_pan;
-    float target = true_end * ((float)((phi_prime / PI) + 0.5));
-    if (abs(target) < abs(true_end))
+float get_motor_position(float motor_begin, float motor_end, float ref_begin, float ref_end, double ref_target) {
+    float slope = (motor_end - motor_begin) / (ref_end - ref_begin);
+    float target =  slope*((float)ref_target-ref_begin) + motor_begin;
+    if (abs(target) < abs(motor_end - motor_begin))
         return target;
-    return true_end;
-}
-
-float get_tilt_position(float begin_tilt, float end_tilt, double theta_prime) {
-    float true_end = end_tilt - begin_tilt;
-    float target = 3 * true_end * (float)(theta_prime / PI) / 2;
-    if (abs(target) < abs(true_end))
-        return target;
-    return true_end;
+    return motor_end - motor_begin;
 }
 
 bool key_is_pressed(KeySym ks) {
@@ -178,11 +170,10 @@ void calibrate(boost::uint8_t motor_address, Stage* kessler, std::mutex& mtx) {
 }
 
 // Ping device every 10 seconds
-void ping(Stage* kessler, std::mutex& mtx, bool& active) {
+void ping(Stage* kessler, std::mutex& mtx, const bool& active) {
     clock_t last_ping = clock();
-    float since_last_ping;
     while (active) {
-        since_last_ping = (float)(clock() - last_ping)/CLOCKS_PER_SEC;
+        float since_last_ping = (float)(clock() - last_ping)/CLOCKS_PER_SEC;
         if (since_last_ping > 10) {
             mtx.lock();
             kessler->get_network_info();
@@ -192,17 +183,17 @@ void ping(Stage* kessler, std::mutex& mtx, bool& active) {
     }
 }
 
-std::tuple<float, float> find_errors(double hfovx, double hfovy, int nx, int ny, double y0, float begin_pan, float end_pan, float begin_tilt, float end_tilt, double r1, double x1, double y1, float theta1m, float phi1m) {
+std::tuple<float, float> find_errors(double hfovx, double hfovy, int nx, int ny, double sep, float begin_pan, float end_pan, float begin_tilt, float end_tilt, float begin_pan_angle, float end_pan_angle, float begin_tilt_angle, float end_tilt_angle, double r1, double x1, double y1, float theta1m, float phi1m) {
     double phi = get_phi(x1, nx, hfovx);
     double theta = get_theta(y1, ny, hfovy);
-    double phi_prime_estimate = get_phi_prime(phi, theta, y0, r1, 0);
-    double theta_prime_estimate = get_theta_prime(phi, theta, y0, r1, 0);
-    double phi_prime_actual = PI * ((phi1m / (end_pan - begin_pan)) - 0.5);
-    double theta_prime_actual = 2 * PI * theta1m / (3 * (end_tilt - begin_tilt));
+    double phi_prime_estimate = get_phi_prime(phi, theta, sep, r1, 0);
+    double theta_prime_estimate = get_theta_prime(phi, theta, sep, r1, 0);
+    double phi_prime_actual = begin_pan_angle + (phi1m - begin_pan)*(end_pan_angle - begin_pan_angle)/(end_pan - begin_pan);
+    double theta_prime_actual = begin_tilt_angle + (theta1m - begin_tilt)*(end_tilt_angle - begin_tilt_angle)/(end_tilt - begin_tilt);
     auto phi_prime_error = (float)(phi_prime_actual - phi_prime_estimate);
     auto theta_prime_error = (float)(theta_prime_actual - theta_prime_estimate);
-    printf("Estimated theta_p/phi_p: (%.2f, %.2f)\n", theta_prime_estimate * 180 / PI, phi_prime_estimate * 180 / PI);
-    printf("Actual theta_p/phi_p: (%.2f, %.2f)\n", theta_prime_actual * 180 / PI, phi_prime_actual * 180 / PI);
+    printf("Estimated theta_p/phi_p: (%.2f, %.2f)\n", theta_prime_estimate * 180 / M_PI, phi_prime_estimate * 180 / M_PI);
+    printf("Actual theta_p/phi_p: (%.2f, %.2f)\n", theta_prime_actual * 180 / M_PI, phi_prime_actual * 180 / M_PI);
     std::tuple<float, float> ret = {theta_prime_error, phi_prime_error};
     return ret;
 }

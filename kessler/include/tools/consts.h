@@ -1,7 +1,5 @@
 #pragma once
 
-const double PI = 3.14159265358979323846;
-
 const unsigned char SSP_PROTOCOL_VERSION = 0x04;
 const unsigned short SSP_HEADER_SIZE = 0x06;
 const float TILT_MAX_SPEED = 65;

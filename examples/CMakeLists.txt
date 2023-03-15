@@ -15,6 +15,10 @@ find_package(Boost 1.81.0 REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARIES})
 
+find_package(nlohmann_json 3.11.2 REQUIRED)
+include_directories(${nlohmann_json_INCLUDE_DIR})
+link_directories(${nlohmann_json_LIBRARIES})
+
 find_package(PkgConfig)
 pkg_check_modules (KESSLER REQUIRED kessler)
 
@@ -31,4 +35,4 @@ add_executable(wasd_controller wasd_controller.cpp)
 target_link_libraries(wasd_controller ${Boost_LIBRARIES} ${fmt_LIBRARIES} ${X11_LIBRARIES} ${KESSLER_LIBRARIES})
 
 add_executable(calibrator calibrator.cpp)
-target_link_libraries(calibrator ${Boost_LIBRARIES} ${fmt_LIBRARIES} ${X11_LIBRARIES} ${KESSLER_LIBRARIES})
+target_link_libraries(calibrator ${nlohmann_json_LIBRARIES} ${Boost_LIBRARIES} ${fmt_LIBRARIES} ${X11_LIBRARIES} ${KESSLER_LIBRARIES})

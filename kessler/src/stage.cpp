@@ -489,7 +489,6 @@ std::string Stage::get_string(boost::uint16_t len) {
 }
 
 unsigned char* Stage::get_block(boost::uint16_t len) {
-    std::string out;
     boost::asio::streambuf blocksb;
     boost::asio::mutable_buffers_1 bufs = blocksb.prepare(len);
     size_t n = ConnectSocket.receive(bufs);
