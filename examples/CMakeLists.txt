@@ -28,9 +28,6 @@ target_link_libraries(basic_pointer ${Boost_LIBRARIES} ${fmt_LIBRARIES} ${X11_LI
 add_executable(pointer pointer.cpp)
 target_link_libraries(pointer ${Boost_LIBRARIES} ${fmt_LIBRARIES} ${X11_LIBRARIES} ${KESSLER_LIBRARIES})
 
-add_executable(wasd_calibrator wasd_calibrator.cpp)
-target_link_libraries(wasd_calibrator ${Boost_LIBRARIES} ${fmt_LIBRARIES} ${X11_LIBRARIES} ${KESSLER_LIBRARIES})
-
 add_executable(wasd_controller wasd_controller.cpp)
 target_link_libraries(wasd_controller ${Boost_LIBRARIES} ${fmt_LIBRARIES} ${X11_LIBRARIES} ${KESSLER_LIBRARIES})
 

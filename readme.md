@@ -69,8 +69,8 @@ make
 ```
 See the `examples` directory for executables built using CMake and Conan.
 
-# Building Examples 
-Using the same Conan prerequisites as above:
+## Building Examples 
+The example programs are built using the same Conan setup as above:
 1) `cd` into the `examples` folder
 2) `conan install . -pr:b=default --output-folder=build --build=missing`
 3) `cd build`
@@ -78,13 +78,28 @@ Using the same Conan prerequisites as above:
 5) `make`
 
 # Usage
-TODO: write an example and explanation
+A simple program is written below to demonstrate using the library. After including the header, create a `Stage` object using the IP address and port. The `Stage` object has functions corresponding to those outlined in the Cineshooter API. The default IP address is `192.168.50.1`, and the default port is `5520`.
+```c++
+#include <iostream>
+#include <kessler/stage.h>
+
+int main() {
+    // Initialize the Stage object.
+    Stage kessler("192.168.50.1", 5520);
+    // Perform the handshake procedure outlined in the API.
+    kessler.handshake();
+    // Interact with the stage. Here, we print the device info.
+    std::cout << kessler.get_device_info().to_string();
+    return 0;
+}
+```
 ## Headers
 The most useful include paths are:
 * `kessler/stage.h`
 * `kessler/tools/calibrator.h`
 * `kessler/tools/pointer_utils.h`
-  Note that `calibrator.h` includes both `stage.h` and `pointer_utils.h`.
+
+Note that `pointer_utils.h` contains `stage.h`, and `calibrator.h` includes both `stage.h` and `pointer_utils.h`. `stage.h` is the bare-bones header that only contains the stage operations from the Cineshooter API. `pointer_utils.h` contains several helper functions that can be used to drive and calibrate the stage. `calibrator.h` uses the functions in `pointer_utils.h` to calibrate each motor to a user-defined reference frame.
 
 # Notes
 
@@ -116,11 +131,14 @@ The following features are not implemented:
 ## Examples
 The `examples` directory contains executables related to running the stage.
 ### Executables
-TODO: add descriptions of each
 * `basic_pointer.cpp`
+  * Set start and end positions for all three motors. Then, select a motor and move it to a new position.
+* `calibrator.cpp`
+  * Run the calibration procedure for all three motors and print the resulting calibration parameters.
 * `pointer.cpp`
-* `wasd_calibrator.cpp`
+  * Run the calibration procedure for all three motors. Then, enter the (x, y) coordinates of an object in a camera's field of view to point the stage at the object.
 * `wasd_controller.cpp`
+  * Freely control the stage using a keyboard.
 
 # References
 1) https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1204r0.html#tests-unit
