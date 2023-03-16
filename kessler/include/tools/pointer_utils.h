@@ -33,11 +33,12 @@ double get_theta_prime(double phi, double theta, double sep, double r, double er
 }
 
 float get_motor_position(float motor_begin, float motor_end, float ref_begin, float ref_end, double ref_target) {
-    float slope = (motor_end - motor_begin) / (ref_end - ref_begin);
-    float target =  slope*((float)ref_target-ref_begin) + motor_begin;
-    if (abs(target) < abs(motor_end - motor_begin))
+    float true_end = motor_end - motor_begin;
+    float slope = true_end / (ref_end - ref_begin);
+    float target =  slope*((float)ref_target-ref_begin);
+    if (abs(target) < abs(true_end))
         return target;
-    return motor_end - motor_begin;
+    return true_end;
 }
 
 bool key_is_pressed(KeySym ks) {

@@ -23,8 +23,6 @@ std::tuple<double, double, float, float, float, float, float, float> calibrate_s
     float begin_tilt = info.motors[2].begin_position;
     float end_tilt = info.motors[2].end_position;
 
-    printf("Calibrate for systematic errors? (y/n)\n");
-    std::cin >> correction;
     float theta_prime_error = 0;
     float phi_prime_error = 0;
     if (correction) {
