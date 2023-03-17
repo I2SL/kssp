@@ -27,6 +27,7 @@ This library is an implementation of the [Cineshooter API](https://support.kessl
 11) `cmake -DCMAKE_C_COMPILER=gcc-11 -DCMAKE_CXX_COMPILER=g++-11 -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release ..`
 12) `make`
 13) `sudo make install`
+
 If a program cannot find `libkssp.so` after installation, run `sudo ldconfig` and try again.
 
 To include the library in another project, include the following in `CMakeLists.txt`:
