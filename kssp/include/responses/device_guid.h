@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef KESSLER_DEVICE_GUID_H
-#define KESSLER_DEVICE_GUID_H
+#ifndef KSSP_DEVICE_GUID_H
+#define KSSP_DEVICE_GUID_H
 
 #include <cstring>
 #include <string>
@@ -16,4 +16,4 @@ public:
     [[nodiscard]] std::string to_string() const;
 };
 
-#endif //KESSLER_DEVICE_GUID_H
+#endif //KSSP_DEVICE_GUID_H

@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef LIBKESSLER_NETWORK_INFO_H
-#define LIBKESSLER_NETWORK_INFO_H
+#ifndef KSSP_NETWORK_INFO_H
+#define KSSP_NETWORK_INFO_H
 
 #include <fmt/format.h>
 #include <string>
@@ -31,4 +31,4 @@ private:
     char* mac_str;
 };
 
-#endif //LIBKESSLER_NETWORK_INFO_H
+#endif //KSSP_NETWORK_INFO_H

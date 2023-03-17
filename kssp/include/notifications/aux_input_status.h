@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef KESSLER_AUX_INPUT_STATUS_H
-#define KESSLER_AUX_INPUT_STATUS_H
+#ifndef KSSP_AUX_INPUT_STATUS_H
+#define KSSP_AUX_INPUT_STATUS_H
 
 #include <boost/endian/conversion.hpp>
 
@@ -11,5 +11,4 @@ public:
     boost::uint8_t status;
 };
 
-
-#endif //KESSLER_AUX_INPUT_STATUS_H
+#endif //KSSP_AUX_INPUT_STATUS_H

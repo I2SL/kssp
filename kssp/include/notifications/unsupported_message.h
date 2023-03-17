@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef KESSLER_UNSUPPORTED_MESSAGE_H
-#define KESSLER_UNSUPPORTED_MESSAGE_H
+#ifndef KSSP_UNSUPPORTED_MESSAGE_H
+#define KSSP_UNSUPPORTED_MESSAGE_H
 
 #include <boost/endian/conversion.hpp>
 
@@ -12,4 +12,4 @@ public:
 };
 
 
-#endif //KESSLER_UNSUPPORTED_MESSAGE_H
+#endif //KSSP_UNSUPPORTED_MESSAGE_H

@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef KESSLER_ERROR_STATUS_H
-#define KESSLER_ERROR_STATUS_H
+#ifndef KSSP_ERROR_STATUS_H
+#define KSSP_ERROR_STATUS_H
 
 #include <boost/endian/conversion.hpp>
 
@@ -12,5 +12,4 @@ public:
     boost::uint8_t motor_address;
 };
 
-
-#endif //KESSLER_ERROR_STATUS_H
+#endif //KSSP_ERROR_STATUS_H

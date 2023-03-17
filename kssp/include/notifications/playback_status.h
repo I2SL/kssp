@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef KESSLER_PLAYBACK_STATUS_H
-#define KESSLER_PLAYBACK_STATUS_H
+#ifndef KSSP_PLAYBACK_STATUS_H
+#define KSSP_PLAYBACK_STATUS_H
 
 #include <boost/endian/conversion.hpp>
 
@@ -23,4 +23,4 @@ public:
 };
 
 
-#endif //KESSLER_PLAYBACK_STATUS_H
+#endif //KSSP_PLAYBACK_STATUS_H

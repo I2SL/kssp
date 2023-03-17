@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include <nlohmann/json.hpp>
-#include <kessler/tools/calibrator.h>
+#include <kssp/tools/calibrator.h>
 
 using json = nlohmann::json;
 
@@ -31,11 +31,11 @@ int main (int argc, char* argv[]) {
     float begin_pan, end_pan, begin_tilt, end_tilt, theta_prime_error, phi_prime_error;
     double hfovx, hfovy, r, x, y;
 
-    Stage kessler("192.168.50.1", 5520);
-    kessler.handshake();
-    std::cout << kessler.get_device_info().to_string();
-    std::thread pinger(ping, &kessler, std::ref(mtx), std::ref(active));
-    std::tie(hfovx, hfovy,begin_pan, end_pan, begin_tilt, end_tilt, theta_prime_error, phi_prime_error) = calibrate_stage(&kessler, focal_len, sep, dist, px, nx, ny, correction, prev_cal, begin_pan_angle, end_pan_angle, begin_tilt_angle, end_tilt_angle);
+    Stage stage("192.168.50.1", 5520);
+    stage.handshake();
+    std::cout << stage.get_device_info().to_string();
+    std::thread pinger(ping, &stage, std::ref(mtx), std::ref(active));
+    std::tie(hfovx, hfovy,begin_pan, end_pan, begin_tilt, end_tilt, theta_prime_error, phi_prime_error) = calibrate_stage(&stage, focal_len, sep, dist, px, nx, ny, correction, prev_cal, begin_pan_angle, end_pan_angle, begin_tilt_angle, end_tilt_angle);
 
     while (true) {
         printf("Enter target distance (or 0 to quit):\n");
@@ -70,8 +70,8 @@ int main (int argc, char* argv[]) {
         std::cin >> input;
         if (input == std::string("y")) {
             mtx.lock();
-            kessler.set_position_speed_acceleration(2, pan_position, PAN_MAX_SPEED, PAN_MAX_ACC);
-            kessler.set_position_speed_acceleration(3, tilt_position, TILT_MAX_SPEED, TILT_MAX_ACC);
+            stage.set_position_speed_acceleration(2, pan_position, PAN_MAX_SPEED, PAN_MAX_ACC);
+            stage.set_position_speed_acceleration(3, tilt_position, TILT_MAX_SPEED, TILT_MAX_ACC);
             mtx.unlock();
         }
     }

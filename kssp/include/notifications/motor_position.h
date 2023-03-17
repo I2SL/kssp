@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef KESSLER_MOTOR_POSITION_H
-#define KESSLER_MOTOR_POSITION_H
+#ifndef KSSP_MOTOR_POSITION_H
+#define KSSP_MOTOR_POSITION_H
 
 #include <boost/endian/conversion.hpp>
 
@@ -13,4 +13,4 @@ public:
 };
 
 
-#endif //KESSLER_MOTOR_POSITION_H
+#endif //KSSP_MOTOR_POSITION_H

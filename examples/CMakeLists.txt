@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(kessler-examples)
+project(kssp-examples)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -20,16 +20,16 @@ include_directories(${nlohmann_json_INCLUDE_DIR})
 link_directories(${nlohmann_json_LIBRARIES})
 
 find_package(PkgConfig)
-pkg_check_modules (KESSLER REQUIRED kessler)
+pkg_check_modules (KSSP REQUIRED kssp)
 
 add_executable(basic_pointer basic_pointer.cpp)
-target_link_libraries(basic_pointer ${Boost_LIBRARIES} ${fmt_LIBRARIES} ${X11_LIBRARIES} ${KESSLER_LIBRARIES})
+target_link_libraries(basic_pointer ${Boost_LIBRARIES} ${fmt_LIBRARIES} ${X11_LIBRARIES} ${KSSP_LIBRARIES})
 
 add_executable(pointer pointer.cpp)
-target_link_libraries(pointer ${Boost_LIBRARIES} ${fmt_LIBRARIES} ${X11_LIBRARIES} ${KESSLER_LIBRARIES})
+target_link_libraries(pointer ${Boost_LIBRARIES} ${fmt_LIBRARIES} ${X11_LIBRARIES} ${KSSP_LIBRARIES})
 
 add_executable(wasd_controller wasd_controller.cpp)
-target_link_libraries(wasd_controller ${Boost_LIBRARIES} ${fmt_LIBRARIES} ${X11_LIBRARIES} ${KESSLER_LIBRARIES})
+target_link_libraries(wasd_controller ${Boost_LIBRARIES} ${fmt_LIBRARIES} ${X11_LIBRARIES} ${KSSP_LIBRARIES})
 
 add_executable(calibrator calibrator.cpp)
-target_link_libraries(calibrator ${nlohmann_json_LIBRARIES} ${Boost_LIBRARIES} ${fmt_LIBRARIES} ${X11_LIBRARIES} ${KESSLER_LIBRARIES})
+target_link_libraries(calibrator ${nlohmann_json_LIBRARIES} ${Boost_LIBRARIES} ${fmt_LIBRARIES} ${X11_LIBRARIES} ${KSSP_LIBRARIES})

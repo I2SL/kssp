@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef KESSLER_LED_STATUS_H
-#define KESSLER_LED_STATUS_H
+#ifndef KSSP_LED_STATUS_H
+#define KSSP_LED_STATUS_H
 
 #include <fmt/format.h>
 #include <string>
@@ -17,4 +17,4 @@ public:
 private:
     static std::string status_to_string(boost::uint8_t status);
 };
-#endif //KESSLER_LED_STATUS_H
+#endif //KSSP_LED_STATUS_H

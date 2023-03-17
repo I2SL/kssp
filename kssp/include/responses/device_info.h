@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef KESSLER_DEVICE_INFO_H
-#define KESSLER_DEVICE_INFO_H
+#ifndef KSSP_DEVICE_INFO_H
+#define KSSP_DEVICE_INFO_H
 
 #include <fmt/format.h>
 #include <string>
@@ -46,4 +46,4 @@ public:
 };
 
 
-#endif //KESSLER_DEVICE_INFO_H
+#endif //KSSP_DEVICE_INFO_H

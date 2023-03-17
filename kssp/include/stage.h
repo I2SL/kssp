@@ -1,8 +1,8 @@
 #define BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION
 #pragma once
 
-#ifndef KESSLER_STAGE_H
-#define KESSLER_STAGE_H
+#ifndef KSSP_STAGE_H
+#define KSSP_STAGE_H
 
 #include <condition_variable>
 #include <fmt/format.h>
@@ -100,4 +100,4 @@ private:
     unsigned char* get_block(boost::uint16_t len);
 };
 
-#endif //KESSLER_STAGE_H
+#endif //KSSP_STAGE_H

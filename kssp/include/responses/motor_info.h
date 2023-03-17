@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef KESSLER_MOTOR_INFO_H
-#define KESSLER_MOTOR_INFO_H
+#ifndef KSSP_MOTOR_INFO_H
+#define KSSP_MOTOR_INFO_H
 
 #include <fmt/format.h>
 #include <string>
@@ -37,4 +37,4 @@ public:
     std::string to_string();
 };
 
-#endif //KESSLER_MOTOR_INFO_H
+#endif //KSSP_MOTOR_INFO_H

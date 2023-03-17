@@ -27,8 +27,10 @@ This library is an implementation of the [Cineshooter API](https://support.kessl
 11) `cmake -DCMAKE_C_COMPILER=gcc-11 -DCMAKE_CXX_COMPILER=g++-11 -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release ..`
 12) `make`
 13) `sudo make install`
+If a program cannot find `libkssp.so` after installation, run `sudo ldconfig` and try again.
 
 To include the library in another project, include the following in `CMakeLists.txt`:
+
 ```cmake
 find_package(X11 REQUIRED)
 include_directories(${X11_INCLUDE_DIR})
@@ -43,12 +45,12 @@ include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARIES})
 
 find_package(PkgConfig)
-pkg_check_modules(KESSLER REQUIRED kessler)
+pkg_check_modules(KSSP REQUIRED kssp)
 ```
-Then, link the `kessler`, `Boost`, `fmt`, and `X11` libraries:
+Then, link the `kssp`, `Boost`, `fmt`, and `X11` libraries:
 ```cmake
 add_executable(example main.cpp)
-target_link_libraries(example ${Boost_LIBRARIES} ${fmt_LIBRARIES} ${X11_LIBRARIES} ${KESSLER_LIBRARIES})
+target_link_libraries(example ${Boost_LIBRARIES} ${fmt_LIBRARIES} ${X11_LIBRARIES} ${KSSP_LIBRARIES})
 ```
 If using Conan, the `conanfile.txt` file in the root directory should include
 ```
@@ -81,23 +83,23 @@ The example programs are built using the same Conan setup as above:
 A simple program is written below to demonstrate using the library. After including the header, create a `Stage` object using the IP address and port. The `Stage` object has functions corresponding to those outlined in the Cineshooter API. The default IP address is `192.168.50.1`, and the default port is `5520`.
 ```c++
 #include <iostream>
-#include <kessler/stage.h>
+#include <kssp/stage.h>
 
 int main() {
     // Initialize the Stage object.
-    Stage kessler("192.168.50.1", 5520);
+    Stage stage("192.168.50.1", 5520);
     // Perform the handshake procedure outlined in the API.
-    kessler.handshake();
+    stage.handshake();
     // Interact with the stage. Here, we print the device info.
-    std::cout << kessler.get_device_info().to_string();
+    std::cout << stage.get_device_info().to_string();
     return 0;
 }
 ```
 ## Headers
 The most useful include paths are:
-* `kessler/stage.h`
-* `kessler/tools/calibrator.h`
-* `kessler/tools/pointer_utils.h`
+* `kssp/stage.h`
+* `kssp/tools/calibrator.h`
+* `kssp/tools/pointer_utils.h`
 
 Note that `pointer_utils.h` contains `stage.h`, and `calibrator.h` includes both `stage.h` and `pointer_utils.h`. `stage.h` is the bare-bones header that only contains the stage operations from the Cineshooter API. `pointer_utils.h` contains several helper functions that can be used to drive and calibrate the stage. `calibrator.h` uses the functions in `pointer_utils.h` to calibrate each motor to a user-defined reference frame.
 
