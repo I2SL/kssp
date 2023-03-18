@@ -13,26 +13,87 @@
 #include "../stage.h"
 
 double get_hfov(double focal_len, double dist, int npx, double px_size) {
+    /*
+    Get the half field of view
+    Args:
+        focal_len: focal length in meters
+        dist: distance to focal plan in meters
+        npx: number of pixels along desired dimension
+        px_size: pixel size in meters
+    Ret:
+        hfov: horizontal half field of view in radians
+    */
     return atan((1/dist + 1/focal_len) * npx * px_size / 2);
 }
 
 double get_phi(double x, int nx, double hfov) {
+    /*
+    Get the azimuthal angle of an object in frame
+    Args:
+        x: x coordinate of object
+        nx: number of pixels along x
+        hfov: horizontal half field of view in radians
+    Ret:
+        phi: azimuthal angle of object in radians
+    */
     return atan(2 * x * tan(hfov) / nx);
 }
 
 double get_theta(double y, int ny, double hfov) {
+    /*
+    Get the polar angle of an object in frame
+    Args:
+        y: y coordinate of object
+        ny: number of pixels along y
+        hfov: vertical half field of view in radians
+    Ret:
+        theta: polar angle of object in radians
+    */
     return (M_PI / 2) - atan(2 * y * tan(hfov) / ny);
 }
 
 double get_phi_prime(double phi, double theta, double sep, double r, double error) {
+    /*
+    Get the azimuthal angle of an object in frame with respect to the stage
+    Args:
+        phi: azimuthal angle in radians with respect to camera
+        theta: polar angle in radians with respect to camera
+        sep: distance from camera to stage in meters
+        r: distance to object in meters
+        error: systematic error of pan in radians
+    Ret:
+        phi_prime: azimuthal angle with respect to the stage
+    */
     return phi - (sep / r) * (cos(phi) / sin(theta)) + error;
 }
 
 double get_theta_prime(double phi, double theta, double sep, double r, double error) {
+    /*
+    Get the polar angle of an object in frame with respect to the stage
+    Args:
+        phi: azimuthal angle in radians with respect to camera
+        theta: polar angle in radians with respect to camera
+        sep: distance from camera to stage in meters
+        r: distance to object in meters
+        error: systematic error of tilt in radians
+    Ret:
+        theta_prime: polar angle with respect to the stage
+    */
     return theta - (sep / r) * cos(theta) * sin(phi) + error;
 }
 
 float get_motor_position(float motor_begin, float motor_end, float ref_begin, float ref_end, double ref_target) {
+    /*
+    Get the target motor position from within a specified reference frame
+    Args:
+        motor_begin: motor position at reference frame start
+        motor_end: motor position at reference frame end
+        ref_begin: reference frame start
+        ref_end: reference frame end
+        ref_target: desired position in reference frame
+    Ret:
+        motor_position: desired position in reference frame expressed as a motor position
+    */
     float true_end = motor_end - motor_begin;
     float slope = true_end / (ref_end - ref_begin);
     float target =  slope*((float)ref_target-ref_begin);
@@ -51,8 +112,8 @@ bool key_is_pressed(KeySym ks) {
     return isPressed;
 }
 
-// Drive stage with manual controls
 void controller (Stage* stage)
+// Drive stage with manual controls. Use up/down arrow keys to adjust the speed
 {
     printf("\n");
     printf("CONTROLS:\n");
@@ -128,8 +189,16 @@ void controller (Stage* stage)
     }
 }
 
-// Calibrate a given motor
 void calibrate(boost::uint8_t motor_address, Stage* stage, std::mutex& mtx) {
+    /*
+    Calibrate a given motor by marking start and end positions
+    Args:
+        motor_address: 1, 2, or 3 for slide, pan, and tilt motors, respectively
+        stage: pointer to Stage object
+        mtx: mutex to prevent threads from writing to motor at same time
+    Ret:
+        None
+    */
     bool start = false;
     bool end = false;
     while(!stage->MotorCalibratedQueue.empty()) stage->MotorCalibratedQueue.pop();
@@ -170,8 +239,16 @@ void calibrate(boost::uint8_t motor_address, Stage* stage, std::mutex& mtx) {
     stage->MotorCalibratedQueue.pop();
 }
 
-// Ping device every 10 seconds
 void ping(Stage* stage, std::mutex& mtx, const bool& active) {
+    /*
+    Ping the stage every 10 seconds
+    Args:
+        stage: pointer to Stage object
+        active: external boolean to stop loop
+        mtx: mutex to prevent threads from writing to motor at same time
+    Ret:
+        None
+    */
     clock_t last_ping = clock();
     while (active) {
         float since_last_ping = (float)(clock() - last_ping)/CLOCKS_PER_SEC;
@@ -185,6 +262,19 @@ void ping(Stage* stage, std::mutex& mtx, const bool& active) {
 }
 
 std::tuple<float, float> find_errors(double hfovx, double hfovy, int nx, int ny, double sep, float begin_pan, float end_pan, float begin_tilt, float end_tilt, float begin_pan_angle, float end_pan_angle, float begin_tilt_angle, float end_tilt_angle, double r1, double x1, double y1, float theta1m, float phi1m) {
+    /*
+    Find the systematic error of pan and tilt
+    Args (unlisted here correspond to variables with same names above):
+        r1: distance to calibration target in meters
+        x1: x coordinate of calibration target
+        y1: y coordinate of calibration target
+        theta1m: tilt motor position of calibration target
+        phi1m: pan motor position of calibration target
+    Ret:
+        errors: tuple containing systematic errors
+            theta_prime_error: tilt error in radians
+            phi_prime_error: pan error in radians
+    */
     double phi = get_phi(x1, nx, hfovx);
     double theta = get_theta(y1, ny, hfovy);
     double phi_prime_estimate = get_phi_prime(phi, theta, sep, r1, 0);
@@ -200,6 +290,19 @@ std::tuple<float, float> find_errors(double hfovx, double hfovy, int nx, int ny,
 }
 
 std::tuple<float, float, double, double, double> get_calibration_point(Stage* stage, std::mutex& mtx) {
+    /*
+    Get information about a calibration target
+    Args:
+        stage: pointer to Stage object
+        mtx: reference to thread-blocking mutex
+    Ret:
+        calibration_point: tuple containing calibration point information
+            tilt_position: tilt motor position looking at object
+            pan_position: pan motor position looking at object
+            r: distance to object in meters
+            x: x coordinate of object
+            y: y coordinate of object
+    */
     float pan_position;
     float tilt_position;
     double r;

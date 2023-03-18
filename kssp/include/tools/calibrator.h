@@ -1,6 +1,36 @@
 #include "pointer_utils.h"
 
 std::tuple<double, double, float, float, float, float, float, float> calibrate_stage (Stage* stage, double focal_len, double sep, double dist, double px_size, int num_x, int num_y, bool correction, bool prev_cal, float begin_pan_angle, float end_pan_angle, float begin_tilt_angle, float end_tilt_angle) {
+    /*
+    This function calibrates the pan and tilt motors to a user-defined angle range when the scene is being observed
+    with a camera.
+
+    Args:
+        stage: pointer to the Stage object
+        focal_len: focal length in meters
+        sep: camera/stage separation in meters
+        dist: distance to the focal plane in meters
+        px_size: camera pixel size in meters
+        num_x: number of pixels along the horizontal
+        num_y: number of pixels along the vertical
+        correction: true or false whether to perform correction for systematic error
+        prev_cal: true or false whether to use the stage's currently loaded calibration
+        begin_pan_angle: reference point for the pan motor's lower limit (e.g. 0 degrees)
+        end_pan_angle: reference point for the pan motor's upper limit (e.g. 180 degrees)
+        begin_tilt_angle: reference point for the tilt motor's lower limit (e.g. 0 degrees)
+        end_tilt_angle: reference point for the tilt motor's upper limit (e.g. 180 degrees)
+
+    Ret:
+        cal_params: tuple containing results of calibration
+            hfovx: horizontal field of view in radians
+            hfovy: vertical field of view in radians
+            begin_pan: pan motor position at begin_pan_angle
+            end_pan: pan motor position at end_pan_angle
+            begin_tilt: tilt motor position at begin_tilt_angle
+            end_tilt: tilt motor position at end_tilt_angle
+            theta_prime_error: systematic error of tilt in radians (0 if not corrected)
+            phi_prime_error: systematic error of pan in radians (0 if not corrected)
+    */
     std::mutex mtx;
     double hfovx = get_hfov(focal_len, dist, num_x, px_size);
     double hfovy = get_hfov(focal_len, dist, num_y, px_size);

@@ -379,13 +379,6 @@ void Stage::on_receive_motor_calibrated_notification() {
     float end_position = get_float();
     class MotorCalibrated notification(motor_address, begin_position, end_position);
     MotorCalibratedQueue.push(notification);
-//    unsigned char* bytes = get_block(9);
-//    for (int i=0 ; i<9 ; i++ )
-//    {
-//        std::cout << std::setw(2) << std::setfill('0') << std::hex << (int) bytes[i]<<"\t";
-//    }
-//    class MotorCalibrated notification(0, 0);
-//    MotorCalibratedQueue.push(notification);
 }
 
 void Stage::on_receive_motor_position_notification() {
