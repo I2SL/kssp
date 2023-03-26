@@ -8,7 +8,7 @@ int main () {
     stage.handshake();
     std::cout << stage.get_device_info().to_string();
     stage.reset_axis(0);
-    std::thread driver(controller, &stage);
+    std::thread driver(controller, &stage, XK_space);
 
     printf("Move Slide motor to start position and press 'Q'. Then move Slide motor to end position and press `Q`.\n");
     calibrate(1, &stage, mtx);

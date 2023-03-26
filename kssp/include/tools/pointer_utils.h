@@ -112,8 +112,9 @@ bool key_is_pressed(KeySym ks) {
     return isPressed;
 }
 
-void controller (Stage* stage)
+void controller (Stage* stage, KeySym ks)
 // Drive stage with manual controls. Use up/down arrow keys to adjust the speed
+// ks is the key to stop this function. It can be anything except WASDQE or the arrow keys.
 {
     printf("\n");
     printf("CONTROLS:\n");
@@ -126,7 +127,7 @@ void controller (Stage* stage)
     printf("Slide Right: Right Arrow\n");
     printf("Speed Up: Up Arrow\n");
     printf("Speed Down: Down Arrow\n");
-    printf("Stop: Space\n");
+    printf("Stop: %s\n", XKeysymToString(ks));
 
     bool running = true;
     int speed = 0;
@@ -181,7 +182,7 @@ void controller (Stage* stage)
         speed = std::clamp(speed + 1 * speed_dir, 0, 100);
         if (speed_dir != 0) printf("Speed: %d\n", speed);
 
-        if (key_is_pressed(XK_space)) {
+        if (key_is_pressed(ks)) {
             running = false;
         }
 
@@ -215,10 +216,10 @@ void calibrate(boost::uint8_t motor_address, Stage* stage, std::mutex& mtx) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
-    printf("Press `Q` to mark Motor %hd end position.\n", motor_address);
+    printf("Press `E` to mark Motor %hd end position.\n", motor_address);
     while (!end) {
-        bool q_pressed = key_is_pressed(XK_Q);
-        if (q_pressed) {
+        bool e_pressed = key_is_pressed(XK_E);
+        if (e_pressed) {
             mtx.lock();
             stage->mark_end_position(motor_address);
             printf("End position marked.\n");

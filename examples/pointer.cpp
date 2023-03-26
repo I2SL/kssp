@@ -35,7 +35,7 @@ int main (int argc, char* argv[]) {
     stage.handshake();
     std::cout << stage.get_device_info().to_string();
     std::thread pinger(ping, &stage, std::ref(mtx), std::ref(active));
-    std::tie(hfovx, hfovy,begin_pan, end_pan, begin_tilt, end_tilt, theta_prime_error, phi_prime_error) = calibrate_stage(&stage, focal_len, sep, dist, px, nx, ny, correction, prev_cal, begin_pan_angle, end_pan_angle, begin_tilt_angle, end_tilt_angle);
+    std::tie(hfovx, hfovy,begin_pan, end_pan, begin_tilt, end_tilt, theta_prime_error, phi_prime_error) = calibrate_stage(&stage, focal_len, sep, dist, px, nx, ny, correction, prev_cal, begin_pan_angle, end_pan_angle, begin_tilt_angle, end_tilt_angle, XK_C);
 
     while (true) {
         printf("Enter target distance (or 0 to quit):\n");
