@@ -28,6 +28,8 @@ public:
   float end_tilt_angle;
   KeySym ks;
 
+  CalibrationInit() {}
+
   CalibrationInit(double focal_len, double sep, double dist, double px_size,
                   int num_x, int num_y, bool correction, bool prev_cal,
                   float begin_pan_angle, float end_pan_angle,
@@ -59,6 +61,8 @@ public:
   float theta_prime_error;
   float phi_prime_error;
 
+  Calibration() {}
+
   Calibration(double hfovx, double hfovy, float begin_pan, float end_pan,
               float begin_tilt, float end_tilt, float theta_prime_error,
               float phi_prime_error) {
@@ -80,6 +84,8 @@ public:
   double r;
   double x;
   double y;
+
+  CalibrationPoint() {}
 
   CalibrationPoint(float tilt_position, float pan_position, double r, double x,
                    double y) {
