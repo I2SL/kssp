@@ -12,44 +12,123 @@
 
 #include "../stage.h"
 
+class CalibrationInit {
+public:
+  double focal_len;
+  double sep;
+  double dist;
+  double px_size;
+  int num_x;
+  int num_y;
+  bool correction;
+  bool prev_cal;
+  float begin_pan_angle;
+  float end_pan_angle;
+  float begin_tilt_angle;
+  float end_tilt_angle;
+  KeySym ks;
+
+  CalibrationInit(double focal_len, double sep, double dist, double px_size,
+                  int num_x, int num_y, bool correction, bool prev_cal,
+                  float begin_pan_angle, float end_pan_angle,
+                  float begin_tilt_angle, float end_tilt_angle, KeySym ks) {
+    this->focal_len = focal_len;
+    this->sep = sep;
+    this->dist = dist;
+    this->px_size = px_size;
+    this->num_x = num_x;
+    this->num_y = num_y;
+    this->correction = correction;
+    this->prev_cal = prev_cal;
+    this->begin_pan_angle = begin_pan_angle;
+    this->end_pan_angle = end_pan_angle;
+    this->begin_tilt_angle = begin_tilt_angle;
+    this->end_tilt_angle = end_tilt_angle;
+    this->ks = ks;
+  }
+};
+
+class Calibration {
+public:
+  double hfovx;
+  double hfovy;
+  float begin_pan;
+  float end_pan;
+  float begin_tilt;
+  float end_tilt;
+  float theta_prime_error;
+  float phi_prime_error;
+
+  Calibration(double hfovx, double hfovy, float begin_pan, float end_pan,
+              float begin_tilt, float end_tilt, float theta_prime_error,
+              float phi_prime_error) {
+    this->hfovx = hfovx;
+    this->hfovy = hfovy;
+    this->begin_pan = begin_pan;
+    this->end_pan = end_pan;
+    this->begin_tilt = begin_tilt;
+    this->end_tilt = end_tilt;
+    this->theta_prime_error = theta_prime_error;
+    this->phi_prime_error = phi_prime_error;
+  }
+};
+
+class CalibrationPoint {
+public:
+  float tilt_position;
+  float pan_position;
+  double r;
+  double x;
+  double y;
+
+  CalibrationPoint(float tilt_position, float pan_position, double r, double x,
+                   double y) {
+    this->tilt_position = tilt_position;
+    this->pan_position = pan_position;
+    this->r = r;
+    this->x = x;
+    this->y = y;
+  }
+};
+
 double get_hfov(double focal_len, double dist, int npx, double px_size) {
-    /*
-    Get the half field of view
-    Args:
-        focal_len: focal length in meters
-        dist: distance to focal plan in meters
-        npx: number of pixels along desired dimension
-        px_size: pixel size in meters
-    Ret:
-        hfov: horizontal half field of view in radians
-    */
-    return atan((1/dist + 1/focal_len) * npx * px_size / 2);
+  /*
+  Get the half field of view
+  Args:
+      focal_len: focal length in meters
+      dist: distance to focal plan in meters
+      npx: number of pixels along desired dimension
+      px_size: pixel size in meters
+  Ret:
+      hfov: horizontal half field of view in radians
+  */
+  return atan((1 / dist + 1 / focal_len) * npx * px_size / 2);
 }
 
 double get_phi(double x, int nx, double hfov) {
-    /*
-    Get the azimuthal angle of an object in frame
-    Args:
-        x: x coordinate of object
-        nx: number of pixels along x
-        hfov: horizontal half field of view in radians
-    Ret:
-        phi: azimuthal angle of object in radians
-    */
-    return atan(2 * x * tan(hfov) / nx);
+  /*
+  Get the azimuthal angle of an object in frame
+  Args:
+      x: x coordinate of object
+      nx: number of pixels along x
+      hfov: horizontal half field of view in radians
+  Ret:
+      phi: azimuthal angle of object in radians
+  */
+  return atan(2 * x * tan(hfov) / nx);
 }
 
 double get_theta(double y, int ny, double hfov) {
-    /*
-    Get the polar angle of an object in frame
-    Args:
-        y: y coordinate of object
-        ny: number of pixels along y
-        hfov: vertical half field of view in radians
-    Ret:
-        theta: polar angle of object in radians
-    */
-    return (M_PI / 2) - atan(2 * y * tan(hfov) / ny);
+  /*
+  Get the polar angle of an object in frame
+  Args:
+      y: y coordinate of object
+      ny: number of pixels along y
+      hfov: vertical half field of view in radians
+  Ret:
+      theta: polar angle of object in radians
+  */
+  return (M_PI / 2) - atan(2 * y * tan(hfov) / ny);
 }
 
 double get_phi_prime(double phi, double theta, double sep, double r, double error) {
@@ -112,9 +191,10 @@ bool key_is_pressed(KeySym ks) {
     return isPressed;
 }
 
-void controller (Stage* stage, KeySym ks)
+void controller(Stage *stage, KeySym ks)
 // Drive stage with manual controls. Use up/down arrow keys to adjust the speed
-// ks is the key to stop this function. It can be anything except WASDQE or the arrow keys.
+// ks is the key to stop this function. It can be anything except WASDQE or the
+// arrow keys.
 {
     printf("\n");
     printf("CONTROLS:\n");
@@ -136,8 +216,7 @@ void controller (Stage* stage, KeySym ks)
     int prev_pan_dir = 0;
     int prev_slide_dir = 0;
 
-    while (running)
-    {
+    while (running) {
         const bool w_pressed = key_is_pressed(XK_W);
         const bool s_pressed = key_is_pressed(XK_S);
         const bool a_pressed = key_is_pressed(XK_A);
@@ -149,48 +228,63 @@ void controller (Stage* stage, KeySym ks)
         const float speed_p = (float)speed / 100;
 
         int tilt_dir = 0;
-        if (w_pressed) tilt_dir = 1;
-        if (s_pressed) tilt_dir = -1;
+        if (w_pressed)
+          tilt_dir = 1;
+        if (s_pressed)
+          tilt_dir = -1;
 
         if (prev_tilt_dir != tilt_dir) {
-            stage->set_position_speed_acceleration(3, 25000 * (float)tilt_dir, TILT_MAX_SPEED * speed_p * (float)abs(tilt_dir), TILT_MAX_ACC);
-            prev_tilt_dir = tilt_dir;
+          stage->set_position_speed_acceleration(
+              3, 25000 * (float)tilt_dir,
+              TILT_MAX_SPEED * speed_p * (float)abs(tilt_dir), TILT_MAX_ACC);
+          prev_tilt_dir = tilt_dir;
         }
 
         int pan_dir = 0;
-        if (d_pressed) pan_dir = 1;
-        if (a_pressed) pan_dir = -1;
+        if (d_pressed)
+          pan_dir = 1;
+        if (a_pressed)
+          pan_dir = -1;
 
         if (prev_pan_dir != pan_dir) {
-            stage->set_position_speed_acceleration(2, 25000 * (float)pan_dir, PAN_MAX_SPEED * speed_p * (float)abs(pan_dir), PAN_MAX_ACC);
-            prev_pan_dir = pan_dir;
+          stage->set_position_speed_acceleration(
+              2, 25000 * (float)pan_dir,
+              PAN_MAX_SPEED * speed_p * (float)abs(pan_dir), PAN_MAX_ACC);
+          prev_pan_dir = pan_dir;
         }
 
         int slide_dir = 0;
-        if (right_pressed) slide_dir = 1;
-        if (left_pressed) slide_dir = -1;
+        if (right_pressed)
+          slide_dir = 1;
+        if (left_pressed)
+          slide_dir = -1;
 
         if (prev_slide_dir != slide_dir) {
-            stage->set_position_speed_acceleration(1, 25000 * (float)slide_dir, PAN_MAX_SPEED * speed_p * (float)abs(slide_dir), PAN_MAX_ACC);
-            prev_slide_dir = slide_dir;
+          stage->set_position_speed_acceleration(
+              1, 25000 * (float)slide_dir,
+              PAN_MAX_SPEED * speed_p * (float)abs(slide_dir), PAN_MAX_ACC);
+          prev_slide_dir = slide_dir;
         }
 
         int speed_dir = 0;
-        if (up_pressed) speed_dir = 1;
-        if (down_pressed) speed_dir = -1;
+        if (up_pressed)
+          speed_dir = 1;
+        if (down_pressed)
+          speed_dir = -1;
 
         speed = std::clamp(speed + 1 * speed_dir, 0, 100);
-        if (speed_dir != 0) printf("Speed: %d\n", speed);
+        if (speed_dir != 0)
+          printf("Speed: %d\n", speed);
 
         if (key_is_pressed(ks)) {
-            running = false;
+          running = false;
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
 
-void calibrate(boost::uint8_t motor_address, Stage* stage, std::mutex& mtx) {
+void calibrate(boost::uint8_t motor_address, Stage *stage, std::mutex &mtx) {
     /*
     Calibrate a given motor by marking start and end positions
     Args:
@@ -202,16 +296,17 @@ void calibrate(boost::uint8_t motor_address, Stage* stage, std::mutex& mtx) {
     */
     bool start = false;
     bool end = false;
-    while(!stage->MotorCalibratedQueue.empty()) stage->MotorCalibratedQueue.pop();
+    while (!stage->MotorCalibratedQueue.empty())
+        stage->MotorCalibratedQueue.pop();
     printf("Press `Q` to mark Motor %hd start position.\n", motor_address);
     while (!start) {
         bool q_pressed = key_is_pressed(XK_Q);
         if (q_pressed) {
-            mtx.lock();
-            stage->mark_begin_position(motor_address);
-            printf("Start position marked.\n");
-            start = true;
-            mtx.unlock();
+          mtx.lock();
+          stage->mark_begin_position(motor_address);
+          printf("Start position marked.\n");
+          start = true;
+          mtx.unlock();
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
@@ -220,16 +315,16 @@ void calibrate(boost::uint8_t motor_address, Stage* stage, std::mutex& mtx) {
     while (!end) {
         bool e_pressed = key_is_pressed(XK_E);
         if (e_pressed) {
-            mtx.lock();
-            stage->mark_end_position(motor_address);
-            printf("End position marked.\n");
-            end = true;
-            mtx.unlock();
+          mtx.lock();
+          stage->mark_end_position(motor_address);
+          printf("End position marked.\n");
+          end = true;
+          mtx.unlock();
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
-    while(stage->MotorCalibratedQueue.empty()){
-        //do nothing until message received
+    while (stage->MotorCalibratedQueue.empty()) {
+        // do nothing until message received
     }
 
     class MotorCalibrated info = stage->MotorCalibratedQueue.front();
@@ -240,7 +335,7 @@ void calibrate(boost::uint8_t motor_address, Stage* stage, std::mutex& mtx) {
     stage->MotorCalibratedQueue.pop();
 }
 
-void ping(Stage* stage, std::mutex& mtx, const bool& active) {
+void ping(Stage *stage, std::mutex &mtx, const bool &active) {
     /*
     Ping the stage every 10 seconds
     Args:
@@ -252,17 +347,19 @@ void ping(Stage* stage, std::mutex& mtx, const bool& active) {
     */
     clock_t last_ping = clock();
     while (active) {
-        float since_last_ping = (float)(clock() - last_ping)/CLOCKS_PER_SEC;
+        float since_last_ping = (float)(clock() - last_ping) / CLOCKS_PER_SEC;
         if (since_last_ping > 10) {
-            mtx.lock();
-            stage->get_network_info();
-            last_ping = clock();
-            mtx.unlock();
+          mtx.lock();
+          stage->get_network_info();
+          last_ping = clock();
+          mtx.unlock();
         }
     }
 }
 
-std::tuple<float, float> find_errors(double hfovx, double hfovy, int nx, int ny, double sep, float begin_pan, float end_pan, float begin_tilt, float end_tilt, float begin_pan_angle, float end_pan_angle, float begin_tilt_angle, float end_tilt_angle, double r1, double x1, double y1, float theta1m, float phi1m) {
+std::tuple<float, float> find_errors(CalibrationInit calInit,
+                                     Calibration calParams, double r, double x,
+                                     double y, float theta_m, float phi_m) {
     /*
     Find the systematic error of pan and tilt
     Args (unlisted here correspond to variables with same names above):
@@ -276,21 +373,33 @@ std::tuple<float, float> find_errors(double hfovx, double hfovy, int nx, int ny,
             theta_prime_error: tilt error in radians
             phi_prime_error: pan error in radians
     */
-    double phi = get_phi(x1, nx, hfovx);
-    double theta = get_theta(y1, ny, hfovy);
-    double phi_prime_estimate = get_phi_prime(phi, theta, sep, r1, 0);
-    double theta_prime_estimate = get_theta_prime(phi, theta, sep, r1, 0);
-    double phi_prime_actual = begin_pan_angle + (phi1m - begin_pan)*(end_pan_angle - begin_pan_angle)/(end_pan - begin_pan);
-    double theta_prime_actual = begin_tilt_angle + (theta1m - begin_tilt)*(end_tilt_angle - begin_tilt_angle)/(end_tilt - begin_tilt);
+    double hfovx = get_hfov(calInit.focal_len, calInit.dist, calInit.num_x, calInit.px_size);
+    double hfovy = get_hfov(calInit.focal_len, calInit.dist, calInit.num_y, calInit.px_size);
+    double phi = get_phi(x, calInit.num_x, hfovx);
+    double theta = get_theta(y, calInit.num_y, hfovy);
+    double phi_prime_estimate = get_phi_prime(phi, theta, calInit.sep, r, 0);
+    double theta_prime_estimate = get_theta_prime(phi, theta, calInit.sep, r, 0);
+    double phi_prime_actual =
+        calInit.begin_pan_angle +
+        (phi_m - calParams.begin_pan) *
+            (calInit.end_pan_angle - calInit.begin_pan_angle) /
+            (calParams.end_pan - calParams.begin_pan);
+    double theta_prime_actual =
+        calInit.begin_tilt_angle +
+        (theta_m - calParams.begin_tilt) *
+            (calInit.end_tilt_angle - calInit.begin_tilt_angle) /
+            (calParams.end_tilt - calParams.begin_tilt);
     auto phi_prime_error = (float)(phi_prime_actual - phi_prime_estimate);
     auto theta_prime_error = (float)(theta_prime_actual - theta_prime_estimate);
-    printf("Estimated theta_p/phi_p: (%.2f, %.2f)\n", theta_prime_estimate * 180 / M_PI, phi_prime_estimate * 180 / M_PI);
-    printf("Actual theta_p/phi_p: (%.2f, %.2f)\n", theta_prime_actual * 180 / M_PI, phi_prime_actual * 180 / M_PI);
+    printf("Estimated theta_p/phi_p: (%.2f, %.2f)\n",
+           theta_prime_estimate * 180 / M_PI, phi_prime_estimate * 180 / M_PI);
+    printf("Actual theta_p/phi_p: (%.2f, %.2f)\n",
+           theta_prime_actual * 180 / M_PI, phi_prime_actual * 180 / M_PI);
     std::tuple<float, float> ret = {theta_prime_error, phi_prime_error};
     return ret;
 }
 
-std::tuple<float, float, double, double, double> get_calibration_point(Stage* stage, std::mutex& mtx) {
+CalibrationPoint get_calibration_point(Stage *stage, std::mutex &mtx) {
     /*
     Get information about a calibration target
     Args:
@@ -313,13 +422,13 @@ std::tuple<float, float, double, double, double> get_calibration_point(Stage* st
     while (true) {
         bool q_pressed = key_is_pressed(XK_Q);
         if (q_pressed) {
-            mtx.lock();
-            class MotorInfo info = stage->get_motor_info();
-            std::cout << info.to_string();
-            pan_position = info.motors[1].position;
-            tilt_position = info.motors[2].position;
-            mtx.unlock();
-            break;
+          mtx.lock();
+          class MotorInfo info = stage->get_motor_info();
+          std::cout << info.to_string();
+          pan_position = info.motors[1].position;
+          tilt_position = info.motors[2].position;
+          mtx.unlock();
+          break;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
@@ -329,7 +438,6 @@ std::tuple<float, float, double, double, double> get_calibration_point(Stage* st
     std::cin >> x;
     printf("Enter target y coordinate:\n");
     std::cin >> y;
-    std::tuple<float, float, double, double, double> ret{tilt_position, pan_position, r, x, y};
-    return ret;
+    CalibrationPoint point(tilt_position, pan_position, r, x, y);
+    return point;
 }
-
