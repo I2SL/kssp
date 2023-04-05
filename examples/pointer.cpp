@@ -28,14 +28,15 @@ int main (int argc, char* argv[]) {
     float end_tilt_angle = (float)settings.value("END_TILT_ANGLE", 2*M_PI/3);
     std::mutex mtx;
     bool active = true;
-    float begin_pan, end_pan, begin_tilt, end_tilt, theta_prime_error, phi_prime_error;
-    double hfovx, hfovy, r, x, y;
+    float r;
+    double x, y;
 
     Stage stage("192.168.50.1", 5520);
     stage.handshake();
     std::cout << stage.get_device_info().to_string();
     std::thread pinger(ping, &stage, std::ref(mtx), std::ref(active));
-    std::tie(hfovx, hfovy,begin_pan, end_pan, begin_tilt, end_tilt, theta_prime_error, phi_prime_error) = calibrate_stage(&stage, focal_len, sep, dist, px, nx, ny, correction, prev_cal, begin_pan_angle, end_pan_angle, begin_tilt_angle, end_tilt_angle, XK_C);
+    CalibrationInit cal_init(focal_len, sep, dist, px, nx, ny, correction, prev_cal, begin_pan_angle, end_pan_angle, begin_tilt_angle, end_tilt_angle, XK_C);
+    Calibration cal_params = calibrate_stage(&stage, cal_init);
 
     while (true) {
         printf("Enter target distance (or 0 to quit):\n");
@@ -48,22 +49,22 @@ int main (int argc, char* argv[]) {
         printf("Enter target y coordinate:\n");
         std::cin >> y;
 
-        double theta = get_theta(y, ny, hfovy);
-        double phi = get_phi(x, nx, hfovx);
-        double theta_prime = get_theta_prime(phi, theta, sep, r, theta_prime_error);
-        double phi_prime = get_phi_prime(phi, theta, sep, r, phi_prime_error);
+        double theta = get_theta(y, ny, cal_params.hfovy);
+        double phi = get_phi(x, nx, cal_params.hfovx);
+        double theta_prime = get_theta_prime(phi, theta, sep, r, cal_params.theta_prime_error);
+        double phi_prime = get_phi_prime(phi, theta, sep, r, cal_params.phi_prime_error);
 
         printf("Calculated Coordinates in degrees (theta, phi):\n");
         printf("EBS: (%.2f, %.2f)\n", theta * 180 / M_PI, phi * 180 / M_PI);
         printf("FBC: (%.2f, %.2f)\n", theta_prime * 180 / M_PI, phi_prime * 180 / M_PI);
         printf("\n");
 
-        float pan_position = get_motor_position(begin_pan, end_pan, begin_pan_angle, end_pan_angle, phi_prime);
-        float tilt_position = get_motor_position(begin_tilt, end_tilt, begin_tilt_angle, end_tilt_angle, theta_prime);
+        float pan_position = get_motor_position(cal_params.begin_pan, cal_params.end_pan, begin_pan_angle, end_pan_angle, phi_prime);
+        float tilt_position = get_motor_position(cal_params.begin_tilt, cal_params.end_tilt, begin_tilt_angle, end_tilt_angle, theta_prime);
 
         printf("Target motor positions:\n");
-        printf("Pan: %.2f (Range: 0 - %.2f)\n", pan_position, end_pan - begin_pan);
-        printf("Tilt: %.2f (Range: 0 - %.2f)\n", tilt_position, end_tilt - begin_tilt);
+        printf("Pan: %.2f (Range: 0 - %.2f)\n", pan_position, cal_params.end_pan - cal_params.begin_pan);
+        printf("Tilt: %.2f (Range: 0 - %.2f)\n", tilt_position, cal_params.end_tilt - cal_params.begin_tilt);
 
         std::string input;
         printf("Move to target? (y/n)\n");
