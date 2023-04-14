@@ -283,6 +283,9 @@ void controller(Stage *stage, KeySym ks)
           printf("Speed: %d\n", speed);
 
         if (key_is_pressed(ks)) {
+          stage->set_position_speed_acceleration(1, 25000, 0, SLIDE_MAX_ACC);
+          stage->set_position_speed_acceleration(2, 25000, 0, PAN_MAX_ACC);
+          stage->set_position_speed_acceleration(3, 25000, 0, TILT_MAX_ACC);
           running = false;
         }
 

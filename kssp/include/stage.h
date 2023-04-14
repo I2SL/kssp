@@ -40,6 +40,7 @@
 class Stage{
 public:
     Stage(const std::string &host, int port);
+    ~Stage();
     class DeviceInfo get_device_info();
     class MotorInfo get_motor_info();
     class DeviceGUID get_device_guid();
@@ -54,7 +55,6 @@ public:
     void reset_axis(boost::uint8_t motor_address);
     void mark_begin_position(boost::uint8_t motor_address);
     void mark_end_position(boost::uint8_t motor_address);
-    void shutdown();
     std::queue<class AuxInputStatus> AuxInputStatusQueue;
     std::queue<class ErrorStatus> ErrorStatusQueue;
     std::queue<class MotorCalibrated> MotorCalibratedQueue;
@@ -78,6 +78,7 @@ private:
     std::mutex receive_mtx;
     std::unique_lock<std::mutex> lck;
     std::condition_variable cv;
+    std::thread connect_thread;
     bool ready = false;
     void event_queue_manager();
     void on_receive_device_info_response();

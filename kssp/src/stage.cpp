@@ -14,9 +14,12 @@ Stage::Stage(const std::string &host, const int port)
     boost::asio::ip::tcp::endpoint endpoint = boost::asio::ip::tcp::endpoint(address, port);
     ConnectSocket.connect(endpoint);
 
-    boost::async([this]() {
-        this->event_queue_manager();
-    });
+    connect_thread = std::thread(&Stage::event_queue_manager, this);
+}
+
+Stage::~Stage() {
+    active = false;
+    connect_thread.join();
 }
 
 class DeviceInfo Stage::get_device_info() {
@@ -491,14 +494,3 @@ unsigned char* Stage::get_block(boost::uint16_t len) {
 
     return uchars;
 }
-
-void Stage::shutdown() {
-    active = false;
-    boost::system::error_code ec;
-    ConnectSocket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-    ConnectSocket.close();
-}
-
-
-
-

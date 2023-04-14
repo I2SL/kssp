@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(kssp VERSION 1.0.3 DESCRIPTION "Library to drive the Kessler Second Shooter Pro")
+project(kssp VERSION 1.0.4 DESCRIPTION "Library to drive the Kessler Second Shooter Pro")
 
 set(CMAKE_CXX_STANDARD 20)
 
