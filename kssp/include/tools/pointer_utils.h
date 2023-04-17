@@ -177,14 +177,34 @@ float get_motor_position(float motor_begin, float motor_end, float ref_begin, fl
         ref_end: reference frame end
         ref_target: desired position in reference frame
     Ret:
-        motor_position: desired position in reference frame expressed as a motor position
+        motor_position: desired position in reference frame expressed as a motor position, bounded by the calibration
     */
     float true_end = motor_end - motor_begin;
     float slope = true_end / (ref_end - ref_begin);
     float target =  slope*((float)ref_target-ref_begin);
-    if (abs(target) < abs(true_end))
-        return target;
-    return true_end;
+    return (true_end > 0 && target > 0 && true_end > target) ? target :
+           (true_end > 0 && target > 0 && true_end < target) ? true_end :
+           (true_end < 0 && target < 0 && true_end < target) ? target :
+           (true_end < 0 && target < 0 && true_end > target) ? true_end : 0;
+}
+
+float get_angle_from_position(float motor_begin, float motor_end, float ref_begin, float ref_end, float motor_position) {
+    /*
+    Get the motor angle from within a specified reference frame, given the current position
+    Args:
+        motor_begin: motor position at reference frame start
+        motor_end: motor position at reference frame end
+        ref_begin: reference frame start
+        ref_end: reference frame end
+        motor_position: motor position
+    Ret:
+        angle: angle of the motor in radians, bounded by the reference frame
+    */
+    float true_end = motor_end - motor_begin;
+    float slope = (ref_end - ref_begin) / true_end;
+    float target =  slope*motor_position + ref_begin;
+    return (target > ref_end) ? ref_end :
+           (target < ref_begin) ? ref_begin : target;
 }
 
 bool key_is_pressed(KeySym ks) {
